@@ -92,60 +92,6 @@ color:#f5e6b3;
 100%{transform:translateX(-100%)}
 }
 
-.header{
-display:none;
-}
-
-/* ===== الصندوق ===== */
-.intro-box{
-display:block;
-margin:20px;
-padding:30px;
-border-radius:18px;
-background:
-linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.65)),
-url('https://c.top4top.io/p_3807ka9e10.jpg');
-background-size:cover;
-background-position:center;
-border:1px solid rgba(255,255,255,.15);
-text-align:center;
-box-shadow:0 0 25px rgba(0,0,0,.4);
-color:#fff;
-text-decoration:none;
-transition:0.4s ease;
-position:relative;
-overflow:hidden;
-}
-
-.intro-box:hover{
-transform:translateY(-5px) scale(1.01);
-box-shadow:0 0 30px rgba(212,175,55,.25);
-}
-
-.intro-box h2{
-margin:0;
-color:#f5e6b3;
-font-size:20px;
-position:relative;
-z-index:2;
-}
-
-.intro-box::after{
-content:"";
-position:absolute;
-top:0;
-left:-100%;
-width:100%;
-height:100%;
-background:linear-gradient(120deg,transparent,rgba(255,255,255,.15),transparent);
-transition:0.6s;
-}
-
-.intro-box:hover::after{
-left:100%;
-}
-
-/* باقي التصميم بدون تغيير */
 .grid{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -187,11 +133,6 @@ cursor:pointer;
 position:relative;
 }
 
-.share-card:hover{
-transform:translateY(-6px);
-border-color:#ffffff;
-}
-
 .share-badge{
 position:absolute;
 top:10px;
@@ -220,10 +161,6 @@ font-size:12px;
 <div class="marquee">
 <span>طالبة علم شرعي سنة تانية — منصة الملخصات والكتب والفوائد العلمية</span>
 </div>
-
-<a class="intro-box" href="https://www.facebook.com/share/1GfgZ1JQGy/" target="_blank">
-<h2>طالبة علم شرعي سنة تانية في المعهد الديني - سبها</h2>
-</a>
 
 <div class="grid">
 
@@ -287,12 +224,6 @@ font-size:12px;
 <div class="summary">تفسير آيات القرآن الكريم</div>
 </a>
 
-<a class="card share-card" href="#" onclick="shareSite(); return false;">
-<div class="share-badge" id="shareCount">0</div>
-<h3>📤 مشاركة الملخصات</h3>
-<div class="summary">شارك الموقع مع زملائك بسهولة</div>
-</a>
-
 </div>
 
 <script>
@@ -311,28 +242,6 @@ window.location.href="admin.html";
 }else{
 alert("كلمة المرور غير صحيحة");
 }
-}
-
-let count = localStorage.getItem("shareCount") || 0;
-document.getElementById("shareCount").innerText = count;
-
-function shareSite() {
-const data = {
-title: "طالبة علم شرعي سنة تانية بالمعهد الديني",
-text: "ادخل هذا الموقع وشاهد الملخصات 👇",
-url: "https://pkingll.github.io/3333/"
-};
-
-if (navigator.share) {
-navigator.share(data);
-} else {
-navigator.clipboard.writeText(data.url);
-alert("تم نسخ الرابط 📋");
-}
-
-count++;
-localStorage.setItem("shareCount", count);
-document.getElementById("shareCount").innerText = count;
 }
 </script>
 
