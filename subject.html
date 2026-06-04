@@ -2,290 +2,207 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>عرض المادة</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المواد</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Cairo,sans-serif
-}
-
 body{
+margin:0;
+font-family:Cairo;
 background:#06131f;
-color:#fff;
-min-height:100vh;
-overflow-x:hidden
+color:white;
 }
 
-body:before{
+body::before{
 content:"";
 position:fixed;
 inset:0;
 z-index:-1;
-background:
-linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),
+background:linear-gradient(rgba(0,0,0,.7),rgba(0,0,0,.85)),
 url('https://a.top4top.io/p_38068co2c0.jpg');
 background-size:cover;
 background-position:center;
 }
 
-.marquee{
-overflow:hidden;
-background:rgba(0,0,0,.45);
-padding:12px 0
-}
-
-.marquee span{
-display:inline-block;
-white-space:nowrap;
-padding-left:100%;
-color:#f5e6b3;
-font-weight:700;
-animation:move 18s linear infinite;
-}
-
-@keyframes move{
-0%{transform:translateX(0)}
-100%{transform:translateX(-100%)}
-}
-
+/* العنوان */
 .header{
 text-align:center;
-padding:25px 15px
-}
-
-.header h1{
-color:#f5e6b3
-}
-
-.doors-bar{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-justify-content:center;
-padding:10px;
-}
-
-.door-btn{
-padding:10px 14px;
-border:none;
-border-radius:12px;
-background:#0d2033;
+padding:20px;
 color:#f5e6b3;
-cursor:pointer;
-border:1px solid rgba(255,255,255,.1);
-}
-
-.door-btn.active{
-background:#d4af37;
-color:#06131f;
+font-size:22px;
 font-weight:bold;
 }
 
-.content{
+/* الأزرار */
+.container{
 width:92%;
 max-width:900px;
-margin:20px auto 100px;
-background:rgba(5,15,30,.65);
-border:1px solid rgba(255,255,255,.1);
-border-radius:20px;
-padding:20px;
-line-height:2;
+margin:auto;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
+padding-bottom:80px;
 }
 
-.content img{
-width:100%;
-border-radius:12px;
-margin:10px 0
-}
-
-.content a{
-display:block;
-margin:10px 0;
-padding:12px;
-background:#0d2033;
-border-radius:10px;
+.btn{
+background:rgba(5,15,30,.7);
+border:1px solid rgba(255,255,255,.15);
+padding:18px;
+border-radius:15px;
+text-align:center;
+cursor:pointer;
+transition:.3s;
 color:#f5e6b3;
+font-weight:bold;
 text-decoration:none;
 }
 
-.back{
-position:fixed;
-left:15px;
-bottom:15px;
-padding:14px 20px;
-border:none;
-border-radius:14px;
-background:#d4af37;
-color:#06131f;
-font-weight:bold;
-cursor:pointer;
+.btn:hover{
+transform:translateY(-5px);
+border-color:#d4af37;
 }
 
-.audio-box{
-margin:15px 0;
-padding:14px;
-background:#0d2033;
-border-radius:14px;
-border:1px solid rgba(255,255,255,.08);
+/* صفحة الباب */
+.page{
+width:92%;
+max-width:800px;
+margin:20px auto;
+background:rgba(5,15,30,.7);
+padding:20px;
+border-radius:15px;
+display:none;
 }
 
-.audio-title{
+.page h2{
 color:#f5e6b3;
-margin-bottom:10px;
-font-weight:700;
 }
 
-.audio-box audio{
+img{
+width:100%;
+border-radius:12px;
+margin-top:10px;
+}
+
+audio{
+width:100%;
+margin-top:10px;
+}
+
+.back{
+margin-top:15px;
+background:#d4af37;
+border:none;
+padding:10px;
+border-radius:10px;
+cursor:pointer;
 width:100%;
 }
 </style>
-
 </head>
 
 <body>
 
-<div class="marquee">
-<span>من يرد الله به خيراً يفقهه في الدين • من يرد الله به خيراً يفقهه في الدين</span>
+<div class="header" id="title">الأبواب</div>
+
+<!-- قائمة الأبواب -->
+<div class="container" id="chaptersList"></div>
+
+<!-- صفحة الباب -->
+<div class="page" id="chapterPage">
+<h2 id="chapterTitle"></h2>
+<p id="chapterContent"></p>
+<img id="chapterImg" style="display:none;">
+<audio id="chapterAudio" controls style="display:none;"></audio>
+
+<button class="back" onclick="back()">رجوع</button>
 </div>
-
-<div class="header">
-<h1 id="title">المادة</h1>
-</div>
-
-<!-- أزرار الأبواب -->
-<div class="doors-bar" id="doorsBar"></div>
-
-<div class="content" id="content"></div>
-
-<button class="back" onclick="location.href='index.html'">
-⬅ الرجوع
-</button>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, query, where, getDocs } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
- apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",
- authDomain: "p-726bc.firebaseapp.com",
- projectId: "p-726bc",
- storageBucket: "p-726bc.firebasestorage.app",
- messagingSenderId: "752913389065",
- appId: "1:752913389065:web:20cf8c03fe4ace03650ad8"
+apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",
+authDomain: "p-726bc.firebaseapp.com",
+projectId: "p-726bc",
+storageBucket: "p-726bc.firebasestorage.app",
+messagingSenderId: "752913389065",
+appId: "1:752913389065:web:20cf8c03fe4ace03650ad8"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const params = new URLSearchParams(location.search);
-const id = params.get("id");
+const subject = params.get("id");
 
-const names = {
-aqida:"العقيدة",
-hadith:"الحديث",
-fiqh:"الفقه",
-usul:"أصول الفقه",
-history:"تاريخ الخلفاء الراشدين",
-dawah:"منهج الدعوة",
-tajweed:"أحكام وتجويد القرآن",
-literature:"الدراسات الأدبية",
-nahw:"النحو والصرف",
-computer:"الحاسوب",
-english:"الإنجليزي",
-tafsir:"التفسير"
-};
+const list = document.getElementById("chaptersList");
+const page = document.getElementById("chapterPage");
 
-document.getElementById("title").textContent =
-names[id] || "المادة";
+let chapters = [];
 
-let currentDoor = -1;
-let dataGlobal = null;
+async function loadChapters(){
 
-// ===== تحميل المادة =====
-const snap = await getDoc(doc(db,"subjects",id));
+const q = query(collection(db,"chapters"), where("subject","==",subject));
+const snap = await getDocs(q);
 
-if(!snap.exists()){
-document.getElementById("content").innerHTML = "<p>لا يوجد محتوى</p>";
-throw new Error("no data");
+snap.forEach(doc=>{
+chapters.push({id:doc.id,...doc.data()});
+});
+
+render();
 }
 
-dataGlobal = snap.data();
+function render(){
 
-const items = dataGlobal.items || [];
-const doors = dataGlobal.doors || [];
+list.innerHTML="";
 
-// ===== عرض الأبواب =====
-const doorsBar = document.getElementById("doorsBar");
-
-function renderDoors(){
-doorsBar.innerHTML = "";
-
-if(doors.length === 0){
-renderContent(items);
-return;
-}
-
-doors.forEach((d,i)=>{
-const btn = document.createElement("button");
-btn.className = "door-btn";
-btn.innerText = d.name;
-
-btn.onclick = ()=>{
-currentDoor = i;
-document.querySelectorAll(".door-btn").forEach(b=>b.classList.remove("active"));
-btn.classList.add("active");
-renderContent(d.items || []);
-};
-
-doorsBar.appendChild(btn);
+chapters.forEach((ch,i)=>{
+list.innerHTML += `
+<a class="btn" onclick="openChapter(${i})">
+📘 ${ch.title}
+</a>
+`;
 });
 }
 
-// ===== عرض المحتوى =====
-function renderContent(list){
+window.openChapter = (i)=>{
+const ch = chapters[i];
 
-const content = document.getElementById("content");
-content.innerHTML = "";
+document.getElementById("chapterTitle").innerText = ch.title;
+document.getElementById("chapterContent").innerText = ch.content;
 
-list.forEach(item=>{
+const img = document.getElementById("chapterImg");
+const audio = document.getElementById("chapterAudio");
 
-if(item.type==="title"){
-content.innerHTML += `<h2>${item.text}</h2>`;
+if(ch.image){
+img.src = ch.image;
+img.style.display="block";
+}else{
+img.style.display="none";
 }
 
-if(item.type==="text"){
-content.innerHTML += `<p>${item.text}</p>`;
+if(ch.audio){
+audio.src = ch.audio;
+audio.style.display="block";
+}else{
+audio.style.display="none";
 }
 
-if(item.type==="image"){
-content.innerHTML += `<img src="${item.url}">`;
-}
+list.style.display="none";
+page.style.display="block";
+};
 
-if(item.type==="link"){
-content.innerHTML += `<a href="${item.url}" target="_blank">${item.name}</a>`;
-}
+window.back = ()=>{
+page.style.display="none";
+list.style.display="grid";
+};
 
-if(item.type==="audio"){
-content.innerHTML += `
-<div class="audio-box">
-<div class="audio-title">🎧 ${item.name}</div>
-<audio controls src="${item.url}"></audio>
-</div>`;
-}
-
-});
-
-}
-
-// init
-renderDoors();
+loadChapters();
 
 </script>
 
