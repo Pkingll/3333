@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>لوحة التحكم</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Cairo,sans-serif}
+body{background:#06131f;color:#fff;min-height:100vh}
+body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),url('https://a.top4top.io/p_38068co2c0.jpg');background-size:cover;background-position:center}
+.header{text-align:center;padding:20px;color:#f5e6b3;font-size:24px;font-weight:700}
+.container{width:95%;max-width:900px;margin:auto;padding-bottom:100px}
+.card{background:rgba(5,15,30,.65);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:16px;margin-bottom:15px}
+select,button{width:100%;padding:12px;border:none;border-radius:12px}
+select{background:#0d2033;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+button{background:#d4af37;color:#06131f;font-weight:bold}
+.item{background:#0d2033;padding:12px;border-radius:12px;margin-top:10px}
+.actions{display:flex;gap:8px;margin-top:10px}
+.actions button{flex:1}
+.delete{background:#b91c1c;color:#fff}
+.edit{background:#2563eb;color:#fff}
+.savebar{position:fixed;bottom:15px;left:15px;right:15px}
+</style>
+</head>
+<body>
+<div class="header">لوحة التحكم</div>
+
+<div class="container">
+<div class="card">
+<select id="subject">
+<option value="aqida">العقيدة</option>
+<option value="hadith">الحديث</option>
+<option value="fiqh">الفقه</option>
+<option value="usul">أصول الفقه</option>
+<option value="history">تاريخ الخلفاء الراشدين</option>
+<option value="dawah">منهج الدعوة</option>
+<option value="tajweed">التجويد</option>
+<option value="literature">الدراسات الأدبية</option>
+<option value="nahw">النحو والصرف</option>
+<option value="computer">الحاسوب</option>
+<option value="english">الإنجليزي</option>
+<option value="tafsir">التفسير</option>
+</select>
+</div>
+
+<div class="card">
+<div class="grid">
+<button onclick="addTitle()">إضافة عنوان</button>
+<button onclick="addText()">إضافة نص</button>
+<button onclick="addImage()">إضافة صورة</button>
+<button onclick="addBook()">إضافة كتاب PDF</button>
+<button onclick="addLink()">إضافة رابط</button>
+<button onclick="loadSubject()">تحديث</button>
+</div>
+</div>
+
+<div id="preview"></div>
+</div>
+
+<div class="savebar">
+<button onclick="saveData()">💾 حفظ التعديلات</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+ apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",
+ authDomain: "p-726bc.firebaseapp.com",
+ projectId: "p-726bc",
+ storageBucket: "p-726bc.firebasestorage.app",
+ messagingSenderId: "752913389065",
+ appId: "1:752913389065:web:20cf8c03fe4ace03650ad8"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let items=[];
+
+window.addTitle=()=>{
+ const t=prompt("العنوان");
+ if(!t) return;
+ items.push({type:"title",text:t}); render();
+};
+
+window.addText=()=>{
+ const t=prompt("النص");
+ if(!t) return;
+ items.push({type:"text",text:t}); render();
+};
+
+window.addImage=()=>{
+ const u=prompt("رابط الصورة");
+ if(!u) return;
+ items.push({type:"image",url:u}); render();
+};
+
+window.addBook=()=>{
+ const n=prompt("اسم الكتاب");
+ const u=prompt("رابط PDF");
+ if(!n||!u) return;
+ items.push({type:"book",name:n,url:u}); render();
+};
+
+window.addLink=()=>{
+ const n=prompt("اسم الرابط");
+ const u=prompt("الرابط");
+ if(!n||!u) return;
+ items.push({type:"link",name:n,url:u}); render();
+};
+
+window.deleteItem=(i)=>{ items.splice(i,1); render(); };
+
+window.editItem=(i)=>{
+ const current=items[i].text || items[i].name || "";
+ const v=prompt("تعديل",current);
+ if(!v) return;
+ if(items[i].text) items[i].text=v;
+ if(items[i].name) items[i].name=v;
+ render();
+};
+
+function render(){
+ const p=document.getElementById("preview");
+ p.innerHTML="";
+ items.forEach((it,i)=>{
+  const div=document.createElement("div");
+  div.className="item";
+  let body="";
+  if(it.type==="title") body=`<h2>${it.text}</h2>`;
+  if(it.type==="text") body=`<p>${it.text}</p>`;
+  if(it.type==="image") body=`<img src="${it.url}" style="width:100%;border-radius:10px">`;
+  if(it.type==="book") body=`📚 ${it.name}`;
+  if(it.type==="link") body=`🔗 ${it.name}`;
+  div.innerHTML=body+`<div class="actions"><button class="edit" onclick="editItem(${i})">تعديل</button><button class="delete" onclick="deleteItem(${i})">حذف</button></div>`;
+  p.appendChild(div);
+ });
+}
+
+window.saveData=async()=>{
+ const subject=document.getElementById("subject").value;
+ await setDoc(doc(db,"subjects",subject),{items,updatedAt:new Date().toISOString()});
+ alert("تم الحفظ بنجاح");
+};
+
+window.loadSubject=async()=>{
+ const subject=document.getElementById("subject").value;
+ const snap=await getDoc(doc(db,"subjects",subject));
+ items=snap.exists() ? (snap.data().items||[]) : [];
+ render();
+};
+
+document.getElementById("subject").addEventListener("change",loadSubject);
+loadSubject();
+</script>
+</body>
+</html>

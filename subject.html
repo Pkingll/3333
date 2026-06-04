@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>عرض المادة</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Cairo,sans-serif}
+body{background:#06131f;color:#fff;min-height:100vh;overflow-x:hidden}
+body:before{
+content:"";position:fixed;inset:0;z-index:-1;
+background:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),
+url('https://a.top4top.io/p_38068co2c0.jpg');
+background-size:cover;background-position:center;
+}
+.marquee{overflow:hidden;background:rgba(0,0,0,.45);padding:12px 0}
+.marquee span{
+display:inline-block;
+white-space:nowrap;
+padding-left:100%;
+color:#f5e6b3;
+font-weight:700;
+animation:move 18s linear infinite;
+}
+@keyframes move{
+0%{transform:translateX(0)}
+100%{transform:translateX(-100%)}
+}
+.header{text-align:center;padding:25px 15px}
+.header h1{color:#f5e6b3}
+.content{
+width:92%;max-width:900px;margin:20px auto 100px;
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:20px;
+padding:20px;
+line-height:2;
+}
+.content img{width:100%;border-radius:12px;margin:10px 0}
+.content a{
+display:block;
+margin:10px 0;
+padding:12px;
+background:#0d2033;
+border-radius:10px;
+color:#f5e6b3;
+text-decoration:none;
+}
+.back{
+position:fixed;
+left:15px;
+bottom:15px;
+padding:14px 20px;
+border:none;
+border-radius:14px;
+background:#d4af37;
+color:#06131f;
+font-weight:bold;
+cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="marquee">
+<span>من يرد الله به خيراً يفقهه في الدين • من يرد الله به خيراً يفقهه في الدين • من يرد الله به خيراً يفقهه في الدين</span>
+</div>
+
+<div class="header">
+<h1 id="title">المادة</h1>
+</div>
+
+<div class="content" id="content"></div>
+
+<button class="back" onclick="location.href='index.html'">⬅ الرجوع</button>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+ apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",
+ authDomain: "p-726bc.firebaseapp.com",
+ projectId: "p-726bc",
+ storageBucket: "p-726bc.firebasestorage.app",
+ messagingSenderId: "752913389065",
+ appId: "1:752913389065:web:20cf8c03fe4ace03650ad8"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const params = new URLSearchParams(location.search);
+const id = params.get("id");
+
+const names = {
+aqida:"العقيدة",
+hadith:"الحديث",
+fiqh:"الفقه",
+usul:"أصول الفقه",
+history:"تاريخ الخلفاء الراشدين",
+dawah:"منهج الدعوة",
+tajweed:"أحكام وتجويد القرآن",
+literature:"الدراسات الأدبية",
+nahw:"النحو والصرف",
+computer:"الحاسوب",
+english:"الإنجليزي",
+tafsir:"التفسير"
+};
+
+document.getElementById("title").textContent = names[id] || "المادة";
+
+const snap = await getDoc(doc(db,"subjects",id));
+const content = document.getElementById("content");
+
+if(snap.exists()){
+ const data = snap.data();
+ (data.items || []).forEach(item=>{
+   if(item.type==="title"){
+      content.innerHTML += `<h2>${item.text}</h2>`;
+   }
+   if(item.type==="text"){
+      content.innerHTML += `<p>${item.text}</p>`;
+   }
+   if(item.type==="image"){
+      content.innerHTML += `<img src="${item.url}">`;
+   }
+   if(item.type==="book"){
+      content.innerHTML += `<a target="_blank" href="${item.url}">📚 ${item.name}</a>`;
+   }
+   if(item.type==="link"){
+      content.innerHTML += `<a target="_blank" href="${item.url}">🔗 ${item.name}</a>`;
+   }
+ });
+}else{
+ content.innerHTML="<p>لا يوجد محتوى لهذه المادة حالياً.</p>";
+}
+</script>
+
+</body>
+</html>
