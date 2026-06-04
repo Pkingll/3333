@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>طالبة علم شرعي - السنة الثانية</title>
 
+<meta property="og:title" content="طالبة علم شرعي - السنة الثانية" />
+<meta property="og:description" content="منصة الملخصات والكتب والفوائد العلمية" />
+<meta property="og:image" content="https://a.top4top.io/p_38068co2c0.jpg" />
+<meta property="og:url" content="https://pkingll.github.io/3333/" />
+<meta property="og:type" content="website" />
+
 <style>
 body{
 margin:0;
@@ -125,6 +131,33 @@ margin-top:10px;
 font-size:14px;
 opacity:.85;
 }
+
+/* ===== زر مشاركة مع عداد ===== */
+.share-card{
+background:rgba(212,175,55,.12);
+border:1px dashed rgba(212,175,55,.6);
+text-align:center;
+cursor:pointer;
+position:relative;
+}
+
+.share-card:hover{
+transform:translateY(-6px);
+border-color:#ffffff;
+}
+
+/* عداد المشاركات */
+.share-badge{
+position:absolute;
+top:10px;
+left:10px;
+background:rgba(0,0,0,.6);
+border:1px solid #d4af37;
+color:#d4af37;
+padding:4px 10px;
+border-radius:20px;
+font-size:12px;
+}
 </style>
 </head>
 
@@ -142,17 +175,14 @@ opacity:.85;
 </div>
 
 <div class="marquee">
-<span>
-طالبة علم شرعي سنة تانية — منصة الملخصات والكتب والفوائد العلمية
-</span>
+<span>طالبة علم شرعي سنة تانية — منصة الملخصات والكتب والفوائد العلمية</span>
 </div>
 
-<div class="header">
-طالبة علم شرعي - السنة الثانية
-</div>
+<div class="header">طالبة علم شرعي - السنة الثانية</div>
 
 <div class="grid">
 
+<!-- المواد -->
 <a class="card" href="subject.html?id=aqida">
 <h3>العقيدة</h3>
 <div class="summary">ملخصات العقيدة وأصول الإيمان</div>
@@ -213,6 +243,13 @@ opacity:.85;
 <div class="summary">تفسير آيات القرآن الكريم</div>
 </a>
 
+<!-- زر المشاركة -->
+<a class="card share-card" href="#" onclick="shareSite(); return false;">
+<div class="share-badge" id="shareCount">0</div>
+<h3>📤 مشاركة الملخصات</h3>
+<div class="summary">شارك الموقع مع زملائك بسهولة</div>
+</a>
+
 </div>
 
 <script>
@@ -225,15 +262,36 @@ document.getElementById("sidebar").classList.remove("active");
 }
 
 function openAdmin(){
-
 const pass = prompt("أدخل كلمة مرور الأدمن");
-
 if(pass === "1997"){
 window.location.href="admin.html";
 }else{
 alert("كلمة المرور غير صحيحة");
 }
+}
 
+/* ===== عداد المشاركات ===== */
+let count = localStorage.getItem("shareCount") || 0;
+document.getElementById("shareCount").innerText = count;
+
+function shareSite() {
+const data = {
+title: "طالبة علم شرعي - السنة الثانية",
+text: "ادخل هذا الموقع وشاهد الملخصات 👇",
+url: "https://pkingll.github.io/3333/"
+};
+
+if (navigator.share) {
+navigator.share(data);
+} else {
+navigator.clipboard.writeText(data.url);
+alert("تم نسخ الرابط 📋");
+}
+
+/* زيادة العداد */
+count++;
+localStorage.setItem("shareCount", count);
+document.getElementById("shareCount").innerText = count;
 }
 </script>
 
