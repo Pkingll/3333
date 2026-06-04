@@ -103,7 +103,6 @@ font-weight:bold;
 cursor:pointer;
 }
 
-/* 🎧 تنسيق الصوت */
 .audio-box{
 margin:15px 0;
 padding:14px;
@@ -122,6 +121,34 @@ font-weight:700;
 width:100%;
 border-radius:10px;
 }
+
+/* ================== إضافة الفصول ================== */
+.box{
+width:92%;
+max-width:900px;
+margin:10px auto;
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:15px;
+padding:15px;
+}
+
+.itemBtn{
+padding:10px;
+margin:8px 0;
+background:#0d2033;
+border-radius:10px;
+cursor:pointer;
+color:#f5e6b3;
+}
+
+.lessonBtn{
+padding:10px;
+margin:8px 0;
+background:#112233;
+border-radius:10px;
+cursor:pointer;
+}
 </style>
 
 </head>
@@ -139,6 +166,19 @@ border-radius:10px;
 <h1 id="title">المادة</h1>
 </div>
 
+<!-- 📂 الفصول (إضافة فقط) -->
+<div class="box">
+<h3 style="color:#f5e6b3">📂 الفصول</h3>
+<div id="chaptersList"></div>
+</div>
+
+<!-- 📖 الدروس -->
+<div class="box" id="lessonsBox" style="display:none">
+<h3 style="color:#f5e6b3">📖 الدروس</h3>
+<div id="lessonsList"></div>
+</div>
+
+<!-- المحتوى القديم بدون تغيير -->
 <div class="content" id="content"></div>
 
 <button class="back" onclick="location.href='index.html'">
@@ -152,7 +192,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import {
 getFirestore,
 doc,
-getDoc
+getDoc,
+collection,
+query,
+where,
+getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -170,6 +214,7 @@ const db = getFirestore(app);
 const params = new URLSearchParams(location.search);
 const id = params.get("id");
 
+/* ================= اسم المادة ================= */
 const names = {
 aqida:"العقيدة",
 hadith:"الحديث",
@@ -188,83 +233,118 @@ tafsir:"التفسير"
 document.getElementById("title").textContent =
 names[id] || "المادة";
 
+/* ================= المحتوى القديم ================= */
 const snap = await getDoc(doc(db,"subjects",id));
 
-const content =
-document.getElementById("content");
+const content = document.getElementById("content");
 
 if(snap.exists()){
-
  const data = snap.data();
 
  (data.items || []).forEach(item=>{
 
-   // عنوان
-   if(item.type==="title"){
-      content.innerHTML += `
-      <h2>${item.text}</h2>
-      `;
-   }
+ if(item.type==="title"){
+ content.innerHTML += `<h2>${item.text}</h2>`;
+ }
 
-   // نص
-   if(item.type==="text"){
-      content.innerHTML += `
-      <p>${item.text}</p>
-      `;
-   }
+ if(item.type==="text"){
+ content.innerHTML += `<p>${item.text}</p>`;
+ }
 
-   // صورة
-   if(item.type==="image"){
-      content.innerHTML += `
-      <img src="${item.url}">
-      `;
-   }
+ if(item.type==="image"){
+ content.innerHTML += `<img src="${item.url}">`;
+ }
 
-   // كتاب
-   if(item.type==="book"){
-      content.innerHTML += `
-      <a target="_blank" href="${item.url}">
-      📚 ${item.name}
-      </a>
-      `;
-   }
+ if(item.type==="book"){
+ content.innerHTML += `<a href="${item.url}" target="_blank">📚 ${item.name}</a>`;
+ }
 
-   // رابط
-   if(item.type==="link"){
-      content.innerHTML += `
-      <a target="_blank" href="${item.url}">
-      🔗 ${item.name}
-      </a>
-      `;
-   }
+ if(item.type==="link"){
+ content.innerHTML += `<a href="${item.url}" target="_blank">🔗 ${item.name}</a>`;
+ }
 
-   // 🎧 صوت
-   if(item.type==="audio"){
-      content.innerHTML += `
-      <div class="audio-box">
-
-        <div class="audio-title">
-        🎧 ${item.name}
-        </div>
-
-        <audio controls>
-          <source src="${item.url}" type="audio/mpeg">
-          المتصفح لا يدعم تشغيل الصوت
-        </audio>
-
-      </div>
-      `;
-   }
+ if(item.type==="audio"){
+ content.innerHTML += `
+ <div class="audio-box">
+ <div class="audio-title">🎧 ${item.name}</div>
+ <audio controls src="${item.url}"></audio>
+ </div>`;
+ }
 
  });
-
-}else{
-
- content.innerHTML = `
- <p>لا يوجد محتوى لهذه المادة حالياً.</p>
- `;
-
 }
+
+/* ================= الفصول + الدروس ================= */
+
+let chaptersList = document.getElementById("chaptersList");
+let lessonsList = document.getElementById("lessonsList");
+
+async function loadChapters(){
+
+const q = query(
+collection(db,"chapters"),
+where("subject","==",id)
+);
+
+const snap = await getDocs(q);
+
+chaptersList.innerHTML = "";
+
+snap.forEach(docu=>{
+const data = docu.data();
+const chapterId = docu.id;
+
+chaptersList.innerHTML += `
+<div class="itemBtn" onclick="openChapter('${chapterId}')">
+📂 ${data.title}
+</div>`;
+});
+}
+
+window.openChapter = async (chapterId)=>{
+
+document.getElementById("lessonsBox").style.display="block";
+
+const q = query(
+collection(db,"lessons"),
+where("chapterId","==",chapterId)
+);
+
+const snap = await getDocs(q);
+
+lessonsList.innerHTML = "";
+
+snap.forEach(docu=>{
+const data = docu.data();
+
+lessonsList.innerHTML += `
+<div class="lessonBtn" onclick='openLesson(${JSON.stringify(data)})'>
+📖 ${data.title}
+</div>`;
+});
+};
+
+/* فتح درس داخل نفس الصفحة */
+window.openLesson = (d)=>{
+
+content.innerHTML = `
+<h2 style="color:#f5e6b3">${d.title}</h2>
+<p>${d.text || ""}</p>
+
+${d.image ? `<img src="${d.image}">` : ""}
+
+${d.audio ? `
+<div class="audio-box">
+<div class="audio-title">🎧 ${d.title}</div>
+<audio controls src="${d.audio}"></audio>
+</div>` : ""}
+
+${d.link ? `<a href="${d.link}" target="_blank">🔗 ${d.link}</a>` : ""}
+`;
+};
+
+/* تشغيل */
+loadChapters();
 
 </script>
 
