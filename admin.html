@@ -60,7 +60,7 @@ button{background:#d4af37;color:#06131f;font-weight:bold}
 </div>
 
 <div class="savebar">
-<button onclick="saveData()">💾 حفظ التعديلات</button>
+<button id="saveBtn" onclick="saveData()">💾 حفظ التعديلات</button>
 </div>
 
 <script type="module">
@@ -141,10 +141,41 @@ function render(){
  });
 }
 
-window.saveData=async()=>{
- const subject=document.getElementById("subject").value;
- await setDoc(doc(db,"subjects",subject),{items,updatedAt:new Date().toISOString()});
- alert("تم الحفظ بنجاح");
+window.saveData = async () => {
+
+  const btn = document.getElementById("saveBtn");
+
+  try {
+
+    btn.disabled = true;
+    btn.innerText = "جاري الحفظ...";
+
+    const subject =
+    document.getElementById("subject").value;
+
+    await setDoc(
+      doc(db,"subjects",subject),
+      {
+        items: items,
+        updatedAt: new Date().toISOString()
+      }
+    );
+
+    alert("تم حفظ التعديلات بنجاح");
+
+  } catch(error) {
+
+    console.error(error);
+
+    alert("خطأ في الحفظ:\n" + error.message);
+
+  } finally {
+
+    btn.disabled = false;
+    btn.innerText = "💾 حفظ التعديلات";
+
+  }
+
 };
 
 window.loadSubject=async()=>{
