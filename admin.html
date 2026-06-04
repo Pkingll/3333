@@ -26,18 +26,12 @@ button{background:#d4af37;color:#06131f;font-weight:bold;cursor:pointer}
 .savebar{position:fixed;bottom:15px;left:15px;right:15px}
 audio{width:100%;margin-top:10px}
 
-/* ✨ تحسين عرض المواد */
 #preview{
   font-size:14px;
   line-height:1.7;
 }
-#preview h2{
-  font-size:18px;
-}
-#preview p{
-  font-size:14px;
-}
-
+#preview h2{font-size:18px;}
+#preview p{font-size:14px;}
 </style>
 
 </head>
@@ -104,7 +98,7 @@ const db = getFirestore(app);
 
 let items = [];
 
-// ===== إضافة عناصر =====
+// ===== عناصر =====
 window.addTitle = () => {
  const t = prompt("العنوان");
  if (!t) return;
@@ -210,13 +204,12 @@ function render() {
  });
 }
 
-// ===== حفظ =====
+// ===== حفظ (مُصحح) =====
 window.saveData = async () => {
 
  const btn = document.getElementById("saveBtn");
 
  try {
-
   btn.disabled = true;
   btn.innerText = "جاري الحفظ...";
 
@@ -227,7 +220,10 @@ window.saveData = async () => {
     updatedAt: new Date().toISOString()
   });
 
-  alert("تم حفظ التعديلات بنجاح");
+  alert("تم الحفظ بنجاح 🚀");
+
+  // ✅ مهم: إعادة تحميل بعد الحفظ
+  await loadSubject();
 
  } catch (error) {
   alert("خطأ: " + error.message);
@@ -235,15 +231,19 @@ window.saveData = async () => {
   btn.disabled = false;
   btn.innerText = "💾 حفظ التعديلات";
  }
-
 };
 
-// ===== تحميل =====
+// ===== تحميل (مُصحح) =====
 window.loadSubject = async () => {
  const subject = document.getElementById("subject").value;
  const snap = await getDoc(doc(db, "subjects", subject));
 
- items = snap.exists() ? (snap.data().items || []) : [];
+ if (snap.exists()) {
+  items = snap.data().items || [];
+ } else {
+  items = [];
+ }
+
  render();
 };
 
