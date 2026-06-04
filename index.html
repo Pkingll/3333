@@ -93,13 +93,10 @@ color:#f5e6b3;
 }
 
 .header{
-text-align:center;
-padding:25px;
-font-size:24px;
-color:#f5e6b3;
+display:none;
 }
 
-/* ===== الصندوق الجديد (قابل للنقر بالكامل) ===== */
+/* ===== الصندوق ===== */
 .intro-box{
 display:block;
 margin:20px;
@@ -133,7 +130,6 @@ position:relative;
 z-index:2;
 }
 
-/* لمعة متحركة */
 .intro-box::after{
 content:"";
 position:absolute;
@@ -149,8 +145,7 @@ transition:0.6s;
 left:100%;
 }
 
-/* ===== باقي التصميم بدون تغيير ===== */
-
+/* باقي التصميم بدون تغيير */
 .grid{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -226,9 +221,6 @@ font-size:12px;
 <span>طالبة علم شرعي سنة تانية — منصة الملخصات والكتب والفوائد العلمية</span>
 </div>
 
-<div class="header">طالبة علم شرعي - السنة الثانية</div>
-
-<!-- ===== الصندوق (كامل قابل للنقر) ===== -->
 <a class="intro-box" href="https://www.facebook.com/share/1GfgZ1JQGy/" target="_blank">
 <h2>طالبة علم شرعي سنة تانية في المعهد الديني - سبها</h2>
 </a>
@@ -326,7 +318,7 @@ document.getElementById("shareCount").innerText = count;
 
 function shareSite() {
 const data = {
-title: "طالبة علم شرعي - السنة الثانية",
+title: "طالبة علم شرعي سنة تانية بالمعهد الديني",
 text: "ادخل هذا الموقع وشاهد الملخصات 👇",
 url: "https://pkingll.github.io/3333/"
 };
