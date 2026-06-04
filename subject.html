@@ -3,126 +3,101 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>المواد</title>
+<title>عرض المادة</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-body{
+*{
 margin:0;
-font-family:Cairo;
-background:#06131f;
-color:white;
+padding:0;
+box-sizing:border-box;
+font-family:Cairo,sans-serif;
 }
 
-body::before{
+body{
+background:#06131f;
+color:#fff;
+min-height:100vh;
+}
+
+body:before{
 content:"";
 position:fixed;
 inset:0;
 z-index:-1;
-background:linear-gradient(rgba(0,0,0,.7),rgba(0,0,0,.85)),
+background:
+linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),
 url('https://a.top4top.io/p_38068co2c0.jpg');
 background-size:cover;
 background-position:center;
 }
 
-/* العنوان */
 .header{
 text-align:center;
 padding:20px;
 color:#f5e6b3;
-font-size:22px;
-font-weight:bold;
 }
 
-/* الأزرار */
-.container{
+.content{
 width:92%;
 max-width:900px;
-margin:auto;
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:15px;
-padding-bottom:80px;
+margin:20px auto;
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:20px;
+padding:20px;
+line-height:2;
 }
 
-.btn{
-background:rgba(5,15,30,.7);
-border:1px solid rgba(255,255,255,.15);
-padding:18px;
-border-radius:15px;
-text-align:center;
-cursor:pointer;
-transition:.3s;
+.content img{
+width:100%;
+border-radius:12px;
+margin:10px 0;
+}
+
+.content a{
+display:block;
+margin:10px 0;
+padding:12px;
+background:#0d2033;
+border-radius:10px;
 color:#f5e6b3;
-font-weight:bold;
 text-decoration:none;
 }
 
-.btn:hover{
-transform:translateY(-5px);
-border-color:#d4af37;
-}
-
-/* صفحة الباب */
-.page{
-width:92%;
-max-width:800px;
-margin:20px auto;
-background:rgba(5,15,30,.7);
-padding:20px;
-border-radius:15px;
-display:none;
-}
-
-.page h2{
-color:#f5e6b3;
-}
-
-img{
-width:100%;
-border-radius:12px;
-margin-top:10px;
-}
-
-audio{
-width:100%;
-margin-top:10px;
-}
-
 .back{
-margin-top:15px;
+position:fixed;
+bottom:15px;
+left:15px;
 background:#d4af37;
 border:none;
-padding:10px;
-border-radius:10px;
+padding:12px;
+border-radius:12px;
 cursor:pointer;
-width:100%;
+}
+
+.audio-box{
+margin-top:10px;
+background:#0d2033;
+padding:10px;
+border-radius:12px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header" id="title">الأبواب</div>
+<div class="header" id="title">المادة</div>
 
-<!-- قائمة الأبواب -->
-<div class="container" id="chaptersList"></div>
+<div class="content" id="content"></div>
 
-<!-- صفحة الباب -->
-<div class="page" id="chapterPage">
-<h2 id="chapterTitle"></h2>
-<p id="chapterContent"></p>
-<img id="chapterImg" style="display:none;">
-<audio id="chapterAudio" controls style="display:none;"></audio>
-
-<button class="back" onclick="back()">رجوع</button>
-</div>
+<button class="back" onclick="location.href='index.html'">رجوع</button>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, query, where, getDocs } 
+import { getFirestore, doc, getDoc } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -138,71 +113,53 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const params = new URLSearchParams(location.search);
-const subject = params.get("id");
+const id = params.get("id");
 
-const list = document.getElementById("chaptersList");
-const page = document.getElementById("chapterPage");
+document.getElementById("title").innerText = id;
 
-let chapters = [];
+const snap = await getDoc(doc(db,"subjects",id));
 
-async function loadChapters(){
+const content = document.getElementById("content");
 
-const q = query(collection(db,"chapters"), where("subject","==",subject));
-const snap = await getDocs(q);
+if(snap.exists()){
 
-snap.forEach(doc=>{
-chapters.push({id:doc.id,...doc.data()});
+const data = snap.data();
+
+(data.items || []).forEach(item=>{
+
+if(item.type==="title"){
+content.innerHTML += `<h2>${item.text}</h2>`;
+}
+
+if(item.type==="text"){
+content.innerHTML += `<p>${item.text}</p>`;
+}
+
+if(item.type==="image"){
+content.innerHTML += `<img src="${item.url}">`;
+}
+
+if(item.type==="book"){
+content.innerHTML += `<a href="${item.url}" target="_blank">📚 ${item.name}</a>`;
+}
+
+if(item.type==="link"){
+content.innerHTML += `<a href="${item.url}" target="_blank">🔗 ${item.name}</a>`;
+}
+
+if(item.type==="audio"){
+content.innerHTML += `
+<div class="audio-box">
+🎧 ${item.name}
+<audio controls src="${item.url}"></audio>
+</div>`;
+}
+
 });
 
-render();
-}
-
-function render(){
-
-list.innerHTML="";
-
-chapters.forEach((ch,i)=>{
-list.innerHTML += `
-<a class="btn" onclick="openChapter(${i})">
-📘 ${ch.title}
-</a>
-`;
-});
-}
-
-window.openChapter = (i)=>{
-const ch = chapters[i];
-
-document.getElementById("chapterTitle").innerText = ch.title;
-document.getElementById("chapterContent").innerText = ch.content;
-
-const img = document.getElementById("chapterImg");
-const audio = document.getElementById("chapterAudio");
-
-if(ch.image){
-img.src = ch.image;
-img.style.display="block";
 }else{
-img.style.display="none";
+content.innerHTML = "<p>لا يوجد محتوى</p>";
 }
-
-if(ch.audio){
-audio.src = ch.audio;
-audio.style.display="block";
-}else{
-audio.style.display="none";
-}
-
-list.style.display="none";
-page.style.display="block";
-};
-
-window.back = ()=>{
-page.style.display="none";
-list.style.display="grid";
-};
-
-loadChapters();
 
 </script>
 
