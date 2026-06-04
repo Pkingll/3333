@@ -63,6 +63,30 @@ padding:25px 15px
 color:#f5e6b3
 }
 
+.doors-bar{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+justify-content:center;
+padding:10px;
+}
+
+.door-btn{
+padding:10px 14px;
+border:none;
+border-radius:12px;
+background:#0d2033;
+color:#f5e6b3;
+cursor:pointer;
+border:1px solid rgba(255,255,255,.1);
+}
+
+.door-btn.active{
+background:#d4af37;
+color:#06131f;
+font-weight:bold;
+}
+
 .content{
 width:92%;
 max-width:900px;
@@ -103,7 +127,6 @@ font-weight:bold;
 cursor:pointer;
 }
 
-/* 🎧 تنسيق الصوت */
 .audio-box{
 margin:15px 0;
 padding:14px;
@@ -120,24 +143,23 @@ font-weight:700;
 
 .audio-box audio{
 width:100%;
-border-radius:10px;
 }
 </style>
 
 </head>
+
 <body>
 
 <div class="marquee">
-<span>
-من يرد الله به خيراً يفقهه في الدين •
-من يرد الله به خيراً يفقهه في الدين •
-من يرد الله به خيراً يفقهه في الدين
-</span>
+<span>من يرد الله به خيراً يفقهه في الدين • من يرد الله به خيراً يفقهه في الدين</span>
 </div>
 
 <div class="header">
 <h1 id="title">المادة</h1>
 </div>
+
+<!-- أزرار الأبواب -->
+<div class="doors-bar" id="doorsBar"></div>
 
 <div class="content" id="content"></div>
 
@@ -148,12 +170,7 @@ border-radius:10px;
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-import {
-getFirestore,
-doc,
-getDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
  apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",
@@ -188,83 +205,87 @@ tafsir:"التفسير"
 document.getElementById("title").textContent =
 names[id] || "المادة";
 
+let currentDoor = -1;
+let dataGlobal = null;
+
+// ===== تحميل المادة =====
 const snap = await getDoc(doc(db,"subjects",id));
 
-const content =
-document.getElementById("content");
+if(!snap.exists()){
+document.getElementById("content").innerHTML = "<p>لا يوجد محتوى</p>";
+throw new Error("no data");
+}
 
-if(snap.exists()){
+dataGlobal = snap.data();
 
- const data = snap.data();
+const items = dataGlobal.items || [];
+const doors = dataGlobal.doors || [];
 
- (data.items || []).forEach(item=>{
+// ===== عرض الأبواب =====
+const doorsBar = document.getElementById("doorsBar");
 
-   // عنوان
-   if(item.type==="title"){
-      content.innerHTML += `
-      <h2>${item.text}</h2>
-      `;
-   }
+function renderDoors(){
+doorsBar.innerHTML = "";
 
-   // نص
-   if(item.type==="text"){
-      content.innerHTML += `
-      <p>${item.text}</p>
-      `;
-   }
+if(doors.length === 0){
+renderContent(items);
+return;
+}
 
-   // صورة
-   if(item.type==="image"){
-      content.innerHTML += `
-      <img src="${item.url}">
-      `;
-   }
+doors.forEach((d,i)=>{
+const btn = document.createElement("button");
+btn.className = "door-btn";
+btn.innerText = d.name;
 
-   // كتاب
-   if(item.type==="book"){
-      content.innerHTML += `
-      <a target="_blank" href="${item.url}">
-      📚 ${item.name}
-      </a>
-      `;
-   }
+btn.onclick = ()=>{
+currentDoor = i;
+document.querySelectorAll(".door-btn").forEach(b=>b.classList.remove("active"));
+btn.classList.add("active");
+renderContent(d.items || []);
+};
 
-   // رابط
-   if(item.type==="link"){
-      content.innerHTML += `
-      <a target="_blank" href="${item.url}">
-      🔗 ${item.name}
-      </a>
-      `;
-   }
+doorsBar.appendChild(btn);
+});
+}
 
-   // 🎧 صوت
-   if(item.type==="audio"){
-      content.innerHTML += `
-      <div class="audio-box">
+// ===== عرض المحتوى =====
+function renderContent(list){
 
-        <div class="audio-title">
-        🎧 ${item.name}
-        </div>
+const content = document.getElementById("content");
+content.innerHTML = "";
 
-        <audio controls>
-          <source src="${item.url}" type="audio/mpeg">
-          المتصفح لا يدعم تشغيل الصوت
-        </audio>
+list.forEach(item=>{
 
-      </div>
-      `;
-   }
+if(item.type==="title"){
+content.innerHTML += `<h2>${item.text}</h2>`;
+}
 
- });
+if(item.type==="text"){
+content.innerHTML += `<p>${item.text}</p>`;
+}
 
-}else{
+if(item.type==="image"){
+content.innerHTML += `<img src="${item.url}">`;
+}
 
- content.innerHTML = `
- <p>لا يوجد محتوى لهذه المادة حالياً.</p>
- `;
+if(item.type==="link"){
+content.innerHTML += `<a href="${item.url}" target="_blank">${item.name}</a>`;
+}
+
+if(item.type==="audio"){
+content.innerHTML += `
+<div class="audio-box">
+<div class="audio-title">🎧 ${item.name}</div>
+<audio controls src="${item.url}"></audio>
+</div>`;
+}
+
+});
 
 }
+
+// init
+renderDoors();
 
 </script>
 
