@@ -142,10 +142,6 @@ function render(){
 }
 
 window.saveData=async()=>{
-
-alert("زر الحفظ يعمل");
-
-};
  const subject=document.getElementById("subject").value;
  await setDoc(doc(db,"subjects",subject),{items,updatedAt:new Date().toISOString()});
  alert("تم الحفظ بنجاح");
