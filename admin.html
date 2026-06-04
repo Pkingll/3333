@@ -9,29 +9,142 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Cairo,sans-serif}
-body{background:#06131f;color:#fff;min-height:100vh}
-body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),url('https://a.top4top.io/p_38068co2c0.jpg');background-size:cover;background-position:center}
-.header{text-align:center;padding:20px;color:#f5e6b3;font-size:24px;font-weight:700}
-.container{width:95%;max-width:900px;margin:auto;padding-bottom:100px}
-.card{background:rgba(5,15,30,.65);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:16px;margin-bottom:15px}
-select,button{width:100%;padding:12px;border:none;border-radius:12px}
-select{background:#0d2033;color:#fff}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-button{background:#d4af37;color:#06131f;font-weight:bold;cursor:pointer}
-.item{background:#0d2033;padding:12px;border-radius:12px;margin-top:10px}
-.actions{display:flex;gap:8px;margin-top:10px}
-.actions button{flex:1}
-.delete{background:#b91c1c;color:#fff}
-.edit{background:#2563eb;color:#fff}
-.savebar{position:fixed;bottom:15px;left:15px;right:15px}
-audio{width:100%;margin-top:10px}
 
-#preview{
-  font-size:14px;
-  line-height:1.7;
+body{
+background:#06131f;
+color:#fff;
+min-height:100vh;
 }
-#preview h2{font-size:18px;}
-#preview p{font-size:14px;}
+
+body:before{
+content:"";
+position:fixed;
+inset:0;
+z-index:-1;
+background:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),url('https://a.top4top.io/p_38068co2c0.jpg');
+background-size:cover;
+background-position:center;
+}
+
+.header{
+text-align:center;
+padding:20px;
+color:#f5e6b3;
+font-size:22px;
+font-weight:700;
+}
+
+.container{
+width:95%;
+max-width:900px;
+margin:auto;
+padding-bottom:120px;
+}
+
+.card{
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:18px;
+padding:15px;
+margin-bottom:15px;
+}
+
+select,button{
+width:100%;
+padding:12px;
+border:none;
+border-radius:12px;
+margin-top:8px;
+}
+
+select{
+background:#0d2033;
+color:#fff;
+}
+
+button{
+background:#d4af37;
+color:#06131f;
+font-weight:bold;
+cursor:pointer;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+margin-top:10px;
+}
+
+.item{
+background:#0d2033;
+padding:12px;
+border-radius:12px;
+margin-top:10px;
+}
+
+.actions{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+.actions button{
+flex:1;
+}
+
+.delete{
+background:#b91c1c;
+color:#fff;
+}
+
+.edit{
+background:#2563eb;
+color:#fff;
+}
+
+.door-list{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+margin-top:10px;
+}
+
+.door-btn{
+padding:8px 12px;
+border-radius:10px;
+background:#0d2033;
+border:1px solid rgba(255,255,255,.1);
+cursor:pointer;
+position:relative;
+}
+
+.door-btn.active{
+background:#d4af37;
+color:#06131f;
+font-weight:bold;
+}
+
+.small-actions{
+display:flex;
+gap:5px;
+margin-top:5px;
+}
+
+.small-actions button{
+padding:5px;
+font-size:12px;
+border-radius:6px;
+}
+
+.savebar{
+position:fixed;
+bottom:15px;
+left:15px;
+right:15px;
+}
+
+audio{width:100%}
 </style>
 
 </head>
@@ -42,6 +155,7 @@ audio{width:100%;margin-top:10px}
 
 <div class="container">
 
+<!-- المادة -->
 <div class="card">
 <select id="subject">
 <option value="aqida">العقيدة</option>
@@ -57,26 +171,35 @@ audio{width:100%;margin-top:10px}
 <option value="english">الإنجليزي</option>
 <option value="tafsir">التفسير</option>
 </select>
+
+<button onclick="loadSubject()">تحديث</button>
 </div>
 
+<!-- الأبواب -->
+<div class="card">
+<button onclick="addDoor()">➕ اضف باب</button>
+<div id="doors" class="door-list"></div>
+</div>
+
+<!-- أدوات -->
 <div class="card">
 <div class="grid">
 <button onclick="addTitle()">إضافة عنوان</button>
 <button onclick="addText()">إضافة نص</button>
 <button onclick="addImage()">إضافة صورة</button>
-<button onclick="addBook()">إضافة كتاب PDF</button>
 <button onclick="addLink()">إضافة رابط</button>
 <button onclick="addAudio()">إضافة صوت</button>
-<button onclick="loadSubject()">تحديث</button>
 </div>
 </div>
 
+<!-- المعاينة -->
 <div id="preview"></div>
 
 </div>
 
+<!-- حفظ -->
 <div class="savebar">
-<button id="saveBtn" onclick="saveData()">💾 حفظ التعديلات</button>
+<button onclick="saveData()">💾 حفظ التعديلات</button>
 </div>
 
 <script type="module">
@@ -97,158 +220,182 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 let items = [];
+let doors = [];
+let currentDoor = -1;
 
-// ===== عناصر =====
-window.addTitle = () => {
- const t = prompt("العنوان");
- if (!t) return;
- items.push({ type: "title", text: t });
+// ===== تحميل =====
+window.loadSubject = async () => {
+ const id = document.getElementById("subject").value;
+ const snap = await getDoc(doc(db,"subjects",id));
+
+ if(snap.exists()){
+  const data = snap.data();
+  items = data.items || [];
+  doors = data.doors || [];
+ } else {
+  items = [];
+  doors = [];
+ }
+
+ renderDoors();
  render();
 };
 
-window.addText = () => {
- const t = prompt("النص");
- if (!t) return;
- items.push({ type: "text", text: t });
- render();
-};
+// ===== إضافة باب =====
+window.addDoor = () => {
+ const name = prompt("اسم الباب");
+ if(!name) return;
 
-window.addImage = () => {
- const u = prompt("رابط الصورة");
- if (!u) return;
- items.push({ type: "image", url: u });
- render();
-};
-
-window.addBook = () => {
- const n = prompt("اسم الكتاب");
- const u = prompt("رابط PDF");
- if (!n || !u) return;
- items.push({ type: "book", name: n, url: u });
- render();
-};
-
-window.addLink = () => {
- const n = prompt("اسم الرابط");
- const u = prompt("الرابط");
- if (!n || !u) return;
- items.push({ type: "link", name: n, url: u });
- render();
-};
-
-// 🎧 إضافة صوت
-window.addAudio = () => {
- const name = prompt("اسم الصوت");
- const url = prompt("رابط الصوت (mp3)");
- if (!name || !url) return;
-
- items.push({
-  type: "audio",
-  name: name,
-  url: url
+ doors.push({
+  id: Date.now().toString(),
+  name,
+  items:[]
  });
 
+ renderDoors();
+};
+
+// ===== اختيار باب =====
+window.selectDoor = (i) => {
+ currentDoor = i;
+ render();
+ renderDoors();
+};
+
+// ===== تعديل اسم الباب =====
+window.editDoor = (i) => {
+ const newName = prompt("تعديل اسم الباب", doors[i].name);
+ if(!newName) return;
+
+ doors[i].name = newName;
+ renderDoors();
+};
+
+// ===== حذف باب =====
+window.deleteDoor = (i) => {
+ if(!confirm("هل تريد حذف هذا الباب؟")) return;
+
+ doors.splice(i,1);
+ if(currentDoor === i) currentDoor = -1;
+
+ renderDoors();
  render();
 };
 
-// ===== حذف =====
-window.deleteItem = (i) => {
- items.splice(i, 1);
+// ===== إضافة محتوى =====
+function pushItem(item){
+ if(currentDoor >= 0){
+  doors[currentDoor].items.push(item);
+ } else {
+  items.push(item);
+ }
+ render();
+}
+
+// ===== أدوات =====
+window.addTitle = ()=>pushItem({type:"title",text:prompt("العنوان")});
+window.addText = ()=>pushItem({type:"text",text:prompt("النص")});
+window.addImage = ()=>pushItem({type:"image",url:prompt("رابط الصورة")});
+window.addLink = ()=>{
+ const n = prompt("اسم الرابط");
+ const u = prompt("الرابط");
+ pushItem({type:"link",name:n,url:u});
+};
+window.addAudio = ()=>{
+ const n = prompt("اسم الصوت");
+ const u = prompt("الرابط");
+ pushItem({type:"audio",name:n,url:u});
+};
+
+// ===== حذف عنصر =====
+window.deleteItem = (i)=>{
+ if(currentDoor>=0){
+  doors[currentDoor].items.splice(i,1);
+ } else {
+  items.splice(i,1);
+ }
  render();
 };
 
-// ===== تعديل =====
-window.editItem = (i) => {
- const current = items[i].text || items[i].name || "";
- const v = prompt("تعديل", current);
- if (!v) return;
+// ===== عرض الأبواب =====
+function renderDoors(){
+ const d = document.getElementById("doors");
+ d.innerHTML="";
 
- if (items[i].text) items[i].text = v;
- if (items[i].name) items[i].name = v;
+ doors.forEach((door,i)=>{
+  const wrap = document.createElement("div");
 
- render();
-};
+  const btn = document.createElement("button");
+  btn.className="door-btn";
+  btn.innerText=door.name;
+  btn.onclick=()=>selectDoor(i);
+
+  const actions = document.createElement("div");
+  actions.className="small-actions";
+
+  const editBtn = document.createElement("button");
+  editBtn.innerText="✏️";
+  editBtn.style.background="#2563eb";
+  editBtn.onclick=()=>editDoor(i);
+
+  const delBtn = document.createElement("button");
+  delBtn.innerText="🗑";
+  delBtn.style.background="#b91c1c";
+  delBtn.onclick=()=>deleteDoor(i);
+
+  actions.appendChild(editBtn);
+  actions.appendChild(delBtn);
+
+  wrap.appendChild(btn);
+  wrap.appendChild(actions);
+
+  d.appendChild(wrap);
+ });
+}
 
 // ===== عرض =====
-function render() {
- const p = document.getElementById("preview");
- p.innerHTML = "";
+function render(){
+ const p=document.getElementById("preview");
+ p.innerHTML="";
 
- items.forEach((it, i) => {
-  const div = document.createElement("div");
-  div.className = "item";
+ let data = currentDoor>=0 ? doors[currentDoor].items : items;
 
-  let body = "";
+ data.forEach((it,i)=>{
 
-  if (it.type === "title") body = `<h2>${it.text}</h2>`;
-  if (it.type === "text") body = `<p>${it.text}</p>`;
-  if (it.type === "image") body = `<img src="${it.url}" style="width:100%;border-radius:10px">`;
-  if (it.type === "book") body = `📚 ${it.name}`;
-  if (it.type === "link") body = `🔗 ${it.name}`;
+  const div=document.createElement("div");
+  div.className="item";
 
-  if (it.type === "audio") {
-    body = `
-      🎧 ${it.name}
-      <audio controls src="${it.url}"></audio>
-    `;
-  }
+  let html="";
 
-  div.innerHTML = body + `
-    <div class="actions">
-      <button class="edit" onclick="editItem(${i})">تعديل</button>
-      <button class="delete" onclick="deleteItem(${i})">حذف</button>
-    </div>
-  `;
+  if(it.type==="title") html=`<h2>${it.text}</h2>`;
+  if(it.type==="text") html=`<p>${it.text}</p>`;
+  if(it.type==="image") html=`<img src="${it.url}" style="width:100%">`;
+  if(it.type==="link") html=`<a href="${it.url}" target="_blank">${it.name}</a>`;
+  if(it.type==="audio") html=`🎧 ${it.name}<audio controls src="${it.url}"></audio>`;
+
+  div.innerHTML=html+`
+  <div class="actions">
+   <button class="delete" onclick="deleteItem(${i})">حذف</button>
+  </div>`;
 
   p.appendChild(div);
  });
 }
 
-// ===== حفظ (مُصحح) =====
-window.saveData = async () => {
+// ===== حفظ =====
+window.saveData = async ()=>{
+ const id=document.getElementById("subject").value;
 
- const btn = document.getElementById("saveBtn");
+ await setDoc(doc(db,"subjects",id),{
+  items,
+  doors,
+  updatedAt:new Date().toISOString()
+ });
 
- try {
-  btn.disabled = true;
-  btn.innerText = "جاري الحفظ...";
-
-  const subject = document.getElementById("subject").value;
-
-  await setDoc(doc(db, "subjects", subject), {
-    items: items,
-    updatedAt: new Date().toISOString()
-  });
-
-  alert("تم الحفظ بنجاح 🚀");
-
-  // ✅ مهم: إعادة تحميل بعد الحفظ
-  await loadSubject();
-
- } catch (error) {
-  alert("خطأ: " + error.message);
- } finally {
-  btn.disabled = false;
-  btn.innerText = "💾 حفظ التعديلات";
- }
+ alert("تم الحفظ بنجاح 🚀");
 };
 
-// ===== تحميل (مُصحح) =====
-window.loadSubject = async () => {
- const subject = document.getElementById("subject").value;
- const snap = await getDoc(doc(db, "subjects", subject));
-
- if (snap.exists()) {
-  items = snap.data().items || [];
- } else {
-  items = [];
- }
-
- render();
-};
-
-document.getElementById("subject").addEventListener("change", loadSubject);
-
+document.getElementById("subject").addEventListener("change",loadSubject);
 loadSubject();
 
 </script>
