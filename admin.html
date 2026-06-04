@@ -1,230 +1,304 @@
-<!DOCTYPE html>  <html lang="ar" dir="rtl">  
-<head>  
-<meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width,initial-scale=1.0">  
-<title>لوحة التحكم</title>  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">  <style>  
-*{margin:0;padding:0;box-sizing:border-box;font-family:Cairo,sans-serif}  
-body{background:#06131f;color:#fff;min-height:100vh}  
-body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),url('https://a.top4top.io/p_38068co2c0.jpg');background-size:cover;background-position:center}  
-.header{text-align:center;padding:20px;color:#f5e6b3;font-size:24px;font-weight:700}  
-.container{width:95%;max-width:900px;margin:auto;padding-bottom:100px}  
-.card{background:rgba(5,15,30,.65);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:16px;margin-bottom:15px}  
-select,button{width:100%;padding:12px;border:none;border-radius:12px}  
-select{background:#0d2033;color:#fff}  
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}  
-button{background:#d4af37;color:#06131f;font-weight:bold;cursor:pointer}  
-.item{background:#0d2033;padding:12px;border-radius:12px;margin-top:10px}  
-.actions{display:flex;gap:8px;margin-top:10px}  
-.actions button{flex:1}  
-.delete{background:#b91c1c;color:#fff}  
-.edit{background:#2563eb;color:#fff}  
-.savebar{position:fixed;bottom:15px;left:15px;right:15px}  
-audio{width:100%;margin-top:10px}  
-  
-#preview{  
-  font-size:14px;  
-  line-height:1.7;  
-}  
-#preview h2{font-size:18px;}  
-#preview p{font-size:14px;}  
-</style>  </head>  <body>  <div class="header">لوحة التحكم</div>  <div class="container">  <div class="card">  
-<select id="subject">  
-<option value="aqida">العقيدة</option>  
-<option value="hadith">الحديث</option>  
-<option value="fiqh">الفقه</option>  
-<option value="usul">أصول الفقه</option>  
-<option value="history">تاريخ الخلفاء الراشدين</option>  
-<option value="dawah">منهج الدعوة</option>  
-<option value="tajweed">التجويد</option>  
-<option value="literature">الدراسات الأدبية</option>  
-<option value="nahw">النحو والصرف</option>  
-<option value="computer">الحاسوب</option>  
-<option value="english">الإنجليزي</option>  
-<option value="tafsir">التفسير</option>  
-</select>  
-</div>  <div class="card">  
-<div class="grid">  
-<button onclick="addTitle()">إضافة عنوان</button>  
-<button onclick="addText()">إضافة نص</button>  
-<button onclick="addImage()">إضافة صورة</button>  
-<button onclick="addBook()">إضافة كتاب PDF</button>  
-<button onclick="addLink()">إضافة رابط</button>  
-<button onclick="addAudio()">إضافة صوت</button>  
-<button onclick="loadSubject()">تحديث</button>  
-</div>  
-</div>  <div id="preview"></div>  </div>  <div class="savebar">  
-<button id="saveBtn" onclick="saveData()">💾 حفظ التعديلات</button>  
-</div>  <script type="module">  
-  
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";  
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";  
-  
-const firebaseConfig = {  
- apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",  
- authDomain: "p-726bc.firebaseapp.com",  
- projectId: "p-726bc",  
- storageBucket: "p-726bc.firebasestorage.app",  
- messagingSenderId: "752913389065",  
- appId: "1:752913389065:web:20cf8c03fe4ace03650ad8"  
-};  
-  
-const app = initializeApp(firebaseConfig);  
-const db = getFirestore(app);  
-  
-let items = [];  
-  
-// ===== عناصر =====  
-window.addTitle = () => {  
- const t = prompt("العنوان");  
- if (!t) return;  
- items.push({ type: "title", text: t });  
- render();  
-};  
-  
-window.addText = () => {  
- const t = prompt("النص");  
- if (!t) return;  
- items.push({ type: "text", text: t });  
- render();  
-};  
-  
-window.addImage = () => {  
- const u = prompt("رابط الصورة");  
- if (!u) return;  
- items.push({ type: "image", url: u });  
- render();  
-};  
-  
-window.addBook = () => {  
- const n = prompt("اسم الكتاب");  
- const u = prompt("رابط PDF");  
- if (!n || !u) return;  
- items.push({ type: "book", name: n, url: u });  
- render();  
-};  
-  
-window.addLink = () => {  
- const n = prompt("اسم الرابط");  
- const u = prompt("الرابط");  
- if (!n || !u) return;  
- items.push({ type: "link", name: n, url: u });  
- render();  
-};  
-  
-// 🎧 إضافة صوت  
-window.addAudio = () => {  
- const name = prompt("اسم الصوت");  
- const url = prompt("رابط الصوت (mp3)");  
- if (!name || !url) return;  
-  
- items.push({  
-  type: "audio",  
-  name: name,  
-  url: url  
- });  
-  
- render();  
-};  
-  
-// ===== حذف =====  
-window.deleteItem = (i) => {  
- items.splice(i, 1);  
- render();  
-};  
-  
-// ===== تعديل =====  
-window.editItem = (i) => {  
- const current = items[i].text || items[i].name || "";  
- const v = prompt("تعديل", current);  
- if (!v) return;  
-  
- if (items[i].text) items[i].text = v;  
- if (items[i].name) items[i].name = v;  
-  
- render();  
-};  
-  
-// ===== عرض =====  
-function render() {  
- const p = document.getElementById("preview");  
- p.innerHTML = "";  
-  
- items.forEach((it, i) => {  
-  const div = document.createElement("div");  
-  div.className = "item";  
-  
-  let body = "";  
-  
-  if (it.type === "title") body = `<h2>${it.text}</h2>`;  
-  if (it.type === "text") body = `<p>${it.text}</p>`;  
-  if (it.type === "image") body = `<img src="${it.url}" style="width:100%;border-radius:10px">`;  
-  if (it.type === "book") body = `📚 ${it.name}`;  
-  if (it.type === "link") body = `🔗 ${it.name}`;  
-  
-  if (it.type === "audio") {  
-    body = `  
-      🎧 ${it.name}  
-      <audio controls src="${it.url}"></audio>  
-    `;  
-  }  
-  
-  div.innerHTML = body + `  
-    <div class="actions">  
-      <button class="edit" onclick="editItem(${i})">تعديل</button>  
-      <button class="delete" onclick="deleteItem(${i})">حذف</button>  
-    </div>  
-  `;  
-  
-  p.appendChild(div);  
- });  
-}  
-  
-// ===== حفظ (مُصحح) =====  
-window.saveData = async () => {  
-  
- const btn = document.getElementById("saveBtn");  
-  
- try {  
-  btn.disabled = true;  
-  btn.innerText = "جاري الحفظ...";  
-  
-  const subject = document.getElementById("subject").value;  
-  
-  await setDoc(doc(db, "subjects", subject), {  
-    items: items,  
-    updatedAt: new Date().toISOString()  
-  });  
-  
-  alert("تم الحفظ بنجاح 🚀");  
-  
-  // ✅ مهم: إعادة تحميل بعد الحفظ  
-  await loadSubject();  
-  
- } catch (error) {  
-  alert("خطأ: " + error.message);  
- } finally {  
-  btn.disabled = false;  
-  btn.innerText = "💾 حفظ التعديلات";  
- }  
-};  
-  
-// ===== تحميل (مُصحح) =====  
-window.loadSubject = async () => {  
- const subject = document.getElementById("subject").value;  
- const snap = await getDoc(doc(db, "subjects", subject));  
-  
- if (snap.exists()) {  
-  items = snap.data().items || [];  
- } else {  
-  items = [];  
- }  
-  
- render();  
-};  
-  
-document.getElementById("subject").addEventListener("change", loadSubject);  
-  
-loadSubject();  
-  
-</script>  </body>  
-</html>  
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Cairo,sans-serif}
+body{background:#06131f;color:#fff;min-height:100vh}
+body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),url('https://a.top4top.io/p_38068co2c0.jpg');background-size:cover;background-position:center}
+
+.header{text-align:center;padding:20px;color:#f5e6b3;font-size:24px}
+
+.container{width:95%;max-width:900px;margin:auto;padding-bottom:120px}
+
+.card{background:rgba(5,15,30,.65);border-radius:18px;padding:16px;margin-bottom:15px}
+
+select,button,input,textarea{width:100%;padding:12px;border:none;border-radius:12px;margin-top:10px}
+
+button{background:#d4af37;color:#06131f;font-weight:bold;cursor:pointer}
+
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+
+.item{background:#0d2033;padding:10px;border-radius:12px;margin-top:10px}
+
+.actions{display:flex;gap:8px;margin-top:10px}
+.actions button{flex:1}
+.edit{background:#2563eb;color:#fff}
+.delete{background:#b91c1c;color:#fff}
+.view{background:#16a34a;color:#fff}
+
+/* نافذة العرض */
+.modal{
+position:fixed;inset:0;
+background:rgba(0,0,0,.8);
+display:none;
+align-items:center;
+justify-content:center;
+}
+
+.modal-content{
+background:#0d2033;
+padding:20px;
+width:90%;
+max-width:600px;
+border-radius:15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">لوحة التحكم النهائية</div>
+
+<div class="container">
+
+<!-- ================== النظام القديم ================== -->
+<div class="card">
+<h3>📚 النظام القديم (بدون تغيير)</h3>
+
+<select id="subject">
+<option value="aqida">العقيدة</option>
+<option value="hadith">الحديث</option>
+<option value="fiqh">الفقه</option>
+<option value="usul">الأصول</option>
+<option value="history">التاريخ</option>
+<option value="dawah">الدعوة</option>
+<option value="tajweed">التجويد</option>
+<option value="literature">الأدب</option>
+<option value="nahw">النحو</option>
+<option value="computer">الحاسوب</option>
+<option value="english">الإنجليزي</option>
+<option value="tafsir">التفسير</option>
+</select>
+
+<div class="grid">
+<button onclick="addTitle()">عنوان</button>
+<button onclick="addText()">نص</button>
+<button onclick="addImage()">صورة</button>
+<button onclick="addBook()">كتاب</button>
+<button onclick="addLink()">رابط</button>
+<button onclick="addAudio()">صوت</button>
+</div>
+
+<div id="preview"></div>
+
+<button onclick="saveOld()">💾 حفظ القديم</button>
+</div>
+
+<!-- ================== النظام الجديد ================== -->
+<div class="card">
+<h3>📂 الفصول والدروس (جديد)</h3>
+
+<select id="subject2"></select>
+
+<input id="chapterTitle" placeholder="اسم الفصل">
+<button onclick="addChapter()">➕ إضافة فصل</button>
+
+<div id="chaptersList"></div>
+
+<hr>
+
+<select id="chapterSelect"></select>
+
+<input id="lessonTitle" placeholder="عنوان الدرس">
+<textarea id="lessonText" placeholder="نص الدرس"></textarea>
+<input id="lessonImage" placeholder="رابط صورة">
+<input id="lessonAudio" placeholder="رابط صوت">
+<input id="lessonLink" placeholder="رابط">
+
+<button onclick="addLesson()">➕ إضافة درس</button>
+
+<div id="lessonsList"></div>
+</div>
+
+</div>
+
+<!-- نافذة عرض الدرس -->
+<div class="modal" id="modal">
+<div class="modal-content">
+<h2 id="mTitle"></h2>
+<p id="mText"></p>
+<img id="mImg" style="width:100%;border-radius:10px">
+<audio id="mAudio" controls style="width:100%"></audio>
+<a id="mLink" target="_blank"></a>
+<br><br>
+<button onclick="closeModal()">إغلاق</button>
+</div>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+getFirestore,
+collection,
+addDoc,
+getDocs,
+query,
+where,
+deleteDoc,
+doc,
+updateDoc,
+setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",
+authDomain: "p-726bc.firebaseapp.com",
+projectId: "p-726bc",
+storageBucket: "p-726bc.firebasestorage.app",
+messagingSenderId: "752913389065",
+appId: "1:752913389065:web:20cf8c03fe4ace03650ad8"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* ================= النظام القديم ================= */
+let items=[];
+
+window.addTitle=()=>{let t=prompt("عنوان");if(t)items.push({type:"title",text:t});render();}
+window.addText=()=>{let t=prompt("نص");if(t)items.push({type:"text",text:t});render();}
+window.addImage=()=>{let t=prompt("رابط");if(t)items.push({type:"image",url:t});render();}
+window.addBook=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"book",name:n,url:u});render();}
+window.addLink=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"link",name:n,url:u});render();}
+window.addAudio=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"audio",name:n,url:u});render();}
+
+function render(){
+let p=document.getElementById("preview");
+p.innerHTML="";
+items.forEach((it,i)=>{
+p.innerHTML+=`<div class="item">${it.text||it.name||it.url}</div>`;
+});
+}
+
+window.saveOld=async()=>{
+let s=document.getElementById("subject").value;
+await setDoc(doc(db,"subjects",s),{items});
+alert("تم حفظ القديم");
+};
+
+/* ================= الفصول ================= */
+document.getElementById("subject2").innerHTML = document.getElementById("subject").innerHTML;
+
+let subject2 = "aqida";
+
+document.getElementById("subject2").onchange=(e)=>{
+subject2=e.target.value;
+loadChapters();
+};
+
+window.addChapter=async()=>{
+let t=chapterTitle.value;
+if(!t)return;
+
+await addDoc(collection(db,"chapters"),{
+subject:subject2,
+title:t
+});
+
+loadChapters();
+};
+
+async function loadChapters(){
+
+let q=query(collection(db,"chapters"),where("subject","==",subject2));
+let snap=await getDocs(q);
+
+chaptersList.innerHTML="";
+chapterSelect.innerHTML="";
+
+snap.forEach(d=>{
+let id=d.id;
+let data=d.data();
+
+chaptersList.innerHTML+=`
+<div class="item">
+📂 ${data.title}
+<button onclick="deleteChapter('${id}')">حذف</button>
+</div>`;
+
+chapterSelect.innerHTML+=`<option value="${id}">${data.title}</option>`;
+});
+}
+
+window.deleteChapter=async(id)=>{
+await deleteDoc(doc(db,"chapters",id));
+loadChapters();
+};
+
+/* ================= الدروس ================= */
+window.addLesson=async()=>{
+await addDoc(collection(db,"lessons"),{
+subject:subject2,
+chapterId:chapterSelect.value,
+title:lessonTitle.value,
+text:lessonText.value,
+image:lessonImage.value,
+audio:lessonAudio.value,
+link:lessonLink.value,
+order:Date.now()
+});
+
+loadLessons();
+};
+
+async function loadLessons(){
+
+if(!chapterSelect.value)return;
+
+let q=query(collection(db,"lessons"),where("chapterId","==",chapterSelect.value));
+let snap=await getDocs(q);
+
+lessonsList.innerHTML="";
+
+snap.forEach(d=>{
+let id=d.id;
+let data=d.data();
+
+lessonsList.innerHTML+=`
+<div class="item">
+📖 ${data.title}
+
+<div class="actions">
+<button class="view" onclick='openLesson(${JSON.stringify(data)})'>عرض</button>
+<button class="delete" onclick="deleteLesson('${id}')">حذف</button>
+</div>
+</div>`;
+});
+}
+
+window.deleteLesson=async(id)=>{
+await deleteDoc(doc(db,"lessons",id));
+loadLessons();
+};
+
+/* عرض درس */
+window.openLesson=(d)=>{
+modal.style.display="flex";
+mTitle.innerText=d.title;
+mText.innerText=d.text;
+mImg.src=d.image||"";
+mAudio.src=d.audio||"";
+mLink.href=d.link||"#";
+mLink.innerText=d.link||"";
+};
+
+window.closeModal=()=>{
+modal.style.display="none";
+};
+
+chapterSelect.onchange=loadLessons;
+
+loadChapters();
+
+</script>
+
+</body>
+</html>
