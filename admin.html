@@ -8,40 +8,43 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Cairo,sans-serif}
-body{background:#06131f;color:#fff;min-height:100vh}
-body:before{
-content:"";position:fixed;inset:0;z-index:-1;
-background:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),
-url('https://a.top4top.io/p_38068co2c0.jpg');
-background-size:cover;background-position:center;
+body{
+margin:0;
+font-family:Cairo;
+background:#06131f;
+color:#fff;
 }
 
-.header{text-align:center;padding:20px;color:#f5e6b3;font-size:24px;font-weight:700}
+.header{
+text-align:center;
+padding:20px;
+color:#f5e6b3;
+font-size:22px;
+}
 
-.container{width:95%;max-width:900px;margin:auto;padding-bottom:120px}
+.container{
+width:92%;
+max-width:900px;
+margin:auto;
+}
 
 .card{
 background:rgba(5,15,30,.65);
-border:1px solid rgba(255,255,255,.1);
-border-radius:18px;
-padding:16px;
-margin-bottom:15px;
+padding:15px;
+margin:10px 0;
+border-radius:15px;
 }
 
-select,button{
+button,select{
 width:100%;
-padding:12px;
-border:none;
-border-radius:12px;
+padding:10px;
 margin-top:10px;
+border:none;
+border-radius:10px;
 }
-
-select{background:#0d2033;color:#fff}
 
 button{
 background:#d4af37;
-color:#06131f;
 font-weight:bold;
 cursor:pointer;
 }
@@ -50,62 +53,27 @@ cursor:pointer;
 display:grid;
 grid-template-columns:repeat(2,1fr);
 gap:10px;
-margin-top:10px;
 }
 
 .item{
 background:#0d2033;
-padding:12px;
-border-radius:12px;
+padding:10px;
 margin-top:10px;
+border-radius:10px;
 }
 
 .actions{
 display:flex;
-gap:8px;
+gap:5px;
 margin-top:10px;
 }
 
-.actions button{flex:1}
+.actions button{
+flex:1;
+}
 
 .delete{background:#b91c1c;color:#fff}
 .edit{background:#2563eb;color:#fff}
-
-.savebar{
-position:fixed;
-bottom:15px;
-left:15px;
-right:15px;
-}
-
-/* ===== نافذة الباب ===== */
-.modal{
-display:none;
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.8);
-z-index:9999;
-justify-content:center;
-align-items:center;
-}
-
-.modal-box{
-background:#0d2033;
-padding:20px;
-border-radius:15px;
-width:90%;
-max-width:500px;
-}
-
-.modal-box input,
-.modal-box textarea{
-width:100%;
-padding:10px;
-margin-top:10px;
-border-radius:10px;
-border:none;
-}
-
 </style>
 </head>
 
@@ -115,7 +83,6 @@ border:none;
 
 <div class="container">
 
-<!-- اختيار المادة -->
 <div class="card">
 <select id="subject">
 <option value="aqida">العقيدة</option>
@@ -133,79 +100,28 @@ border:none;
 </select>
 </div>
 
-<!-- أدوات النظام القديم -->
 <div class="card">
 <div class="grid">
-
-<button onclick="addTitle()">إضافة عنوان</button>
-<button onclick="addText()">إضافة نص</button>
-<button onclick="addImage()">إضافة صورة</button>
-<button onclick="addBook()">إضافة كتاب</button>
-<button onclick="addLink()">إضافة رابط</button>
-<button onclick="addAudio()">إضافة صوت</button>
-
-<!-- 🔥 زر الباب الجديد -->
-<button onclick="openChapter()">➕ اضف باب</button>
-
-<button onclick="loadSubject()">تحديث</button>
-
+<button onclick="addTitle()">عنوان</button>
+<button onclick="addText()">نص</button>
+<button onclick="addImage()">صورة</button>
+<button onclick="addBook()">كتاب</button>
+<button onclick="addLink()">رابط</button>
+<button onclick="addAudio()">صوت</button>
 </div>
 </div>
 
-<!-- عرض المعاينة -->
-<div id="preview"></div>
+<div class="card" id="preview"></div>
 
-</div>
+<button onclick="saveData()">💾 حفظ</button>
 
-<!-- حفظ -->
-<div class="savebar">
-<button onclick="saveData()">💾 حفظ التعديلات</button>
-</div>
-
-<!-- ===== نافذة الباب ===== -->
-<div class="modal" id="chapterModal">
-<div class="modal-box">
-
-<h3>إضافة باب جديد</h3>
-
-<select id="chapterSubject">
-<option value="aqida">العقيدة</option>
-<option value="hadith">الحديث</option>
-<option value="fiqh">الفقه</option>
-<option value="usul">أصول الفقه</option>
-<option value="history">التاريخ</option>
-<option value="dawah">الدعوة</option>
-<option value="tajweed">التجويد</option>
-<option value="literature">الأدب</option>
-<option value="nahw">النحو</option>
-<option value="computer">الحاسوب</option>
-<option value="english">الإنجليزي</option>
-<option value="tafsir">التفسير</option>
-</select>
-
-<input id="chapterTitle" placeholder="اسم الباب">
-<textarea id="chapterText" placeholder="اكتب محتوى الباب"></textarea>
-
-<input id="chapterImage" placeholder="رابط صورة (اختياري)">
-<input id="chapterAudio" placeholder="رابط صوت (اختياري)">
-
-<button onclick="saveChapter()">حفظ الباب</button>
-<button onclick="closeChapter()" style="background:#b91c1c;color:white;">إغلاق</button>
-
-</div>
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-getFirestore,
-doc,
-setDoc,
-getDoc,
-collection,
-addDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",
@@ -219,83 +135,34 @@ appId: "1:752913389065:web:20cf8c03fe4ace03650ad8"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ===== النظام القديم ===== */
 let items = [];
 
 window.addTitle=()=>{let t=prompt("عنوان");if(t)items.push({type:"title",text:t});render();}
 window.addText=()=>{let t=prompt("نص");if(t)items.push({type:"text",text:t});render();}
-window.addImage=()=>{let u=prompt("رابط صورة");if(u)items.push({type:"image",url:u});render();}
+window.addImage=()=>{let u=prompt("رابط");if(u)items.push({type:"image",url:u});render();}
 window.addBook=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"book",name:n,url:u});render();}
 window.addLink=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"link",name:n,url:u});render();}
-window.addAudio=()=>{let n=prompt("اسم الصوت");let u=prompt("رابط الصوت");if(n&&u)items.push({type:"audio",name:n,url:u});render();}
+window.addAudio=()=>{let n=prompt("اسم الصوت");let u=prompt("رابط");if(n&&u)items.push({type:"audio",name:n,url:u});render();}
 
-window.render=()=>{
+function render(){
 let p=document.getElementById("preview");
 p.innerHTML="";
 items.forEach((it,i)=>{
-p.innerHTML+=`<div class="item">
-${it.text||it.name||it.url}
-<div class="actions">
-<button class="edit" onclick="editItem(${i})">تعديل</button>
-<button class="delete" onclick="deleteItem(${i})">حذف</button>
-</div>
+p.innerHTML+=`
+<div class="item">
+${it.text || it.name || it.url}
+<button onclick="deleteItem(${i})">حذف</button>
 </div>`;
 });
-};
-
-window.deleteItem=(i)=>{items.splice(i,1);render();}
-window.editItem=(i)=>{let v=prompt("تعديل",items[i].text||items[i].name);if(v)items[i].text?v=items[i].text=v:items[i].name=v;render();}
-
-/* حفظ النظام القديم */
-window.saveData=async()=>{
-let subject=document.getElementById("subject").value;
-await setDoc(doc(db,"subjects",subject),{items});
-alert("تم الحفظ");
-};
-
-/* ===== النظام الجديد (الأبواب) ===== */
-window.openChapter=()=>{
-document.getElementById("chapterModal").style.display="flex";
-};
-
-window.closeChapter=()=>{
-document.getElementById("chapterModal").style.display="none";
-};
-
-window.saveChapter=async()=>{
-
-const subject=document.getElementById("chapterSubject").value;
-const title=document.getElementById("chapterTitle").value;
-const content=document.getElementById("chapterText").value;
-const image=document.getElementById("chapterImage").value;
-const audio=document.getElementById("chapterAudio").value;
-
-if(!title||!content){
-alert("اكتب البيانات");
-return;
 }
 
-await addDoc(collection(db,"chapters"),{
-subject,
-title,
-content,
-image,
-audio,
-createdAt:new Date().toISOString()
-});
+window.deleteItem=(i)=>{items.splice(i,1);render();}
 
-alert("تم حفظ الباب");
-closeChapter();
+window.saveData=async()=>{
+let s=document.getElementById("subject").value;
+await setDoc(doc(db,"subjects",s),{items});
+alert("تم الحفظ");
 };
-
-window.loadSubject=async()=>{
-let subject=document.getElementById("subject").value;
-let snap=await getDoc(doc(db,"subjects",subject));
-if(snap.exists())items=snap.data().items||[];
-render();
-};
-
-loadSubject();
 
 </script>
 
