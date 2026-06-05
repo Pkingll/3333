@@ -17,7 +17,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradi
 
 .container{width:95%;max-width:900px;margin:auto;padding-bottom:120px}
 
-.card{background:rgba(5,15,30,.65);border-radius:18px;padding:16px;margin-bottom:15px}
+/* زيادة مسافات بسيطة */
+.card{background:rgba(5,15,30,.65);border-radius:18px;padding:16px;margin-bottom:25px}
 
 select,button,input,textarea{width:100%;padding:12px;border:none;border-radius:12px;margin-top:10px}
 
@@ -119,7 +120,7 @@ border-radius:15px;
 
 </div>
 
-<!-- نافذة عرض الدرس -->
+<!-- نافذة العرض -->
 <div class="modal" id="modal">
 <div class="modal-content">
 <h2 id="mTitle"></h2>
@@ -167,16 +168,39 @@ window.addTitle=()=>{let t=prompt("عنوان");if(t)items.push({type:"title",te
 window.addText=()=>{let t=prompt("نص");if(t)items.push({type:"text",text:t});render();}
 window.addImage=()=>{let t=prompt("رابط");if(t)items.push({type:"image",url:t});render();}
 window.addBook=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"book",name:n,url:u});render();}
-window.addLink=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"link",name:n,url:u});render();}
+window.addLink=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"link",name:n,url:t});render();}
 window.addAudio=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"audio",name:n,url:u});render();}
 
 function render(){
 let p=document.getElementById("preview");
 p.innerHTML="";
 items.forEach((it,i)=>{
-p.innerHTML+=`<div class="item">${it.text||it.name||it.url}</div>`;
+p.innerHTML+=`
+<div class="item">
+${it.text||it.name||it.url}
+<div class="actions">
+<button class="edit" onclick="editOld(${i})">تعديل</button>
+<button class="delete" onclick="deleteOld(${i})">حذف</button>
+</div>
+</div>`;
 });
 }
+
+window.editOld=(i)=>{
+let it=items[i];
+let v=prompt("تعديل",it.text||it.name||it.url);
+if(v){
+if(it.text)it.text=v;
+else if(it.name)it.name=v;
+else it.url=v;
+render();
+}
+};
+
+window.deleteOld=(i)=>{
+items.splice(i,1);
+render();
+};
 
 window.saveOld=async()=>{
 let s=document.getElementById("subject").value;
@@ -187,7 +211,7 @@ alert("تم حفظ القديم");
 /* ================= الفصول ================= */
 document.getElementById("subject2").innerHTML = document.getElementById("subject").innerHTML;
 
-let subject2 = "aqida";
+let subject2="aqida";
 
 document.getElementById("subject2").onchange=(e)=>{
 subject2=e.target.value;
@@ -206,6 +230,13 @@ title:t
 loadChapters();
 };
 
+window.editChapter=async(id,oldTitle)=>{
+let t=prompt("تعديل اسم الفصل",oldTitle);
+if(!t)return;
+await updateDoc(doc(db,"chapters",id),{title:t});
+loadChapters();
+};
+
 async function loadChapters(){
 
 let q=query(collection(db,"chapters"),where("subject","==",subject2));
@@ -221,7 +252,10 @@ let data=d.data();
 chaptersList.innerHTML+=`
 <div class="item">
 📂 ${data.title}
-<button onclick="deleteChapter('${id}')">حذف</button>
+<div class="actions">
+<button class="edit" onclick="editChapter('${id}','${data.title}')">تعديل</button>
+<button class="delete" onclick="deleteChapter('${id}')">حذف</button>
+</div>
 </div>`;
 
 chapterSelect.innerHTML+=`<option value="${id}">${data.title}</option>`;
@@ -249,6 +283,13 @@ order:Date.now()
 loadLessons();
 };
 
+window.editLesson=async(id,data)=>{
+let t=prompt("تعديل العنوان",data.title);
+if(!t)return;
+await updateDoc(doc(db,"lessons",id),{title:t});
+loadLessons();
+};
+
 async function loadLessons(){
 
 if(!chapterSelect.value)return;
@@ -268,6 +309,7 @@ lessonsList.innerHTML+=`
 
 <div class="actions">
 <button class="view" onclick='openLesson(${JSON.stringify(data)})'>عرض</button>
+<button class="edit" onclick='editLesson("${id}",${JSON.stringify(data)})'>تعديل</button>
 <button class="delete" onclick="deleteLesson('${id}')">حذف</button>
 </div>
 </div>`;
