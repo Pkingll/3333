@@ -13,7 +13,7 @@
 body{
 background:#06131f;
 color:#fff;
-min-height:100vh
+min-height:100vh;
 }
 
 body:before{
@@ -21,31 +21,33 @@ content:"";
 position:fixed;
 inset:0;
 z-index:-1;
-background:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),
+background:
+linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),
 url('https://a.top4top.io/p_38068co2c0.jpg');
 background-size:cover;
-background-position:center
+background-position:center;
 }
 
 .header{
 text-align:center;
 padding:20px;
 color:#f5e6b3;
-font-size:24px
+font-size:24px;
+font-weight:700;
 }
 
 .container{
 width:95%;
 max-width:900px;
 margin:auto;
-padding-bottom:120px
+padding-bottom:120px;
 }
 
 .card{
 background:rgba(5,15,30,.65);
 border-radius:18px;
 padding:16px;
-margin-bottom:25px
+margin-bottom:15px;
 }
 
 select,button,input,textarea{
@@ -53,61 +55,37 @@ width:100%;
 padding:12px;
 border:none;
 border-radius:12px;
-margin-top:10px
+margin-top:10px;
 }
 
 button{
 background:#d4af37;
 color:#06131f;
 font-weight:bold;
-cursor:pointer
+cursor:pointer;
 }
 
-.grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:10px
-}
-
-/* 🔥 هنا التعديل المهم */
 .item{
 background:#0d2033;
 padding:10px;
-border-radius:12px;
 margin-top:10px;
-font-size:14px;   /* 👈 تصغير الخط */
-line-height:1.6
+border-radius:12px;
 }
 
 .actions{
 display:flex;
 gap:8px;
-margin-top:10px
+margin-top:10px;
 }
 
-.actions button{flex:1}
+.actions button{
+flex:1;
+}
 
 .edit{background:#2563eb;color:#fff}
 .delete{background:#b91c1c;color:#fff}
 .view{background:#16a34a;color:#fff}
 
-/* نافذة العرض */
-.modal{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.8);
-display:none;
-align-items:center;
-justify-content:center
-}
-
-.modal-content{
-background:#0d2033;
-padding:20px;
-width:90%;
-max-width:600px;
-border-radius:15px
-}
 </style>
 </head>
 
@@ -117,7 +95,7 @@ border-radius:15px
 
 <div class="container">
 
-<!-- النظام القديم -->
+<!-- ================= النظام القديم ================= -->
 <div class="card">
 <h3>📚 النظام القديم</h3>
 
@@ -136,23 +114,21 @@ border-radius:15px
 <option value="tafsir">التفسير</option>
 </select>
 
-<div class="grid">
 <button onclick="addTitle()">عنوان</button>
 <button onclick="addText()">نص</button>
 <button onclick="addImage()">صورة</button>
 <button onclick="addBook()">كتاب</button>
 <button onclick="addLink()">رابط</button>
 <button onclick="addAudio()">صوت</button>
-</div>
 
 <div id="preview"></div>
 
-<button onclick="saveOld()">💾 حفظ القديم</button>
+<button onclick="saveOld()">حفظ القديم</button>
 </div>
 
-<!-- النظام الجديد -->
+<!-- ================= النظام الجديد ================= -->
 <div class="card">
-<h3>📂 الفصول والدروس</h3>
+<h3>📂 الفصول والدروس (احترافي)</h3>
 
 <select id="subject2"></select>
 
@@ -167,28 +143,16 @@ border-radius:15px
 
 <input id="lessonTitle" placeholder="عنوان الدرس">
 <textarea id="lessonText" placeholder="نص الدرس"></textarea>
-<input id="lessonImage" placeholder="رابط صورة">
-<input id="lessonAudio" placeholder="رابط صوت">
+<input id="lessonImage" placeholder="صورة">
+<input id="lessonAudio" placeholder="صوت">
 <input id="lessonLink" placeholder="رابط">
 
 <button onclick="addLesson()">➕ إضافة درس</button>
 
 <div id="lessonsList"></div>
-</div>
 
 </div>
 
-<!-- modal -->
-<div class="modal" id="modal">
-<div class="modal-content">
-<h2 id="mTitle"></h2>
-<p id="mText"></p>
-<img id="mImg" style="width:100%;border-radius:10px">
-<audio id="mAudio" controls style="width:100%"></audio>
-<a id="mLink" target="_blank"></a>
-<br><br>
-<button onclick="closeModal()">إغلاق</button>
-</div>
 </div>
 
 <script type="module">
@@ -199,161 +163,149 @@ getFirestore,
 collection,
 addDoc,
 getDocs,
-getDoc,
 query,
 where,
 deleteDoc,
 doc,
-setDoc,
-updateDoc
+updateDoc,
+setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",
 authDomain: "p-726bc.firebaseapp.com",
-projectId: "p-726bc",
-storageBucket: "p-726bc.firebasestorage.app",
-messagingSenderId: "752913389065",
-appId: "1:752913389065:web:20cf8c03fe4ace03650ad8"
+projectId: "p-726bc"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* النظام القديم */
-let items=[];
+/* ================= النظام القديم ================= */
+let items = [];
 
-window.addTitle=()=>{let t=prompt("عنوان");if(t)items.push({text:t});render();}
-window.addText=()=>{let t=prompt("نص");if(t)items.push({text:t});render();}
-window.addImage=()=>{let t=prompt("رابط");if(t)items.push({url:t});render();}
-window.addBook=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n)items.push({text:n+" - "+u});render();}
-window.addLink=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n)items.push({text:n+" - "+u});render();}
-window.addAudio=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n)items.push({text:n+" - "+u});render();}
+window.addTitle = ()=>{let t=prompt("عنوان");if(t)items.push({type:"title",text:t});render();}
+window.addText = ()=>{let t=prompt("نص");if(t)items.push({type:"text",text:t});render();}
+window.addImage = ()=>{let t=prompt("رابط");if(t)items.push({type:"image",url:t});render();}
+window.addBook = ()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"book",name:n,url:u});render();}
+window.addLink = ()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"link",name:n,url:u});render();}
+window.addAudio = ()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"audio",name:n,url:u});render();}
 
 function render(){
-preview.innerHTML="";
-items.forEach((it,i)=>{
-preview.innerHTML+=`
-<div class="item">
-${it.text || it.url}
-</div>`;
-});
+document.getElementById("preview").innerHTML =
+items.map(i=>`<div class="item">${i.text||i.name||i.url}</div>`).join("");
 }
 
-window.saveOld=async()=>{
-let s=subject.value;
+window.saveOld = async ()=>{
+let s = document.getElementById("subject").value;
 await setDoc(doc(db,"subjects",s),{items});
 alert("تم الحفظ");
 };
 
-/* تحميل النظام القديم */
-async function loadOld(){
-let s=subject.value;
-let snap=await getDoc(doc(db,"subjects",s));
-if(snap.exists()){
-items=snap.data().items||[];
-}
-render();
-}
-subject.onchange=loadOld;
-loadOld();
+/* ================= الفصول ================= */
+let subject2 = "aqida";
 
-/* الفصول */
-subject2.innerHTML=subject.innerHTML;
-let subject2Value="aqida";
+document.getElementById("subject2").innerHTML =
+document.getElementById("subject").innerHTML;
 
-subject2.onchange=(e)=>{
-subject2Value=e.target.value;
+document.getElementById("subject2").onchange = e=>{
+subject2 = e.target.value;
 loadChapters();
 };
 
-window.addChapter=async()=>{
+window.addChapter = async ()=>{
+let t = chapterTitle.value;
+if(!t) return;
+
 await addDoc(collection(db,"chapters"),{
-subject:subject2Value,
-title:chapterTitle.value
+subject: subject2,
+title: t
 });
-loadChapters();
-};
 
-window.deleteChapter=async(id)=>{
-await deleteDoc(doc(db,"chapters",id));
-loadChapters();
-};
-
-window.editChapter=async(id,old)=>{
-let t=prompt("تعديل",old);
-if(t)await updateDoc(doc(db,"chapters",id),{title:t});
 loadChapters();
 };
 
 async function loadChapters(){
-let q=query(collection(db,"chapters"),where("subject","==",subject2Value));
-let snap=await getDocs(q);
 
-chaptersList.innerHTML="";
-chapterSelect.innerHTML="";
+let q = query(collection(db,"chapters"),where("subject","==",subject2));
+let snap = await getDocs(q);
+
+chaptersList.innerHTML = "";
+chapterSelect.innerHTML = "";
 
 snap.forEach(d=>{
-let id=d.id;
-let data=d.data();
+let id = d.id;
+let data = d.data();
 
-chaptersList.innerHTML+=`
+chaptersList.innerHTML += `
 <div class="item">
 📂 ${data.title}
-<div class="actions">
-<button class="edit" onclick="editChapter('${id}','${data.title}')">تعديل</button>
-<button class="delete" onclick="deleteChapter('${id}')">حذف</button>
-</div>
+<button onclick="deleteChapter('${id}')">🗑️</button>
 </div>`;
 
-chapterSelect.innerHTML+=`<option value="${id}">${data.title}</option>`;
+chapterSelect.innerHTML += `<option value="${id}">${data.title}</option>`;
 });
 }
 
+window.deleteChapter = async (id)=>{
+await deleteDoc(doc(db,"chapters",id));
 loadChapters();
-
-/* الدروس */
-window.addLesson=async()=>{
-await addDoc(collection(db,"lessons"),{
-chapterId:chapterSelect.value,
-title:lessonTitle.value,
-text:lessonText.value,
-image:lessonImage.value,
-audio:lessonAudio.value,
-link:lessonLink.value,
-order:Date.now()
-});
-loadLessons();
 };
 
-window.deleteLesson=async(id)=>{
-await deleteDoc(doc(db,"lessons",id));
+/* ================= الدروس ================= */
+window.addLesson = async ()=>{
+
+await addDoc(collection(db,"lessons"),{
+subject: subject2,
+chapterId: chapterSelect.value,
+title: lessonTitle.value,
+text: lessonText.value,
+image: lessonImage.value,
+audio: lessonAudio.value,
+link: lessonLink.value,
+time: Date.now()
+});
+
 loadLessons();
 };
 
 async function loadLessons(){
-if(!chapterSelect.value)return;
 
-let q=query(collection(db,"lessons"),where("chapterId","==",chapterSelect.value));
-let snap=await getDocs(q);
+if(!chapterSelect.value) return;
 
-lessonsList.innerHTML="";
+let q = query(collection(db,"lessons"),where("chapterId","==",chapterSelect.value));
+let snap = await getDocs(q);
+
+lessonsList.innerHTML = "";
 
 snap.forEach(d=>{
-let id=d.id;
-let data=d.data();
+let id = d.id;
+let data = d.data();
 
-lessonsList.innerHTML+=`
+lessonsList.innerHTML += `
 <div class="item">
 📖 ${data.title}
+
+<div class="actions">
+<button class="view" onclick='openLesson(${JSON.stringify(data)})'>عرض</button>
+<button class="delete" onclick="deleteLesson('${id}')">حذف</button>
+</div>
+
 </div>`;
 });
 }
 
-chapterSelect.onchange=loadLessons;
+window.deleteLesson = async (id)=>{
+await deleteDoc(doc(db,"lessons",id));
+loadLessons();
+};
 
-/* modal */
-window.closeModal=()=>modal.style.display="none";
+window.openLesson = (d)=>{
+alert(d.title + "\n\n" + d.text);
+};
+
+chapterSelect.onchange = loadLessons;
+
+loadChapters();
 
 </script>
 
