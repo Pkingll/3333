@@ -6,41 +6,99 @@
 <title>لوحة التحكم</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Cairo,sans-serif}
-body{background:#06131f;color:#fff;min-height:100vh}
-body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),url('https://a.top4top.io/p_38068co2c0.jpg');background-size:cover;background-position:center}
 
-.header{text-align:center;padding:20px;color:#f5e6b3;font-size:24px}
+body{
+background:#06131f;
+color:#fff;
+min-height:100vh
+}
 
-.container{width:95%;max-width:900px;margin:auto;padding-bottom:120px}
+body:before{
+content:"";
+position:fixed;
+inset:0;
+z-index:-1;
+background:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),
+url('https://a.top4top.io/p_38068co2c0.jpg');
+background-size:cover;
+background-position:center
+}
 
-/* زيادة مسافات بسيطة */
-.card{background:rgba(5,15,30,.65);border-radius:18px;padding:16px;margin-bottom:25px}
+.header{
+text-align:center;
+padding:20px;
+color:#f5e6b3;
+font-size:24px
+}
 
-select,button,input,textarea{width:100%;padding:12px;border:none;border-radius:12px;margin-top:10px}
+.container{
+width:95%;
+max-width:900px;
+margin:auto;
+padding-bottom:120px
+}
 
-button{background:#d4af37;color:#06131f;font-weight:bold;cursor:pointer}
+.card{
+background:rgba(5,15,30,.65);
+border-radius:18px;
+padding:16px;
+margin-bottom:25px
+}
 
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+select,button,input,textarea{
+width:100%;
+padding:12px;
+border:none;
+border-radius:12px;
+margin-top:10px
+}
 
-.item{background:#0d2033;padding:10px;border-radius:12px;margin-top:10px}
+button{
+background:#d4af37;
+color:#06131f;
+font-weight:bold;
+cursor:pointer
+}
 
-.actions{display:flex;gap:8px;margin-top:10px}
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px
+}
+
+/* 🔥 هنا التعديل المهم */
+.item{
+background:#0d2033;
+padding:10px;
+border-radius:12px;
+margin-top:10px;
+font-size:14px;   /* 👈 تصغير الخط */
+line-height:1.6
+}
+
+.actions{
+display:flex;
+gap:8px;
+margin-top:10px
+}
+
 .actions button{flex:1}
+
 .edit{background:#2563eb;color:#fff}
 .delete{background:#b91c1c;color:#fff}
 .view{background:#16a34a;color:#fff}
 
 /* نافذة العرض */
 .modal{
-position:fixed;inset:0;
+position:fixed;
+inset:0;
 background:rgba(0,0,0,.8);
 display:none;
 align-items:center;
-justify-content:center;
+justify-content:center
 }
 
 .modal-content{
@@ -48,7 +106,7 @@ background:#0d2033;
 padding:20px;
 width:90%;
 max-width:600px;
-border-radius:15px;
+border-radius:15px
 }
 </style>
 </head>
@@ -59,9 +117,9 @@ border-radius:15px;
 
 <div class="container">
 
-<!-- ================== النظام القديم ================== -->
+<!-- النظام القديم -->
 <div class="card">
-<h3>📚 النظام القديم (بدون تغيير)</h3>
+<h3>📚 النظام القديم</h3>
 
 <select id="subject">
 <option value="aqida">العقيدة</option>
@@ -92,9 +150,9 @@ border-radius:15px;
 <button onclick="saveOld()">💾 حفظ القديم</button>
 </div>
 
-<!-- ================== النظام الجديد ================== -->
+<!-- النظام الجديد -->
 <div class="card">
-<h3>📂 الفصول والدروس (جديد)</h3>
+<h3>📂 الفصول والدروس</h3>
 
 <select id="subject2"></select>
 
@@ -120,7 +178,7 @@ border-radius:15px;
 
 </div>
 
-<!-- نافذة العرض -->
+<!-- modal -->
 <div class="modal" id="modal">
 <div class="modal-content">
 <h2 id="mTitle"></h2>
@@ -141,12 +199,13 @@ getFirestore,
 collection,
 addDoc,
 getDocs,
+getDoc,
 query,
 where,
 deleteDoc,
 doc,
-updateDoc,
-setDoc
+setDoc,
+updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -161,85 +220,74 @@ appId: "1:752913389065:web:20cf8c03fe4ace03650ad8"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ================= النظام القديم ================= */
+/* النظام القديم */
 let items=[];
 
-window.addTitle=()=>{let t=prompt("عنوان");if(t)items.push({type:"title",text:t});render();}
-window.addText=()=>{let t=prompt("نص");if(t)items.push({type:"text",text:t});render();}
-window.addImage=()=>{let t=prompt("رابط");if(t)items.push({type:"image",url:t});render();}
-window.addBook=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"book",name:n,url:u});render();}
-window.addLink=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"link",name:n,url:t});render();}
-window.addAudio=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"audio",name:n,url:u});render();}
+window.addTitle=()=>{let t=prompt("عنوان");if(t)items.push({text:t});render();}
+window.addText=()=>{let t=prompt("نص");if(t)items.push({text:t});render();}
+window.addImage=()=>{let t=prompt("رابط");if(t)items.push({url:t});render();}
+window.addBook=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n)items.push({text:n+" - "+u});render();}
+window.addLink=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n)items.push({text:n+" - "+u});render();}
+window.addAudio=()=>{let n=prompt("اسم");let u=prompt("رابط");if(n)items.push({text:n+" - "+u});render();}
 
 function render(){
-let p=document.getElementById("preview");
-p.innerHTML="";
+preview.innerHTML="";
 items.forEach((it,i)=>{
-p.innerHTML+=`
+preview.innerHTML+=`
 <div class="item">
-${it.text||it.name||it.url}
-<div class="actions">
-<button class="edit" onclick="editOld(${i})">تعديل</button>
-<button class="delete" onclick="deleteOld(${i})">حذف</button>
-</div>
+${it.text || it.url}
 </div>`;
 });
 }
 
-window.editOld=(i)=>{
-let it=items[i];
-let v=prompt("تعديل",it.text||it.name||it.url);
-if(v){
-if(it.text)it.text=v;
-else if(it.name)it.name=v;
-else it.url=v;
+window.saveOld=async()=>{
+let s=subject.value;
+await setDoc(doc(db,"subjects",s),{items});
+alert("تم الحفظ");
+};
+
+/* تحميل النظام القديم */
+async function loadOld(){
+let s=subject.value;
+let snap=await getDoc(doc(db,"subjects",s));
+if(snap.exists()){
+items=snap.data().items||[];
+}
 render();
 }
-};
+subject.onchange=loadOld;
+loadOld();
 
-window.deleteOld=(i)=>{
-items.splice(i,1);
-render();
-};
+/* الفصول */
+subject2.innerHTML=subject.innerHTML;
+let subject2Value="aqida";
 
-window.saveOld=async()=>{
-let s=document.getElementById("subject").value;
-await setDoc(doc(db,"subjects",s),{items});
-alert("تم حفظ القديم");
-};
-
-/* ================= الفصول ================= */
-document.getElementById("subject2").innerHTML = document.getElementById("subject").innerHTML;
-
-let subject2="aqida";
-
-document.getElementById("subject2").onchange=(e)=>{
-subject2=e.target.value;
+subject2.onchange=(e)=>{
+subject2Value=e.target.value;
 loadChapters();
 };
 
 window.addChapter=async()=>{
-let t=chapterTitle.value;
-if(!t)return;
-
 await addDoc(collection(db,"chapters"),{
-subject:subject2,
-title:t
+subject:subject2Value,
+title:chapterTitle.value
 });
-
 loadChapters();
 };
 
-window.editChapter=async(id,oldTitle)=>{
-let t=prompt("تعديل اسم الفصل",oldTitle);
-if(!t)return;
-await updateDoc(doc(db,"chapters",id),{title:t});
+window.deleteChapter=async(id)=>{
+await deleteDoc(doc(db,"chapters",id));
+loadChapters();
+};
+
+window.editChapter=async(id,old)=>{
+let t=prompt("تعديل",old);
+if(t)await updateDoc(doc(db,"chapters",id),{title:t});
 loadChapters();
 };
 
 async function loadChapters(){
-
-let q=query(collection(db,"chapters"),where("subject","==",subject2));
+let q=query(collection(db,"chapters"),where("subject","==",subject2Value));
 let snap=await getDocs(q);
 
 chaptersList.innerHTML="";
@@ -262,15 +310,11 @@ chapterSelect.innerHTML+=`<option value="${id}">${data.title}</option>`;
 });
 }
 
-window.deleteChapter=async(id)=>{
-await deleteDoc(doc(db,"chapters",id));
 loadChapters();
-};
 
-/* ================= الدروس ================= */
+/* الدروس */
 window.addLesson=async()=>{
 await addDoc(collection(db,"lessons"),{
-subject:subject2,
 chapterId:chapterSelect.value,
 title:lessonTitle.value,
 text:lessonText.value,
@@ -279,19 +323,15 @@ audio:lessonAudio.value,
 link:lessonLink.value,
 order:Date.now()
 });
-
 loadLessons();
 };
 
-window.editLesson=async(id,data)=>{
-let t=prompt("تعديل العنوان",data.title);
-if(!t)return;
-await updateDoc(doc(db,"lessons",id),{title:t});
+window.deleteLesson=async(id)=>{
+await deleteDoc(doc(db,"lessons",id));
 loadLessons();
 };
 
 async function loadLessons(){
-
 if(!chapterSelect.value)return;
 
 let q=query(collection(db,"lessons"),where("chapterId","==",chapterSelect.value));
@@ -306,39 +346,14 @@ let data=d.data();
 lessonsList.innerHTML+=`
 <div class="item">
 📖 ${data.title}
-
-<div class="actions">
-<button class="view" onclick='openLesson(${JSON.stringify(data)})'>عرض</button>
-<button class="edit" onclick='editLesson("${id}",${JSON.stringify(data)})'>تعديل</button>
-<button class="delete" onclick="deleteLesson('${id}')">حذف</button>
-</div>
 </div>`;
 });
 }
 
-window.deleteLesson=async(id)=>{
-await deleteDoc(doc(db,"lessons",id));
-loadLessons();
-};
-
-/* عرض درس */
-window.openLesson=(d)=>{
-modal.style.display="flex";
-mTitle.innerText=d.title;
-mText.innerText=d.text;
-mImg.src=d.image||"";
-mAudio.src=d.audio||"";
-mLink.href=d.link||"#";
-mLink.innerText=d.link||"";
-};
-
-window.closeModal=()=>{
-modal.style.display="none";
-};
-
 chapterSelect.onchange=loadLessons;
 
-loadChapters();
+/* modal */
+window.closeModal=()=>modal.style.display="none";
 
 </script>
 
