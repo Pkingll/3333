@@ -79,9 +79,7 @@ gap:8px;
 margin-top:10px;
 }
 
-.actions button{
-flex:1;
-}
+.actions button{flex:1}
 
 .edit{background:#2563eb;color:#fff}
 .delete{background:#b91c1c;color:#fff}
@@ -97,7 +95,7 @@ hr{margin:15px 0;border:1px solid rgba(255,255,255,.1)}
 
 <div class="container">
 
-<!-- ================= النظام القديم ================= -->
+<!-- النظام القديم -->
 <div class="card">
 <h3>📚 النظام القديم</h3>
 
@@ -125,10 +123,10 @@ hr{margin:15px 0;border:1px solid rgba(255,255,255,.1)}
 
 <div id="preview"></div>
 
-<button onclick="saveOld()">حفظ القديم</button>
+<button onclick="saveOld()">حفظ</button>
 </div>
 
-<!-- ================= الفصول والدروس ================= -->
+<!-- الفصول -->
 <div class="card">
 <h3>📂 الفصول والدروس</h3>
 
@@ -170,7 +168,8 @@ where,
 deleteDoc,
 doc,
 updateDoc,
-setDoc
+setDoc,
+getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -184,13 +183,19 @@ const db = getFirestore(app);
 
 /* ================= النظام القديم ================= */
 let items = [];
+let subject = document.getElementById("subject").value;
 
-window.addTitle = ()=>{let t=prompt("عنوان");if(t)items.push({type:"title",text:t});render();}
-window.addText = ()=>{let t=prompt("نص");if(t)items.push({type:"text",text:t});render();}
-window.addImage = ()=>{let t=prompt("رابط");if(t)items.push({type:"image",url:t});render();}
-window.addBook = ()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"book",name:n,url:u});render();}
-window.addLink = ()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"link",name:n,url:u});render();}
-window.addAudio = ()=>{let n=prompt("اسم");let u=prompt("رابط");if(n&&u)items.push({type:"audio",name:n,url:u});render();}
+document.getElementById("subject").onchange = ()=>{
+subject = document.getElementById("subject").value;
+loadOld();
+};
+
+window.addTitle = ()=>{items.push({type:"title",text:prompt("عنوان")});render();autoSave();}
+window.addText = ()=>{items.push({type:"text",text:prompt("نص")});render();autoSave();}
+window.addImage = ()=>{items.push({type:"image",url:prompt("رابط")});render();autoSave();}
+window.addBook = ()=>{items.push({type:"book",name:prompt("اسم"),url:prompt("رابط")});render();autoSave();}
+window.addLink = ()=>{items.push({type:"link",name:prompt("اسم"),url:prompt("رابط")});render();autoSave();}
+window.addAudio = ()=>{items.push({type:"audio",name:prompt("اسم"),url:prompt("رابط")});render();autoSave();}
 
 window.editItem = (i)=>{
 let v = prompt("تعديل", items[i].text || items[i].name || items[i].url);
@@ -201,16 +206,17 @@ if(items[i].name) items[i].name=v;
 if(items[i].url) items[i].url=v;
 
 render();
+autoSave();
 };
 
 window.deleteItem = (i)=>{
 items.splice(i,1);
 render();
+autoSave();
 };
 
 function render(){
-document.getElementById("preview").innerHTML =
-items.map((i,k)=>`
+preview.innerHTML = items.map((i,k)=>`
 <div class="item">
 ${i.text || i.name || i.url}
 <div class="actions">
@@ -221,14 +227,23 @@ ${i.text || i.name || i.url}
 `).join("");
 }
 
-window.saveOld = async ()=>{
-let s = document.getElementById("subject").value;
-await setDoc(doc(db,"subjects",s),{items});
-alert("تم الحفظ");
-};
+async function loadOld(){
+let d = await getDoc(doc(db,"subjects",subject));
+items = d.exists() ? d.data().items || [] : [];
+render();
+}
+
+async function autoSave(){
+await setDoc(doc(db,"subjects",subject),{items});
+}
+
+window.saveOld = autoSave;
 
 /* ================= الفصول ================= */
 let subject2="aqida";
+
+subject2 = document.getElementById("subject").value;
+subject2 = "aqida";
 
 document.getElementById("subject2").innerHTML =
 document.getElementById("subject").innerHTML;
@@ -239,14 +254,14 @@ loadChapters();
 };
 
 window.addChapter = async ()=>{
-let t = chapterTitle.value;
-if(!t) return;
+if(!chapterTitle.value) return;
 
 await addDoc(collection(db,"chapters"),{
 subject:subject2,
-title:t
+title:chapterTitle.value
 });
 
+chapterTitle.value="";
 loadChapters();
 };
 
@@ -273,12 +288,13 @@ chaptersList.innerHTML+=`
 
 chapterSelect.innerHTML+=`<option value="${id}">${data.title}</option>`;
 });
+
+loadLessons();
 }
 
 window.editChapter = async (id,title)=>{
-let t=prompt("تعديل الفصل",title);
+let t=prompt("تعديل",title);
 if(!t) return;
-
 await updateDoc(doc(db,"chapters",id),{title:t});
 loadChapters();
 };
@@ -289,8 +305,8 @@ loadChapters();
 };
 
 /* ================= الدروس ================= */
-window.addLesson = async ()=>{
 
+window.addLesson = async ()=>{
 await addDoc(collection(db,"lessons"),{
 subject:subject2,
 chapterId:chapterSelect.value,
@@ -322,12 +338,25 @@ lessonsList.innerHTML+=`
 <div class="item">
 📖 ${data.title}
 <div class="actions">
-<button class="view" onclick="alert('${data.title}')">عرض</button>
+<button class="view" onclick="alert('${data.text || data.title}')">عرض</button>
+<button class="edit" onclick="editLesson('${id}',${JSON.stringify(data)})">تعديل</button>
 <button class="delete" onclick="deleteLesson('${id}')">حذف</button>
 </div>
 </div>`;
 });
 }
+
+window.editLesson = async (id,data)=>{
+let title = prompt("العنوان",data.title);
+if(!title) return;
+
+await updateDoc(doc(db,"lessons",id),{
+...data,
+title
+});
+
+loadLessons();
+};
 
 window.deleteLesson = async (id)=>{
 await deleteDoc(doc(db,"lessons",id));
@@ -336,6 +365,7 @@ loadLessons();
 
 chapterSelect.onchange=loadLessons;
 
+loadOld();
 loadChapters();
 
 </script>
