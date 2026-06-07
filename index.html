@@ -1005,10 +1005,6 @@ icon:
 });
 
 </script>
-<!-- ضع هذا الكود بالكامل قبل </body> مباشرة -->
-
-<!-- Firebase Notifications -->
-
 <script type="module">
 
 import { initializeApp }
@@ -1021,7 +1017,12 @@ onMessage
 }
 from "https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging.js";
 
-/* إعدادات Firebase */
+import {
+getFirestore,
+doc,
+setDoc
+}
+from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 const firebaseConfig = {
 
@@ -1045,15 +1046,14 @@ appId:
 
 };
 
-/* تشغيل Firebase */
-
 const app =
 initializeApp(firebaseConfig);
 
 const messaging =
 getMessaging(app);
 
-/* تفعيل الإشعارات */
+const db =
+getFirestore(app);
 
 window.enableNotifications =
 async function(){
@@ -1068,14 +1068,10 @@ return;
 
 }
 
-/* تسجيل ملف الإشعارات */
-
 const registration =
 await navigator.serviceWorker.register(
 './firebase-messaging-sw.js'
 );
-
-/* طلب السماح */
 
 const permission =
 await Notification.requestPermission();
@@ -1088,8 +1084,6 @@ return;
 
 }
 
-/* جلب التوكن */
-
 const currentToken =
 await getToken(messaging,{
 
@@ -1101,29 +1095,25 @@ registration
 
 });
 
-/* نجاح */
-
 if(currentToken){
 
-localStorage.setItem(
-"firebaseToken",
-currentToken
-);
+/* حفظ التوكن داخل Firestore */
 
-prompt(
-"انسخ هذا TOKEN وضعه داخل Firebase 👇",
-currentToken
+await setDoc(
+doc(db,"tokens",currentToken),
+{
+token: currentToken,
+createdAt: Date.now()
+}
 );
 
 alert(
-"تم تفعيل الإشعارات بنجاح ✅"
+"تم تفعيل الإشعارات وحفظ الجهاز ✅"
 );
 
 }else{
 
-alert(
-"لم يتم إنشاء TOKEN ❌"
-);
+alert("لم يتم إنشاء TOKEN ❌");
 
 }
 
@@ -1131,15 +1121,11 @@ alert(
 
 console.log(error);
 
-alert(
-"حدث خطأ أثناء التفعيل ❌"
-);
+alert("حدث خطأ ❌");
 
 }
 
 };
-
-/* استقبال الإشعارات */
 
 onMessage(messaging,(payload)=>{
 
@@ -1148,13 +1134,11 @@ new Notification(
 payload.notification.title,
 
 {
-
 body:
 payload.notification.body,
 
 icon:
 'https://a.top4top.io/p_38068co2c0.jpg'
-
 }
 
 );
