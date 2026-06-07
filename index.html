@@ -1,8 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>طالبة علم شرعي - السنة الثانية</title>
 
 <meta property="og:title" content="طالبة علم شرعي - السنة الثانية" />
@@ -12,6 +14,7 @@
 <meta property="og:type" content="website" />
 
 <style>
+
 body{
 margin:0;
 font-family:Cairo,sans-serif;
@@ -19,6 +22,8 @@ background:#06131f;
 color:white;
 overflow-x:hidden;
 }
+
+/* خلفية الصفحة */
 
 body::before{
 content:"";
@@ -30,7 +35,10 @@ linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),
 url('https://a.top4top.io/p_38068co2c0.jpg');
 background-size:cover;
 background-position:center;
+background-repeat:no-repeat;
 }
+
+/* زر القائمة */
 
 .menu-btn{
 position:fixed;
@@ -48,6 +56,8 @@ background:#d4af37;
 border-radius:5px;
 }
 
+/* القائمة الجانبية */
+
 .sidebar{
 position:fixed;
 top:0;
@@ -60,7 +70,9 @@ padding:20px;
 z-index:999;
 }
 
-.sidebar.active{left:0;}
+.sidebar.active{
+left:0;
+}
 
 .sidebar button{
 width:100%;
@@ -73,11 +85,16 @@ background:#d4af37;
 font-weight:bold;
 }
 
+/* الشريط العلوي المصغر */
+
 .marquee{
 overflow:hidden;
 white-space:nowrap;
-background:rgba(0,0,0,.45);
-padding:12px 0;
+background:rgba(0,0,0,.35);
+padding:6px 0;
+height:28px;
+display:flex;
+align-items:center;
 }
 
 .marquee span{
@@ -85,30 +102,42 @@ display:inline-block;
 padding-left:100%;
 animation:move 20s linear infinite;
 color:#f5e6b3;
+font-size:13px;
+line-height:28px;
 }
 
 @keyframes move{
-0%{transform:translateX(0)}
-100%{transform:translateX(-100%)}
+0%{
+transform:translateX(0);
 }
 
-/* ===== الصندوق الرئيسي ===== */
+100%{
+transform:translateX(-100%);
+}
+}
+
+/* صندوق طالبة العلم */
+
 .intro-box{
 display:block;
 margin:20px;
 padding:30px;
 border-radius:18px;
+
 background:
 linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.65)),
-url('https://a.top4top.io/p_3807ka9e10.jpg');
+url('https://c.top4top.io/p_3807ka9e10.jpg');
+
 background-size:cover;
 background-position:center;
+background-repeat:no-repeat;
+
 border:1px solid rgba(255,255,255,.15);
 text-align:center;
 box-shadow:0 0 25px rgba(0,0,0,.4);
 color:#fff;
 text-decoration:none;
-transition:0.4s ease;
+transition:.4s;
 }
 
 .intro-box:hover{
@@ -121,7 +150,44 @@ color:#f5e6b3;
 font-size:20px;
 }
 
-/* ===== المواد ===== */
+/* صندوق الفوائد */
+
+.fawaid-box{
+margin:10px 20px 20px;
+height:50px;
+border-radius:14px;
+background:rgba(0,0,0,.40);
+border:1px solid rgba(212,175,55,.35);
+overflow:hidden;
+position:relative;
+display:flex;
+align-items:center;
+}
+
+.fawaid-track{
+position:absolute;
+white-space:nowrap;
+font-size:14px;
+color:#f5e6b3;
+left:-100%;
+animation:fawaidMove 18s linear infinite;
+padding:0 15px;
+}
+
+@keyframes fawaidMove{
+
+0%{
+left:-100%;
+}
+
+100%{
+left:100%;
+}
+
+}
+
+/* المواد */
+
 .grid{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -155,7 +221,8 @@ font-size:14px;
 opacity:.85;
 }
 
-/* ===== زر المشاركة (رجع داخل الكروت) ===== */
+/* زر المشاركة */
+
 .share-card{
 background:rgba(212,175,55,.12);
 border:1px dashed rgba(212,175,55,.6);
@@ -166,7 +233,7 @@ position:relative;
 
 .share-card:hover{
 transform:translateY(-6px);
-border-color:#ffffff;
+border-color:#fff;
 }
 
 .share-badge{
@@ -180,30 +247,126 @@ padding:4px 10px;
 border-radius:20px;
 font-size:12px;
 }
+
+/* نافذة إدارة الفوائد */
+
+.fawaid-panel{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.75);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:5000;
+}
+
+.fawaid-content{
+width:90%;
+max-width:500px;
+background:#0b1725;
+padding:20px;
+border-radius:18px;
+border:1px solid rgba(255,255,255,.1);
+}
+
+.fawaid-content textarea{
+width:100%;
+height:120px;
+border:none;
+outline:none;
+padding:12px;
+border-radius:10px;
+resize:none;
+margin-bottom:12px;
+font-family:Cairo,sans-serif;
+}
+
+.fawaid-content button{
+padding:10px 14px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+margin:5px;
+background:#d4af37;
+font-weight:bold;
+}
+
+.fawaid-list{
+margin-top:15px;
+max-height:200px;
+overflow:auto;
+}
+
+.fawaid-item{
+background:rgba(255,255,255,.05);
+padding:10px;
+border-radius:10px;
+margin-bottom:10px;
+}
+
 </style>
 </head>
 
 <body>
 
+<!-- زر القائمة -->
+
 <div class="menu-btn" onclick="toggleMenu()">
-<div></div><div></div><div></div>
+<div></div>
+<div></div>
+<div></div>
 </div>
+
+<!-- القائمة الجانبية -->
 
 <div class="sidebar" id="sidebar">
-<button onclick="openAdmin()">لوحة الأدمن</button>
-<button onclick="closeMenu()">إغلاق</button>
+
+<button onclick="openAdmin()">
+لوحة الأدمن
+</button>
+
+<button onclick="openFawaidAdmin()">
+أدمن الفوائد
+</button>
+
+<button onclick="closeMenu()">
+إغلاق
+</button>
+
 </div>
+
+<!-- الشريط العلوي -->
 
 <div class="marquee">
-<span>طالبة علم شرعي سنة تانية — منصة الملخصات والكتب والفوائد العلمية</span>
+<span>
+طالبة علم شرعي سنة تانية — منصة الملخصات والكتب والفوائد العلمية
+</span>
 </div>
 
-<!-- الصندوق -->
-<a class="intro-box" href="https://www.facebook.com/share/1GfgZ1JQGy/" target="_blank">
-<h2>طالبة علم شرعي سنة تانية في المعهد الديني - سبها</h2>
+<!-- صندوق طالبة العلم -->
+
+<a class="intro-box"
+href="https://www.facebook.com/share/1GfgZ1JQGy/"
+target="_blank">
+
+<h2>
+طالبة علم شرعي سنة تانية في المعهد الديني - سبها
+</h2>
+
 </a>
 
-<!-- المواد + زر المشاركة داخل نفس الشبكة -->
+<!-- صندوق الفوائد -->
+
+<div class="fawaid-box">
+
+<div class="fawaid-track" id="fawaidText">
+📖 مرحباً بكم في قسم الفوائد الفقهية
+</div>
+
+</div>
+
+<!-- المواد -->
+
 <div class="grid">
 
 <a class="card" href="subject.html?id=aqida">
@@ -266,55 +429,296 @@ font-size:12px;
 <div class="summary">تفسير آيات القرآن الكريم</div>
 </a>
 
-<!-- زر مشاركة الملخصات (رجع أخيراً بشكل صحيح) -->
-<a class="card share-card" href="#" onclick="shareSite(); return false;">
-<div class="share-badge" id="shareCount">0</div>
+<!-- زر المشاركة -->
+
+<a class="card share-card"
+href="#"
+onclick="shareSite(); return false;">
+
+<div class="share-badge" id="shareCount">
+0
+</div>
+
 <h3>📤 مشاركة الملخصات</h3>
-<div class="summary">شارك الموقع مع زملائك بسهولة</div>
+
+<div class="summary">
+شارك الموقع مع زملائك بسهولة
+</div>
+
 </a>
 
 </div>
 
+<!-- نافذة إدارة الفوائد -->
+
+<div class="fawaid-panel" id="fawaidPanel">
+
+<div class="fawaid-content">
+
+<h3 style="color:#f5e6b3;">
+إدارة الفوائد الفقهية
+</h3>
+
+<textarea
+id="fawaidInput"
+placeholder="اكتب الفائدة هنا...">
+</textarea>
+
+<button onclick="addFawaid()">
+إضافة
+</button>
+
+<button onclick="closeFawaidPanel()">
+إغلاق
+</button>
+
+<div class="fawaid-list" id="fawaidList"></div>
+
+</div>
+
+</div>
+
 <script>
+
+/* القائمة */
+
 function toggleMenu(){
-document.getElementById("sidebar").classList.toggle("active");
+
+document.getElementById("sidebar")
+.classList.toggle("active");
+
 }
 
 function closeMenu(){
-document.getElementById("sidebar").classList.remove("active");
+
+document.getElementById("sidebar")
+.classList.remove("active");
+
 }
+
+/* الأدمن */
 
 function openAdmin(){
+
 const pass = prompt("أدخل كلمة مرور الأدمن");
+
 if(pass === "1997"){
+
 window.location.href="admin.html";
+
 }else{
+
 alert("كلمة المرور غير صحيحة");
-}
+
 }
 
-/* مشاركة */
-let count = localStorage.getItem("shareCount") || 0;
-document.getElementById("shareCount").innerText = count;
+}
 
-function shareSite() {
+/* المشاركة */
+
+let count =
+localStorage.getItem("shareCount") || 0;
+
+document.getElementById("shareCount")
+.innerText = count;
+
+function shareSite(){
+
 const data = {
-title: "طالبة علم شرعي سنة تانية",
-text: "ادخل هذا الموقع وشاهد الملخصات 👇",
-url: "https://pkingll.github.io/3333/"
+
+title:"طالبة علم شرعي سنة تانية",
+
+text:"ادخل هذا الموقع وشاهد الملخصات 👇",
+
+url:"https://pkingll.github.io/3333/"
+
 };
 
-if (navigator.share) {
+if(navigator.share){
+
 navigator.share(data);
-} else {
+
+}else{
+
 navigator.clipboard.writeText(data.url);
+
 alert("تم نسخ الرابط 📋");
+
 }
 
 count++;
-localStorage.setItem("shareCount", count);
-document.getElementById("shareCount").innerText = count;
+
+localStorage.setItem("shareCount",count);
+
+document.getElementById("shareCount")
+.innerText = count;
+
 }
+
+/* الفوائد */
+
+let fawaid =
+JSON.parse(localStorage.getItem("fawaidList"))
+|| [
+
+"قال ﷺ: من سلك طريقاً يلتمس فيه علماً سهل الله له طريقاً إلى الجنة",
+
+"العلم قبل القول والعمل",
+
+"النية الصالحة تحول العادات إلى عبادات",
+
+"من ترك شيئاً لله عوضه الله خيراً منه"
+
+];
+
+let currentFaidah = 0;
+
+function showFaidah(){
+
+document.getElementById("fawaidText")
+.innerText = "📖 " + fawaid[currentFaidah];
+
+currentFaidah++;
+
+if(currentFaidah >= fawaid.length){
+
+currentFaidah = 0;
+
+}
+
+}
+
+showFaidah();
+
+setInterval(showFaidah,60000);
+
+/* فتح لوحة الفوائد */
+
+function openFawaidAdmin(){
+
+const pass =
+prompt("أدخل كلمة مرور أدمن الفوائد");
+
+if(pass === "1997"){
+
+document.getElementById("fawaidPanel")
+.style.display = "flex";
+
+renderFawaid();
+
+}else{
+
+alert("كلمة المرور غير صحيحة");
+
+}
+
+}
+
+/* إغلاق */
+
+function closeFawaidPanel(){
+
+document.getElementById("fawaidPanel")
+.style.display = "none";
+
+}
+
+/* إضافة */
+
+function addFawaid(){
+
+const input =
+document.getElementById("fawaidInput");
+
+if(input.value.trim() === "") return;
+
+fawaid.push(input.value);
+
+saveFawaid();
+
+input.value = "";
+
+renderFawaid();
+
+}
+
+/* حفظ */
+
+function saveFawaid(){
+
+localStorage.setItem(
+"fawaidList",
+JSON.stringify(fawaid)
+);
+
+}
+
+/* عرض */
+
+function renderFawaid(){
+
+const box =
+document.getElementById("fawaidList");
+
+box.innerHTML = "";
+
+fawaid.forEach((item,index)=>{
+
+box.innerHTML += `
+
+<div class="fawaid-item">
+
+<div style="margin-bottom:10px;">
+${item}
+</div>
+
+<button onclick="editFawaid(${index})">
+تعديل
+</button>
+
+<button onclick="deleteFawaid(${index})">
+حذف
+</button>
+
+</div>
+
+`;
+
+});
+
+}
+
+/* حذف */
+
+function deleteFawaid(index){
+
+fawaid.splice(index,1);
+
+saveFawaid();
+
+renderFawaid();
+
+}
+
+/* تعديل */
+
+function editFawaid(index){
+
+const newText =
+prompt("تعديل الفائدة",fawaid[index]);
+
+if(newText !== null){
+
+fawaid[index] = newText;
+
+saveFawaid();
+
+renderFawaid();
+
+}
+
+}
+
 </script>
 
 </body>
