@@ -85,6 +85,7 @@ background:#0b1725;
 transition:.4s;
 padding:20px;
 z-index:999;
+overflow:auto;
 }
 
 .sidebar.active{
@@ -391,8 +392,6 @@ margin-bottom:10px;
 
 <body>
 
-<!-- زر القائمة -->
-
 <div class="menu-btn"
 onclick="toggleMenu()">
 
@@ -401,8 +400,6 @@ onclick="toggleMenu()">
 <div></div>
 
 </div>
-
-<!-- القائمة الجانبية -->
 
 <div class="sidebar"
 id="sidebar">
@@ -425,8 +422,6 @@ id="sidebar">
 
 </div>
 
-<!-- الشريط العلوي -->
-
 <div class="marquee">
 
 <span>
@@ -437,8 +432,6 @@ id="sidebar">
 </span>
 
 </div>
-
-<!-- صندوق طالبة العلم -->
 
 <a class="intro-box"
 
@@ -455,8 +448,6 @@ target="_blank">
 
 </a>
 
-<!-- صندوق الفوائد -->
-
 <div class="fawaid-box">
 
 <div class="fawaid-track"
@@ -467,8 +458,6 @@ id="fawaidText">
 </div>
 
 </div>
-
-<!-- المواد -->
 
 <div class="grid">
 
@@ -632,8 +621,6 @@ id="shareCount">
 
 </div>
 
-<!-- نافذة إدارة الفوائد -->
-
 <div class="fawaid-panel"
 id="fawaidPanel">
 
@@ -669,8 +656,6 @@ id="fawaidList">
 
 <script>
 
-/* القائمة */
-
 function toggleMenu(){
 
 document.getElementById("sidebar")
@@ -684,8 +669,6 @@ document.getElementById("sidebar")
 .classList.remove("active");
 
 }
-
-/* الأدمن */
 
 function openAdmin(){
 
@@ -703,8 +686,6 @@ alert("كلمة المرور غير صحيحة");
 }
 
 }
-
-/* زر المشاركة */
 
 let count =
 localStorage.getItem("shareCount")
@@ -749,8 +730,6 @@ document.getElementById("shareCount")
 
 }
 
-/* الفوائد */
-
 let fawaid =
 JSON.parse(
 localStorage.getItem("fawaidList")
@@ -790,8 +769,6 @@ showFaidah();
 
 setInterval(showFaidah,60000);
 
-/* فتح لوحة الفوائد */
-
 function openFawaidAdmin(){
 
 const pass =
@@ -812,16 +789,12 @@ alert("كلمة المرور غير صحيحة");
 
 }
 
-/* إغلاق */
-
 function closeFawaidPanel(){
 
 document.getElementById("fawaidPanel")
 .style.display = "none";
 
 }
-
-/* إضافة */
 
 function addFawaid(){
 
@@ -841,8 +814,6 @@ renderFawaid();
 
 }
 
-/* حفظ */
-
 function saveFawaid(){
 
 localStorage.setItem(
@@ -854,8 +825,6 @@ JSON.stringify(fawaid)
 );
 
 }
-
-/* عرض */
 
 function renderFawaid(){
 
@@ -890,8 +859,6 @@ ${item}
 
 }
 
-/* حذف */
-
 function deleteFawaid(index){
 
 fawaid.splice(index,1);
@@ -901,8 +868,6 @@ saveFawaid();
 renderFawaid();
 
 }
-
-/* تعديل */
 
 function editFawaid(index){
 
@@ -998,7 +963,10 @@ registration
 
 if(currentToken){
 
-console.log(currentToken);
+prompt(
+"انسخ الـ TOKEN وضعه داخل Firebase 👇",
+currentToken
+);
 
 alert(
 "تم تفعيل الإشعارات بنجاح ✅"
