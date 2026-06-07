@@ -1009,6 +1009,7 @@ icon:
 
 <!-- Firebase Notifications -->
 
+
 <script type="module">
 
 import { initializeApp }
@@ -1078,14 +1079,14 @@ return;
 
 }
 
-/* تسجيل ملف الإشعارات */
+/* تسجيل Service Worker */
 
 const registration =
 await navigator.serviceWorker.register(
 './firebase-messaging-sw.js'
 );
 
-/* طلب السماح */
+/* طلب الإذن */
 
 const permission =
 await Notification.requestPermission();
@@ -1111,7 +1112,7 @@ registration
 
 });
 
-/* حفظ TOKEN داخل Firestore */
+/* حفظ الجهاز داخل Firestore */
 
 if(currentToken){
 
@@ -1129,7 +1130,7 @@ currentToken
 );
 
 alert(
-"تم تفعيل الإشعارات وحفظ الجهاز ✅"
+"تم تفعيل الإشعارات بنجاح ✅"
 );
 
 }else{
@@ -1175,5 +1176,6 @@ icon:
 });
 
 </script>
+
 </body>
 </html>
