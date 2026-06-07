@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -85,7 +84,7 @@ background:#d4af37;
 font-weight:bold;
 }
 
-/* الشريط العلوي المصغر */
+/* الشريط العلوي */
 
 .marquee{
 overflow:hidden;
@@ -248,7 +247,7 @@ border-radius:20px;
 font-size:12px;
 }
 
-/* نافذة إدارة الفوائد */
+/* نافذة الفوائد */
 
 .fawaid-panel{
 position:fixed;
@@ -309,15 +308,11 @@ margin-bottom:10px;
 
 <body>
 
-<!-- زر القائمة -->
-
 <div class="menu-btn" onclick="toggleMenu()">
 <div></div>
 <div></div>
 <div></div>
 </div>
-
-<!-- القائمة الجانبية -->
 
 <div class="sidebar" id="sidebar">
 
@@ -335,15 +330,11 @@ margin-bottom:10px;
 
 </div>
 
-<!-- الشريط العلوي -->
-
 <div class="marquee">
 <span>
 طالبة علم شرعي سنة تانية — منصة الملخصات والكتب والفوائد العلمية
 </span>
 </div>
-
-<!-- صندوق طالبة العلم -->
 
 <a class="intro-box"
 href="https://www.facebook.com/share/1GfgZ1JQGy/"
@@ -355,8 +346,6 @@ target="_blank">
 
 </a>
 
-<!-- صندوق الفوائد -->
-
 <div class="fawaid-box">
 
 <div class="fawaid-track" id="fawaidText">
@@ -364,8 +353,6 @@ target="_blank">
 </div>
 
 </div>
-
-<!-- المواد -->
 
 <div class="grid">
 
@@ -429,8 +416,6 @@ target="_blank">
 <div class="summary">تفسير آيات القرآن الكريم</div>
 </a>
 
-<!-- زر المشاركة -->
-
 <a class="card share-card"
 href="#"
 onclick="shareSite(); return false;">
@@ -448,8 +433,6 @@ onclick="shareSite(); return false;">
 </a>
 
 </div>
-
-<!-- نافذة إدارة الفوائد -->
 
 <div class="fawaid-panel" id="fawaidPanel">
 
@@ -480,8 +463,6 @@ placeholder="اكتب الفائدة هنا...">
 
 <script>
 
-/* القائمة */
-
 function toggleMenu(){
 
 document.getElementById("sidebar")
@@ -495,8 +476,6 @@ document.getElementById("sidebar")
 .classList.remove("active");
 
 }
-
-/* الأدمن */
 
 function openAdmin(){
 
@@ -513,8 +492,6 @@ alert("كلمة المرور غير صحيحة");
 }
 
 }
-
-/* المشاركة */
 
 let count =
 localStorage.getItem("shareCount") || 0;
@@ -592,8 +569,6 @@ showFaidah();
 
 setInterval(showFaidah,60000);
 
-/* فتح لوحة الفوائد */
-
 function openFawaidAdmin(){
 
 const pass =
@@ -614,16 +589,12 @@ alert("كلمة المرور غير صحيحة");
 
 }
 
-/* إغلاق */
-
 function closeFawaidPanel(){
 
 document.getElementById("fawaidPanel")
 .style.display = "none";
 
 }
-
-/* إضافة */
 
 function addFawaid(){
 
@@ -642,8 +613,6 @@ renderFawaid();
 
 }
 
-/* حفظ */
-
 function saveFawaid(){
 
 localStorage.setItem(
@@ -652,8 +621,6 @@ JSON.stringify(fawaid)
 );
 
 }
-
-/* عرض */
 
 function renderFawaid(){
 
@@ -688,8 +655,6 @@ ${item}
 
 }
 
-/* حذف */
-
 function deleteFawaid(index){
 
 fawaid.splice(index,1);
@@ -699,8 +664,6 @@ saveFawaid();
 renderFawaid();
 
 }
-
-/* تعديل */
 
 function editFawaid(index){
 
@@ -718,6 +681,97 @@ renderFawaid();
 }
 
 }
+
+</script>
+
+<!-- Firebase Notifications -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+
+import {
+getMessaging,
+getToken,
+onMessage
+}
+from "https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging.js";
+
+const firebaseConfig = {
+
+apiKey: "AIzaSyBG_Jmj4gFcYBs8zN2wTXRLOUg7IlVkhF0",
+
+authDomain: "talibat-ilm.firebaseapp.com",
+
+projectId: "talibat-ilm",
+
+storageBucket: "talibat-ilm.firebasestorage.app",
+
+messagingSenderId: "381987453673",
+
+appId: "1:381987453673:web:085dcae14d1cdccb2ace78"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const messaging = getMessaging(app);
+
+if ('serviceWorker' in navigator) {
+
+navigator.serviceWorker.register(
+'/firebase-messaging-sw.js'
+)
+
+.then((registration)=>{
+
+Notification.requestPermission()
+
+.then((permission)=>{
+
+if(permission === "granted"){
+
+getToken(messaging,{
+
+vapidKey:
+"BC1mnmEtPonum_POxdZ-1cFOAlr803s3YkOOlfz17cg-uwB3XdPF7jxepKWcBtoeppUJUcM22FhQYAFmEyMVDJw",
+
+serviceWorkerRegistration: registration
+
+})
+
+.then((currentToken)=>{
+
+if(currentToken){
+
+console.log("TOKEN:", currentToken);
+
+alert(
+"انسخ هذا TOKEN وضعه في Firebase:\n\n"
++ currentToken
+);
+
+}
+
+});
+
+}
+
+});
+
+});
+
+}
+
+onMessage(messaging,(payload)=>{
+
+alert(
+payload.notification.title + "\n\n" +
+payload.notification.body
+);
+
+});
 
 </script>
 
