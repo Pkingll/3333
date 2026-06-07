@@ -19,7 +19,7 @@ appId: "1:381987453673:web:085dcae14d1cdccb2ace78"
 
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage(function(payload){
+messaging.onBackgroundMessage(function(payload) {
 
 self.registration.showNotification(
 payload.notification.title,
