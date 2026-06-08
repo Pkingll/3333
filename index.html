@@ -730,164 +730,9 @@ document.getElementById("shareCount")
 
 }
 
-let fawaid =
-JSON.parse(
-localStorage.getItem("fawaidList")
-)
-
-|| [
-
-"قال ﷺ: من سلك طريقاً يلتمس فيه علماً سهل الله له طريقاً إلى الجنة",
-
-"العلم قبل القول والعمل",
-
-"النية الصالحة تحول العادات إلى عبادات",
-
-"من ترك شيئاً لله عوضه الله خيراً منه"
-
-];
-
-let currentFaidah = 0;
-
-function showFaidah(){
-
-document.getElementById("fawaidText")
-.innerText =
-"📖 " + fawaid[currentFaidah];
-
-currentFaidah++;
-
-if(currentFaidah >= fawaid.length){
-
-currentFaidah = 0;
-
-}
-
-}
-
-showFaidah();
-
-setInterval(showFaidah,60000);
-
-function openFawaidAdmin(){
-
-const pass =
-prompt("أدخل كلمة مرور أدمن الفوائد");
-
-if(pass === "1997"){
-
-document.getElementById("fawaidPanel")
-.style.display = "flex";
-
-renderFawaid();
-
-}else{
-
-alert("كلمة المرور غير صحيحة");
-
-}
-
-}
-
-function closeFawaidPanel(){
-
-document.getElementById("fawaidPanel")
-.style.display = "none";
-
-}
-
-function addFawaid(){
-
-const input =
-document.getElementById("fawaidInput");
-
-if(input.value.trim() === "")
-return;
-
-fawaid.push(input.value);
-
-saveFawaid();
-
-input.value = "";
-
-renderFawaid();
-
-}
-
-function saveFawaid(){
-
-localStorage.setItem(
-
-"fawaidList",
-
-JSON.stringify(fawaid)
-
-);
-
-}
-
-function renderFawaid(){
-
-const box =
-document.getElementById("fawaidList");
-
-box.innerHTML = "";
-
-fawaid.forEach((item,index)=>{
-
-box.innerHTML += `
-
-<div class="fawaid-item">
-
-<div style="margin-bottom:10px;">
-${item}
-</div>
-
-<button onclick="editFawaid(${index})">
-تعديل
-</button>
-
-<button onclick="deleteFawaid(${index})">
-حذف
-</button>
-
-</div>
-
-`;
-
-});
-
-}
-
-function deleteFawaid(index){
-
-fawaid.splice(index,1);
-
-saveFawaid();
-
-renderFawaid();
-
-}
-
-function editFawaid(index){
-
-const newText =
-prompt("تعديل الفائدة",
-fawaid[index]);
-
-if(newText !== null){
-
-fawaid[index] = newText;
-
-saveFawaid();
-
-renderFawaid();
-
-}
-
-}
 
 </script>
+
 
 <!-- Firebase Notifications -->
 
@@ -1075,6 +920,79 @@ alert(
 
 };
 
+
+/* ===== فوائد Firestore ===== */
+let fawaid = [];
+let currentFaidah = 0;
+
+window.openFawaidAdmin = async function(){
+ const pass = prompt("أدخل كلمة مرور أدمن الفوائد");
+ if(pass==="1997"){
+   document.getElementById("fawaidPanel").style.display="flex";
+   await loadFawaid();
+ }else{
+   alert("كلمة المرور غير صحيحة");
+ }
+};
+
+window.closeFawaidPanel=function(){
+ document.getElementById("fawaidPanel").style.display="none";
+};
+
+async function loadFawaid(){
+ const snap = await getDocs(collection(db,"fawaid"));
+ fawaid=[];
+ snap.forEach(d=>fawaid.push({id:d.id,text:d.data().text||""}));
+
+ const box=document.getElementById("fawaidList");
+ box.innerHTML="";
+
+ fawaid.forEach(item=>{
+   box.innerHTML += `
+   <div class="fawaid-item">
+     <div style="margin-bottom:10px;">${item.text}</div>
+     <button onclick="editFawaid('${item.id}')">تعديل</button>
+     <button onclick="deleteFawaid('${item.id}')">حذف</button>
+   </div>`;
+ });
+
+ if(fawaid.length){
+   document.getElementById("fawaidText").innerText="📖 "+fawaid[0].text;
+ }
+}
+
+window.addFawaid = async function(){
+ const input=document.getElementById("fawaidInput");
+ if(!input.value.trim()) return;
+ await addDoc(collection(db,"fawaid"),{text:input.value.trim()});
+ input.value="";
+ await loadFawaid();
+};
+
+window.deleteFawaid = async function(id){
+ await deleteDoc(doc(db,"fawaid",id));
+ await loadFawaid();
+};
+
+window.editFawaid = async function(id){
+ const item=fawaid.find(x=>x.id===id);
+ if(!item) return;
+ const txt=prompt("تعديل الفائدة",item.text);
+ if(txt===null) return;
+ await updateDoc(doc(db,"fawaid",id),{text:txt});
+ await loadFawaid();
+};
+
+setInterval(()=>{
+ if(!fawaid.length) return;
+ currentFaidah=(currentFaidah+1)%fawaid.length;
+ document.getElementById("fawaidText").innerText="📖 "+fawaid[currentFaidah].text;
+},60000);
+
+loadFawaid();
+/* ===== نهاية فوائد Firestore ===== */
+
+
 /* استقبال الإشعارات داخل الموقع */
 
 onMessage(messaging,(payload)=>{
@@ -1099,69 +1017,6 @@ icon:
 
 </script>
 
-
-<script>
-/* Firebase Firestore Fawaid Upgrade */
-let fawaid = [];
-let currentFaidah = 0;
-
-async function loadFawaid(){
- try{
-  const snapshot = await getDocs(collection(db,"fawaid"));
-  fawaid = [];
-  snapshot.forEach(d=>{
-    fawaid.push({id:d.id,text:d.data().text||""});
-  });
-  renderFawaid();
-  if(fawaid.length){
-    document.getElementById("fawaidText").innerText="📖 "+fawaid[0].text;
-  }
- }catch(e){console.log(e);}
-}
-
-async function addFawaid(){
- const input=document.getElementById("fawaidInput");
- if(!input || !input.value.trim()) return;
- await addDoc(collection(db,"fawaid"),{text:input.value.trim()});
- input.value="";
- loadFawaid();
-}
-
-function renderFawaid(){
- const box=document.getElementById("fawaidList");
- if(!box) return;
- box.innerHTML="";
- fawaid.forEach(item=>{
-  box.innerHTML += `
-  <div class="fawaid-item">
-   <div style="margin-bottom:10px;">${item.text}</div>
-   <button onclick="editFawaid('${item.id}',\`${"${item.text}"}\`)">تعديل</button>
-   <button onclick="deleteFawaid('${item.id}')">حذف</button>
-  </div>`;
- });
-}
-
-async function deleteFawaid(id){
- await deleteDoc(doc(db,"fawaid",id));
- loadFawaid();
-}
-
-async function editFawaid(id,text){
- const newText=prompt("تعديل الفائدة",text);
- if(newText===null) return;
- await updateDoc(doc(db,"fawaid",id),{text:newText});
- loadFawaid();
-}
-
-function showFaidah(){
- if(!fawaid.length) return;
- document.getElementById("fawaidText").innerText="📖 "+fawaid[currentFaidah].text;
- currentFaidah=(currentFaidah+1)%fawaid.length;
-}
-
-setInterval(showFaidah,60000);
-setTimeout(loadFawaid,1000);
-</script>
 
 </body>
 </html>
