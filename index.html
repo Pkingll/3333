@@ -906,7 +906,8 @@ from "https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging.js";
 import {
 getFirestore,
 doc,
-setDoc
+setDoc,
+getDoc
 }
 from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
@@ -948,16 +949,49 @@ try{
 
 if(!('serviceWorker' in navigator)){
 
-alert("المتصفح لا يدعم الإشعارات");
+alert("المتصفح لا يدعم الإشعارات ❌");
 
 return;
 
 }
 
+/* إذا الإشعارات مفعلة مسبقاً */
+
+if(Notification.permission === "granted"){
+
+const savedToken =
+localStorage.getItem("firebaseToken");
+
+if(savedToken){
+
+alert("الإشعارات مفعلة بالفعل ✅");
+
+return;
+
+}
+
+}
+
+/* إذا المستخدم حظر الإشعارات */
+
+if(Notification.permission === "denied"){
+
+alert(
+"لقد قمت بحظر الإشعارات من المتصفح ❌"
+);
+
+return;
+
+}
+
+/* تسجيل service worker */
+
 const registration =
 await navigator.serviceWorker.register(
 './firebase-messaging-sw.js'
 );
+
+/* طلب الإذن */
 
 const permission =
 await Notification.requestPermission();
@@ -969,6 +1003,8 @@ alert("تم رفض الإشعارات ❌");
 return;
 
 }
+
+/* إنشاء التوكن */
 
 const currentToken =
 await getToken(messaging,{
@@ -983,13 +1019,24 @@ registration
 
 if(currentToken){
 
-await setDoc(
-doc(db,"tokens",currentToken),
-{
+/* تحقق هل التوكن موجود مسبقاً */
+
+const tokenRef =
+doc(db,"tokens",currentToken);
+
+const tokenSnap =
+await getDoc(tokenRef);
+
+if(!tokenSnap.exists()){
+
+await setDoc(tokenRef,{
 token: currentToken,
 createdAt: Date.now()
+});
+
 }
-);
+
+/* حفظ محلي */
 
 localStorage.setItem(
 "firebaseToken",
@@ -1003,14 +1050,17 @@ alert(
 }else{
 
 alert(
-"لم يتم إنشاء TOKEN ❌"
+"فشل إنشاء TOKEN ❌"
 );
 
 }
 
 }catch(error){
 
-console.log(error);
+console.log(
+"FCM ERROR:",
+error
+);
 
 alert(
 "حدث خطأ أثناء التفعيل ❌"
@@ -1019,6 +1069,8 @@ alert(
 }
 
 };
+
+/* استقبال الإشعارات داخل الموقع */
 
 onMessage(messaging,(payload)=>{
 
