@@ -52,7 +52,10 @@ self.addEventListener('notificationclick', (event) => {
     }).then((clientList) => {
 
       for (const client of clientList) {
-        if (client.url.includes('pkingll.github.io/3333') && 'focus' in client) {
+        if (
+          client.url.includes('pkingll.github.io/3333')
+          && 'focus' in client
+        ) {
           return client.focus();
         }
       }
