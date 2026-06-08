@@ -996,23 +996,7 @@ loadFawaid();
 /* استقبال الإشعارات داخل الموقع */
 
 onMessage(messaging,(payload)=>{
-
-new Notification(
-
-payload.notification.title,
-
-{
-
-body:
-payload.notification.body,
-
-icon:
-'https://a.top4top.io/p_38068co2c0.jpg'
-
-}
-
-);
-
+console.log("Message received:", payload);
 });
 
 </script>
