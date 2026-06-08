@@ -907,7 +907,12 @@ import {
 getFirestore,
 doc,
 setDoc,
-getDoc
+getDoc,
+collection,
+addDoc,
+getDocs,
+deleteDoc,
+updateDoc
 }
 from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
@@ -1092,6 +1097,70 @@ icon:
 
 });
 
+</script>
+
+
+<script>
+/* Firebase Firestore Fawaid Upgrade */
+let fawaid = [];
+let currentFaidah = 0;
+
+async function loadFawaid(){
+ try{
+  const snapshot = await getDocs(collection(db,"fawaid"));
+  fawaid = [];
+  snapshot.forEach(d=>{
+    fawaid.push({id:d.id,text:d.data().text||""});
+  });
+  renderFawaid();
+  if(fawaid.length){
+    document.getElementById("fawaidText").innerText="📖 "+fawaid[0].text;
+  }
+ }catch(e){console.log(e);}
+}
+
+async function addFawaid(){
+ const input=document.getElementById("fawaidInput");
+ if(!input || !input.value.trim()) return;
+ await addDoc(collection(db,"fawaid"),{text:input.value.trim()});
+ input.value="";
+ loadFawaid();
+}
+
+function renderFawaid(){
+ const box=document.getElementById("fawaidList");
+ if(!box) return;
+ box.innerHTML="";
+ fawaid.forEach(item=>{
+  box.innerHTML += `
+  <div class="fawaid-item">
+   <div style="margin-bottom:10px;">${item.text}</div>
+   <button onclick="editFawaid('${item.id}',\`${"${item.text}"}\`)">تعديل</button>
+   <button onclick="deleteFawaid('${item.id}')">حذف</button>
+  </div>`;
+ });
+}
+
+async function deleteFawaid(id){
+ await deleteDoc(doc(db,"fawaid",id));
+ loadFawaid();
+}
+
+async function editFawaid(id,text){
+ const newText=prompt("تعديل الفائدة",text);
+ if(newText===null) return;
+ await updateDoc(doc(db,"fawaid",id),{text:newText});
+ loadFawaid();
+}
+
+function showFaidah(){
+ if(!fawaid.length) return;
+ document.getElementById("fawaidText").innerText="📖 "+fawaid[currentFaidah].text;
+ currentFaidah=(currentFaidah+1)%fawaid.length;
+}
+
+setInterval(showFaidah,60000);
+setTimeout(loadFawaid,1000);
 </script>
 
 </body>
