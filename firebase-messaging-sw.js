@@ -38,7 +38,8 @@ self.registration.showNotification(
 payload.notification.title,
 
 {
-body: payload.notification.body,
+body:
+payload.notification.body,
 
 icon:
 'https://a.top4top.io/p_38068co2c0.jpg'
