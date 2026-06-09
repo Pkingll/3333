@@ -680,6 +680,11 @@ placeholder="اكتب الفائدة هنا...">
 
 <textarea id="postInput" placeholder="اكتب المنشور هنا..."></textarea>
 
+<input id="postImage" placeholder="رابط صورة (اختياري)" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;">
+<input id="postAudio" placeholder="رابط صوت (اختياري)" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;">
+<input id="postVideo" placeholder="رابط فيديو (اختياري)" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;">
+
+
 <button onclick="addPost()">إضافة منشور</button>
 
 <div class="fawaid-list" id="postsAdminList" style="max-height:300px;overflow:auto;"></div>
@@ -1077,7 +1082,15 @@ async function loadPosts(){
  if(box){
  box.innerHTML=arr.map(p=>`
  <div class="fawaid-item">
-   <div style="margin-bottom:10px">${p.text||""}</div>
+   
+${p.image ? `<img src="${p.image}" style="width:100%;border-radius:12px;margin-bottom:10px;max-height:400px;object-fit:cover;">` : ""}
+
+<div style="margin-bottom:10px">${p.text||""}</div>
+
+${p.audio ? `<audio controls style="width:100%;margin-bottom:10px;"><source src="${p.audio}"></audio>` : ""}
+
+${p.video ? `<video controls style="width:100%;border-radius:12px;margin-bottom:10px;max-height:450px;"><source src="${p.video}"></video>` : ""}
+
    <div style="display:flex;gap:6px;flex-wrap:wrap">
      <button onclick="reactPost('${p.id}','leaf')">🍂 ${p.leaf||0}</button>
      <button onclick="reactPost('${p.id}','rose')">🌹 ${p.rose||0}</button>
@@ -1099,13 +1112,28 @@ async function loadPosts(){
 }
 
 window.addPost = async function(){
- const v=document.getElementById("postInput").value.trim();
- if(!v) return;
+
+ const text=document.getElementById("postInput").value.trim();
+ if(!text) return;
+
+ const image=document.getElementById("postImage").value.trim();
+ const audio=document.getElementById("postAudio").value.trim();
+ const video=document.getElementById("postVideo").value.trim();
+
  await addDoc(collection(db,"posts"),{
-  text:v,time:Date.now(),
+  text,
+  image,
+  audio,
+  video,
+  time:Date.now(),
   leaf:0,rose:0,book:0,like:0,heart:0
  });
+
  document.getElementById("postInput").value="";
+ document.getElementById("postImage").value="";
+ document.getElementById("postAudio").value="";
+ document.getElementById("postVideo").value="";
+
  loadPosts();
 };
 
