@@ -274,6 +274,18 @@ if(snap.exists()){
  });
 }
 
+
+try{
+const qLatest = query(collection(db,"lessons"),where("subject","==",id));
+const sLatest = await getDocs(qLatest);
+let latestTime = 0;
+sLatest.forEach(d=>{
+ const t=d.data().time || 0;
+ if(t>latestTime) latestTime=t;
+});
+localStorage.setItem("seenTime_"+id, latestTime);
+}catch(e){console.log(e);}
+
 /* ================= الفصول + الدروس ================= */
 
 let chaptersList = document.getElementById("chaptersList");
