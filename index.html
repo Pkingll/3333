@@ -268,6 +268,14 @@ font-size:14px;
 opacity:.85;
 }
 
+
+.subject-badge{
+position:absolute;top:10px;left:10px;background:#d32f2f;color:#fff;
+min-width:22px;height:22px;border-radius:50%;display:none;
+align-items:center;justify-content:center;font-size:12px;font-weight:bold;
+}
+.card{position:relative;}
+
 /* زر المشاركة */
 
 .share-card{
@@ -462,7 +470,7 @@ id="fawaidText">
 <div class="grid">
 
 <a class="card"
-href="subject.html?id=aqida">
+href="subject.html?id=aqida"><span class="subject-badge" id="badge-aqida">!</span>
 
 <h3>العقيدة</h3>
 
@@ -473,7 +481,7 @@ href="subject.html?id=aqida">
 </a>
 
 <a class="card"
-href="subject.html?id=hadith">
+href="subject.html?id=hadith"><span class="subject-badge" id="badge-hadith">!</span>
 
 <h3>الحديث</h3>
 
@@ -484,7 +492,7 @@ href="subject.html?id=hadith">
 </a>
 
 <a class="card"
-href="subject.html?id=fiqh">
+href="subject.html?id=fiqh"><span class="subject-badge" id="badge-fiqh">!</span>
 
 <h3>الفقه</h3>
 
@@ -495,7 +503,7 @@ href="subject.html?id=fiqh">
 </a>
 
 <a class="card"
-href="subject.html?id=usul">
+href="subject.html?id=usul"><span class="subject-badge" id="badge-usul">!</span>
 
 <h3>أصول الفقه</h3>
 
@@ -506,7 +514,7 @@ href="subject.html?id=usul">
 </a>
 
 <a class="card"
-href="subject.html?id=history">
+href="subject.html?id=history"><span class="subject-badge" id="badge-history">!</span>
 
 <h3>تاريخ الخلفاء الراشدين</h3>
 
@@ -517,7 +525,7 @@ href="subject.html?id=history">
 </a>
 
 <a class="card"
-href="subject.html?id=dawah">
+href="subject.html?id=dawah"><span class="subject-badge" id="badge-dawah">!</span>
 
 <h3>منهج الدعوة</h3>
 
@@ -528,7 +536,7 @@ href="subject.html?id=dawah">
 </a>
 
 <a class="card"
-href="subject.html?id=tajweed">
+href="subject.html?id=tajweed"><span class="subject-badge" id="badge-tajweed">!</span>
 
 <h3>أحكام وتجويد القرآن</h3>
 
@@ -539,7 +547,7 @@ href="subject.html?id=tajweed">
 </a>
 
 <a class="card"
-href="subject.html?id=literature">
+href="subject.html?id=literature"><span class="subject-badge" id="badge-literature">!</span>
 
 <h3>الدراسات الأدبية</h3>
 
@@ -550,7 +558,7 @@ href="subject.html?id=literature">
 </a>
 
 <a class="card"
-href="subject.html?id=nahw">
+href="subject.html?id=nahw"><span class="subject-badge" id="badge-nahw">!</span>
 
 <h3>النحو والصرف</h3>
 
@@ -561,7 +569,7 @@ href="subject.html?id=nahw">
 </a>
 
 <a class="card"
-href="subject.html?id=computer">
+href="subject.html?id=computer"><span class="subject-badge" id="badge-computer">!</span>
 
 <h3>الحاسوب</h3>
 
@@ -572,7 +580,7 @@ href="subject.html?id=computer">
 </a>
 
 <a class="card"
-href="subject.html?id=english">
+href="subject.html?id=english"><span class="subject-badge" id="badge-english">!</span>
 
 <h3>الإنجليزي</h3>
 
@@ -583,7 +591,7 @@ href="subject.html?id=english">
 </a>
 
 <a class="card"
-href="subject.html?id=tafsir">
+href="subject.html?id=tafsir"><span class="subject-badge" id="badge-tafsir">!</span>
 
 <h3>التفسير</h3>
 
@@ -998,6 +1006,29 @@ loadFawaid();
 onMessage(messaging,(payload)=>{
 console.log("Message received:", payload);
 });
+
+async function updateLessonBadges(){
+try{
+const lessonsSnap = await getDocs(collection(db,"lessons"));
+const latest = {};
+lessonsSnap.forEach(d=>{
+ const x=d.data();
+ if(!x.subject) return;
+ const t=x.time || 0;
+ if(!latest[x.subject] || t>latest[x.subject]) latest[x.subject]=t;
+});
+Object.keys(latest).forEach(subject=>{
+ const seen=parseInt(localStorage.getItem("seenTime_"+subject)||"0");
+ const badge=document.getElementById("badge-"+subject);
+ if(badge && latest[subject] > seen){
+   badge.style.display="flex";
+   badge.textContent="1";
+ }
+});
+}catch(e){console.log(e);}
+}
+updateLessonBadges();
+
 
 </script>
 
