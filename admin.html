@@ -334,25 +334,45 @@ snap.forEach(d=>{
 let id=d.id;
 let data=d.data();
 
+const encoded = encodeURIComponent(JSON.stringify(data));
+
 lessonsList.innerHTML+=`
 <div class="item">
 📖 ${data.title}
 <div class="actions">
-<button class="view" onclick="alert('${data.text || data.title}')">عرض</button>
-<button class="edit" onclick="editLesson('${id}',${JSON.stringify(data)})">تعديل</button>
+<button class="view" onclick="alert(${JSON.stringify(data.text || data.title || '')})">عرض</button>
+<button class="edit" onclick="editLesson('${id}','${encoded}')">تعديل</button>
 <button class="delete" onclick="deleteLesson('${id}')">حذف</button>
 </div>
 </div>`;
 });
 }
 
-window.editLesson = async (id,data)=>{
-let title = prompt("العنوان",data.title);
-if(!title) return;
+window.editLesson = async (id,dataStr)=>{
+
+let data = JSON.parse(decodeURIComponent(dataStr));
+
+let title = prompt("العنوان",data.title || "");
+if(title === null) return;
+
+let text = prompt("نص الدرس",data.text || "");
+if(text === null) return;
+
+let image = prompt("رابط الصورة",data.image || "");
+if(image === null) return;
+
+let audio = prompt("رابط الصوت",data.audio || "");
+if(audio === null) return;
+
+let link = prompt("الرابط",data.link || "");
+if(link === null) return;
 
 await updateDoc(doc(db,"lessons",id),{
-...data,
-title
+title,
+text,
+image,
+audio,
+link
 });
 
 loadLessons();
