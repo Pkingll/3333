@@ -90,6 +90,7 @@ margin-top:10px;
 
 hr{margin:15px 0;border:1px solid rgba(255,255,255,.1)}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
 
 <body>
@@ -238,6 +239,7 @@ render();
 
 async function autoSave(){
 await setDoc(doc(db,"subjects",subject),{items});
+initLessonSortable();
 }
 
 window.saveOld = autoSave;
@@ -277,12 +279,15 @@ let snap = await getDocs(q);
 chaptersList.innerHTML="";
 chapterSelect.innerHTML="";
 
-snap.forEach(d=>{
-let id=d.id;
-let data=d.data();
+let arr=[];
+snap.forEach(d=>arr.push({id:d.id,...d.data()}));
+arr.sort((a,b)=>(a.order||0)-(b.order||0));
+
+arr.forEach(data=>{
+let id=data.id;
 
 chaptersList.innerHTML+=`
-<div class="item">
+<div class="item" data-id="${id}">
 📂 ${data.title}
 <div class="actions">
 <button class="edit" onclick="editChapter('${id}','${data.title}')">تعديل</button>
@@ -293,6 +298,7 @@ chaptersList.innerHTML+=`
 chapterSelect.innerHTML+=`<option value="${id}">${data.title}</option>`;
 });
 
+initChapterSortable();
 loadLessons();
 }
 
@@ -353,7 +359,7 @@ let id=data.id;
 const encoded = encodeURIComponent(JSON.stringify(data));
 
 lessonsList.innerHTML+=`
-<div class="item">
+<div class="item" data-id="${id}">
 📖 ${data.title}
 <div class="actions">
 
@@ -452,6 +458,37 @@ loadLessons();
 
 window.moveLessonUp=(id)=>swapLesson(id,"up");
 window.moveLessonDown=(id)=>swapLesson(id,"down");
+
+
+function initChapterSortable(){
+if(window.chapterSortable) window.chapterSortable.destroy();
+
+window.chapterSortable=new Sortable(chaptersList,{
+animation:150,
+onEnd: async ()=>{
+const items=[...chaptersList.children];
+for(let i=0;i<items.length;i++){
+await updateDoc(doc(db,"chapters",items[i].dataset.id),{order:i});
+}
+loadChapters();
+}
+});
+}
+
+function initLessonSortable(){
+if(window.lessonSortable) window.lessonSortable.destroy();
+
+window.lessonSortable=new Sortable(lessonsList,{
+animation:150,
+onEnd: async ()=>{
+const items=[...lessonsList.children];
+for(let i=0;i<items.length;i++){
+await updateDoc(doc(db,"lessons",items[i].dataset.id),{order:i});
+}
+loadLessons();
+}
+});
+}
 
 chapterSelect.onchange=loadLessons;
 
