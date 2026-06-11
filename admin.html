@@ -278,19 +278,14 @@ chaptersList.innerHTML="";
 chapterSelect.innerHTML="";
 
 let arr=[];
-
-snap.forEach(d=>{
-arr.push({id:d.id,...d.data()});
-});
-
+snap.forEach(d=>arr.push({id:d.id,...d.data()}));
 arr.sort((a,b)=>(a.order||0)-(b.order||0));
 
 arr.forEach(data=>{
-
 let id=data.id;
 
 chaptersList.innerHTML+=`
-<div class="item">
+<div class="item" data-id="${id}">
 📂 ${data.title}
 <div class="actions">
 <button class="moveUp" onclick="moveChapterUp('${id}')">⬆</button>
@@ -301,8 +296,6 @@ chaptersList.innerHTML+=`
 </div>`;
 
 chapterSelect.innerHTML+=`<option value="${id}">${data.title}</option>`;
-});
-
 });
 
 loadLessons();
@@ -319,45 +312,6 @@ window.deleteChapter = async (id)=>{
 await deleteDoc(doc(db,"chapters",id));
 loadChapters();
 };
-
-
-async function swapChapter(id,direction){
-
-let q=query(collection(db,"chapters"),where("subject","==",subject2));
-let snap=await getDocs(q);
-
-let arr=[];
-
-snap.forEach(d=>{
-arr.push({id:d.id,...d.data()});
-});
-
-arr.sort((a,b)=>(a.order||0)-(b.order||0));
-
-let index=arr.findIndex(x=>x.id===id);
-if(index===-1) return;
-
-let target=direction==="up"?index-1:index+1;
-
-if(target<0 || target>=arr.length) return;
-
-let current=arr[index];
-let other=arr[target];
-
-await updateDoc(doc(db,"chapters",current.id),{
-order:other.order || target
-});
-
-await updateDoc(doc(db,"chapters",other.id),{
-order:current.order || index
-});
-
-loadChapters();
-}
-
-window.moveChapterUp=(id)=>swapChapter(id,"up");
-window.moveChapterDown=(id)=>swapChapter(id,"down");
-
 
 /* ================= الدروس ================= */
 
@@ -404,7 +358,7 @@ let id=data.id;
 const encoded = encodeURIComponent(JSON.stringify(data));
 
 lessonsList.innerHTML+=`
-<div class="item">
+<div class="item" data-id="${id}">
 📖 ${data.title}
 <div class="actions">
 
@@ -503,6 +457,35 @@ loadLessons();
 
 window.moveLessonUp=(id)=>swapLesson(id,"up");
 window.moveLessonDown=(id)=>swapLesson(id,"down");
+
+
+
+async function swapChapter(id,direction){
+
+let q=query(collection(db,"chapters"),where("subject","==",subject2));
+let snap=await getDocs(q);
+
+let arr=[];
+snap.forEach(d=>arr.push({id:d.id,...d.data()}));
+arr.sort((a,b)=>(a.order||0)-(b.order||0));
+
+let index=arr.findIndex(x=>x.id===id);
+if(index===-1) return;
+
+let target=direction==="up"?index-1:index+1;
+if(target<0||target>=arr.length) return;
+
+let current=arr[index];
+let other=arr[target];
+
+await updateDoc(doc(db,"chapters",current.id),{order:other.order||target});
+await updateDoc(doc(db,"chapters",other.id),{order:current.order||index});
+
+loadChapters();
+}
+
+window.moveChapterUp=(id)=>swapChapter(id,"up");
+window.moveChapterDown=(id)=>swapChapter(id,"down");
 
 chapterSelect.onchange=loadLessons;
 
