@@ -81,6 +81,50 @@ margin-top:10px;
 
 .actions button{flex:1}
 
+.moveUp{background:#9333ea;color:#fff}
+.moveDown{background:#ea580c;color:#fff}
+
+.modal{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.7);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:9999;
+padding:20px;
+}
+
+.modalContent{
+background:#0d2033;
+width:100%;
+max-width:500px;
+border-radius:18px;
+padding:20px;
+}
+
+.modalContent h3{
+margin-bottom:15px;
+text-align:center;
+color:#f5e6b3;
+}
+
+.modalContent textarea{
+min-height:180px;
+resize:vertical;
+}
+
+.modalBtns{
+display:flex;
+gap:10px;
+margin-top:15px;
+}
+
+.modalBtns button{
+flex:1;
+}
+
+
 .edit{background:#2563eb;color:#fff}
 .delete{background:#b91c1c;color:#fff}
 .view{background:#16a34a;color:#fff}
@@ -256,9 +300,12 @@ loadChapters();
 window.addChapter = async ()=>{
 if(!chapterTitle.value) return;
 
+let order = Date.now();
+
 await addDoc(collection(db,"chapters"),{
 subject:subject2,
-title:chapterTitle.value
+title:chapterTitle.value,
+order
 });
 
 chapterTitle.value="";
@@ -273,21 +320,47 @@ let snap = await getDocs(q);
 chaptersList.innerHTML="";
 chapterSelect.innerHTML="";
 
+let arr=[];
+
 snap.forEach(d=>{
-let id=d.id;
-let data=d.data();
+arr.push({
+id:d.id,
+...d.data()
+});
+});
+
+arr.sort((a,b)=>(a.order||0)-(b.order||0));
+
+for(let data of arr){
+
+let id=data.id;
 
 chaptersList.innerHTML+=`
 <div class="item">
 📂 ${data.title}
+
 <div class="actions">
-<button class="edit" onclick="editChapter('${id}','${data.title}')">تعديل</button>
-<button class="delete" onclick="deleteChapter('${id}')">حذف</button>
+
+<button class="moveUp"
+onclick="moveChapterUp('${id}')">⬆</button>
+
+<button class="moveDown"
+onclick="moveChapterDown('${id}')">⬇</button>
+
+<button class="edit"
+onclick="editChapter('${id}','${data.title}')">تعديل</button>
+
+<button class="delete"
+onclick="deleteChapter('${id}')">حذف</button>
+
 </div>
 </div>`;
 
-chapterSelect.innerHTML+=`<option value="${id}">${data.title}</option>`;
-});
+chapterSelect.innerHTML+=`
+<option value="${id}">
+${data.title}
+</option>`;
+}
 
 loadLessons();
 }
@@ -304,6 +377,49 @@ await deleteDoc(doc(db,"chapters",id));
 loadChapters();
 };
 
+async function swapChapter(id,direction){
+
+let q = query(collection(db,"chapters"),where("subject","==",subject2));
+let snap = await getDocs(q);
+
+let arr=[];
+
+snap.forEach(d=>{
+arr.push({
+id:d.id,
+...d.data()
+});
+});
+
+arr.sort((a,b)=>(a.order||0)-(b.order||0));
+
+let index = arr.findIndex(x=>x.id===id);
+
+let target =
+direction==="up"
+? index-1
+: index+1;
+
+if(target < 0 || target >= arr.length) return;
+
+let current = arr[index];
+let other = arr[target];
+
+await updateDoc(doc(db,"chapters",current.id),{
+order:other.order
+});
+
+await updateDoc(doc(db,"chapters",other.id),{
+order:current.order
+});
+
+loadChapters();
+}
+
+window.moveChapterUp=(id)=>swapChapter(id,"up");
+window.moveChapterDown=(id)=>swapChapter(id,"down");
+
+
 /* ================= الدروس ================= */
 
 window.addLesson = async ()=>{
@@ -315,7 +431,8 @@ text:lessonText.value,
 image:lessonImage.value,
 audio:lessonAudio.value,
 link:lessonLink.value,
-time:Date.now()
+time:Date.now(),
+order:Date.now()
 });
 
 loadLessons();
@@ -325,56 +442,94 @@ async function loadLessons(){
 
 if(!chapterSelect.value) return;
 
-let q=query(collection(db,"lessons"),where("chapterId","==",chapterSelect.value));
+let q=query(collection(db,"lessons"),
+where("chapterId","==",chapterSelect.value));
+
 let snap=await getDocs(q);
 
 lessonsList.innerHTML="";
 
-snap.forEach(d=>{
-let id=d.id;
-let data=d.data();
+let arr=[];
 
-const encoded = encodeURIComponent(JSON.stringify(data));
+snap.forEach(d=>{
+arr.push({
+id:d.id,
+...d.data()
+});
+});
+
+arr.sort((a,b)=>(a.order||0)-(b.order||0));
+
+for(let data of arr){
+
+let id=data.id;
 
 lessonsList.innerHTML+=`
 <div class="item">
+
 📖 ${data.title}
+
 <div class="actions">
-<button class="view" onclick="alert(${JSON.stringify(data.text || data.title || '')})">عرض</button>
-<button class="edit" onclick="editLesson('${id}','${encoded}')">تعديل</button>
-<button class="delete" onclick="deleteLesson('${id}')">حذف</button>
+
+<button class="moveUp"
+onclick="moveLessonUp('${id}')">⬆</button>
+
+<button class="moveDown"
+onclick="moveLessonDown('${id}')">⬇</button>
+
+<button class="view"
+onclick="alert(${JSON.stringify(data.text || '')})">
+عرض
+</button>
+
+<button class="edit"
+onclick="openEditModal('${id}', ${JSON.stringify(JSON.stringify(data))})">
+تعديل
+</button>
+
+<button class="delete"
+onclick="deleteLesson('${id}')">
+حذف
+</button>
+
 </div>
 </div>`;
+}
 });
 }
 
-window.editLesson = async (id,dataStr)=>{
+let currentLessonId=null;
 
-let data = JSON.parse(decodeURIComponent(dataStr));
+window.openEditModal=(id,dataStr)=>{
 
-let title = prompt("العنوان",data.title || "");
-if(title === null) return;
+let data=JSON.parse(JSON.parse(dataStr));
 
-let text = prompt("نص الدرس",data.text || "");
-if(text === null) return;
+currentLessonId=id;
 
-let image = prompt("رابط الصورة",data.image || "");
-if(image === null) return;
+editTitle.value=data.title || "";
+editText.value=data.text || "";
+editImage.value=data.image || "";
+editAudio.value=data.audio || "";
+editLink.value=data.link || "";
 
-let audio = prompt("رابط الصوت",data.audio || "");
-if(audio === null) return;
+editModal.style.display="flex";
+};
 
-let link = prompt("الرابط",data.link || "");
-if(link === null) return;
+window.closeModal=()=>{
+editModal.style.display="none";
+};
 
-await updateDoc(doc(db,"lessons",id),{
-title,
-text,
-image,
-audio,
-link
+window.saveLessonEdit=async ()=>{
+
+await updateDoc(doc(db,"lessons",currentLessonId),{
+title:editTitle.value,
+text:editText.value,
+image:editImage.value,
+audio:editAudio.value,
+link:editLink.value
 });
 
+closeModal();
 loadLessons();
 };
 
@@ -383,12 +538,82 @@ await deleteDoc(doc(db,"lessons",id));
 loadLessons();
 };
 
+async function swapLesson(id,direction){
+
+let q=query(collection(db,"lessons"),
+where("chapterId","==",chapterSelect.value));
+
+let snap=await getDocs(q);
+
+let arr=[];
+
+snap.forEach(d=>{
+arr.push({
+id:d.id,
+...d.data()
+});
+});
+
+arr.sort((a,b)=>(a.order||0)-(b.order||0));
+
+let index=arr.findIndex(x=>x.id===id);
+
+let target =
+direction==="up"
+? index-1
+: index+1;
+
+if(target<0 || target>=arr.length) return;
+
+let current=arr[index];
+let other=arr[target];
+
+await updateDoc(doc(db,"lessons",current.id),{
+order:other.order
+});
+
+await updateDoc(doc(db,"lessons",other.id),{
+order:current.order
+});
+
+loadLessons();
+}
+
+window.moveLessonUp=(id)=>swapLesson(id,"up");
+window.moveLessonDown=(id)=>swapLesson(id,"down");
+
+
 chapterSelect.onchange=loadLessons;
 
 loadOld();
 loadChapters();
 
 </script>
+
+
+<!-- نافذة التعديل -->
+<div class="modal" id="editModal">
+<div class="modalContent">
+
+<h3>تعديل الدرس</h3>
+
+<input id="editTitle" placeholder="العنوان">
+
+<textarea id="editText" placeholder="نص الدرس"></textarea>
+
+<input id="editImage" placeholder="رابط الصورة">
+
+<input id="editAudio" placeholder="رابط الصوت">
+
+<input id="editLink" placeholder="الرابط">
+
+<div class="modalBtns">
+<button onclick="saveLessonEdit()">💾 حفظ</button>
+<button class="delete" onclick="closeModal()">إلغاء</button>
+</div>
+
+</div>
+</div>
 
 </body>
 </html>
