@@ -377,6 +377,7 @@ await deleteDoc(doc(db,"chapters",id));
 loadChapters();
 };
 
+
 async function swapChapter(id,direction){
 
 let q = query(collection(db,"chapters"),where("subject","==",subject2));
@@ -395,6 +396,8 @@ arr.sort((a,b)=>(a.order||0)-(b.order||0));
 
 let index = arr.findIndex(x=>x.id===id);
 
+if(index===-1) return;
+
 let target =
 direction==="up"
 ? index-1
@@ -405,12 +408,15 @@ if(target < 0 || target >= arr.length) return;
 let current = arr[index];
 let other = arr[target];
 
+let currentOrder=current.order || index;
+let otherOrder=other.order || target;
+
 await updateDoc(doc(db,"chapters",current.id),{
-order:other.order
+order:otherOrder
 });
 
 await updateDoc(doc(db,"chapters",other.id),{
-order:current.order
+order:currentOrder
 });
 
 loadChapters();
@@ -418,7 +424,6 @@ loadChapters();
 
 window.moveChapterUp=(id)=>swapChapter(id,"up");
 window.moveChapterDown=(id)=>swapChapter(id,"down");
-
 
 /* ================= الدروس ================= */
 
@@ -538,6 +543,7 @@ await deleteDoc(doc(db,"lessons",id));
 loadLessons();
 };
 
+
 async function swapLesson(id,direction){
 
 let q=query(collection(db,"lessons"),
@@ -558,8 +564,9 @@ arr.sort((a,b)=>(a.order||0)-(b.order||0));
 
 let index=arr.findIndex(x=>x.id===id);
 
-let target =
-direction==="up"
+if(index===-1) return;
+
+let target = direction==="up"
 ? index-1
 : index+1;
 
@@ -568,12 +575,15 @@ if(target<0 || target>=arr.length) return;
 let current=arr[index];
 let other=arr[target];
 
+let currentOrder=current.order || index;
+let otherOrder=other.order || target;
+
 await updateDoc(doc(db,"lessons",current.id),{
-order:other.order
+order:otherOrder
 });
 
 await updateDoc(doc(db,"lessons",other.id),{
-order:current.order
+order:currentOrder
 });
 
 loadLessons();
@@ -581,7 +591,6 @@ loadLessons();
 
 window.moveLessonUp=(id)=>swapLesson(id,"up");
 window.moveLessonDown=(id)=>swapLesson(id,"down");
-
 
 chapterSelect.onchange=loadLessons;
 
@@ -614,6 +623,13 @@ loadChapters();
 
 </div>
 </div>
+
+
+<!--
+مهم:
+حتى يظهر نفس الترتيب في صفحة العرض، يجب أن تقوم بترتيب الدروس والفصول هناك بواسطة حقل order
+وليس time.
+-->
 
 </body>
 </html>
