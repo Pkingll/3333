@@ -90,7 +90,6 @@ margin-top:10px;
 
 hr{margin:15px 0;border:1px solid rgba(255,255,255,.1)}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
 
 <body>
@@ -239,7 +238,6 @@ render();
 
 async function autoSave(){
 await setDoc(doc(db,"subjects",subject),{items});
-initLessonSortable();
 }
 
 window.saveOld = autoSave;
@@ -280,16 +278,23 @@ chaptersList.innerHTML="";
 chapterSelect.innerHTML="";
 
 let arr=[];
-snap.forEach(d=>arr.push({id:d.id,...d.data()}));
+
+snap.forEach(d=>{
+arr.push({id:d.id,...d.data()});
+});
+
 arr.sort((a,b)=>(a.order||0)-(b.order||0));
 
 arr.forEach(data=>{
+
 let id=data.id;
 
 chaptersList.innerHTML+=`
-<div class="item" data-id="${id}">
+<div class="item">
 📂 ${data.title}
 <div class="actions">
+<button class="moveUp" onclick="moveChapterUp('${id}')">⬆</button>
+<button class="moveDown" onclick="moveChapterDown('${id}')">⬇</button>
 <button class="edit" onclick="editChapter('${id}','${data.title}')">تعديل</button>
 <button class="delete" onclick="deleteChapter('${id}')">حذف</button>
 </div>
@@ -298,7 +303,8 @@ chaptersList.innerHTML+=`
 chapterSelect.innerHTML+=`<option value="${id}">${data.title}</option>`;
 });
 
-initChapterSortable();
+});
+
 loadLessons();
 }
 
@@ -313,6 +319,45 @@ window.deleteChapter = async (id)=>{
 await deleteDoc(doc(db,"chapters",id));
 loadChapters();
 };
+
+
+async function swapChapter(id,direction){
+
+let q=query(collection(db,"chapters"),where("subject","==",subject2));
+let snap=await getDocs(q);
+
+let arr=[];
+
+snap.forEach(d=>{
+arr.push({id:d.id,...d.data()});
+});
+
+arr.sort((a,b)=>(a.order||0)-(b.order||0));
+
+let index=arr.findIndex(x=>x.id===id);
+if(index===-1) return;
+
+let target=direction==="up"?index-1:index+1;
+
+if(target<0 || target>=arr.length) return;
+
+let current=arr[index];
+let other=arr[target];
+
+await updateDoc(doc(db,"chapters",current.id),{
+order:other.order || target
+});
+
+await updateDoc(doc(db,"chapters",other.id),{
+order:current.order || index
+});
+
+loadChapters();
+}
+
+window.moveChapterUp=(id)=>swapChapter(id,"up");
+window.moveChapterDown=(id)=>swapChapter(id,"down");
+
 
 /* ================= الدروس ================= */
 
@@ -359,7 +404,7 @@ let id=data.id;
 const encoded = encodeURIComponent(JSON.stringify(data));
 
 lessonsList.innerHTML+=`
-<div class="item" data-id="${id}">
+<div class="item">
 📖 ${data.title}
 <div class="actions">
 
@@ -458,37 +503,6 @@ loadLessons();
 
 window.moveLessonUp=(id)=>swapLesson(id,"up");
 window.moveLessonDown=(id)=>swapLesson(id,"down");
-
-
-function initChapterSortable(){
-if(window.chapterSortable) window.chapterSortable.destroy();
-
-window.chapterSortable=new Sortable(chaptersList,{
-animation:150,
-onEnd: async ()=>{
-const items=[...chaptersList.children];
-for(let i=0;i<items.length;i++){
-await updateDoc(doc(db,"chapters",items[i].dataset.id),{order:i});
-}
-loadChapters();
-}
-});
-}
-
-function initLessonSortable(){
-if(window.lessonSortable) window.lessonSortable.destroy();
-
-window.lessonSortable=new Sortable(lessonsList,{
-animation:150,
-onEnd: async ()=>{
-const items=[...lessonsList.children];
-for(let i=0;i<items.length;i++){
-await updateDoc(doc(db,"lessons",items[i].dataset.id),{order:i});
-}
-loadLessons();
-}
-});
-}
 
 chapterSelect.onchange=loadLessons;
 
