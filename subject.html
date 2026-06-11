@@ -302,9 +302,15 @@ const snap = await getDocs(q);
 
 chaptersList.innerHTML = "";
 
+let arr=[];
 snap.forEach(docu=>{
-const data = docu.data();
-const chapterId = docu.id;
+arr.push({id:docu.id,...docu.data()});
+});
+
+arr.sort((a,b)=>(a.order||0)-(b.order||0));
+
+arr.forEach(data=>{
+const chapterId = data.id;
 
 chaptersList.innerHTML += `
 <div class="itemBtn" onclick="openChapter('${chapterId}')">
@@ -326,8 +332,14 @@ const snap = await getDocs(q);
 
 lessonsList.innerHTML = "";
 
+let arr=[];
 snap.forEach(docu=>{
-const data = docu.data();
+arr.push(docu.data());
+});
+
+arr.sort((a,b)=>(a.order||0)-(b.order||0));
+
+arr.forEach(data=>{
 
 lessonsList.innerHTML += `
 <div class="lessonBtn" onclick='openLesson(${JSON.stringify(data)})'>
