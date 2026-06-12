@@ -409,6 +409,7 @@ margin-bottom:10px;
 
 .comment-item{background:rgba(255,255,255,.04);padding:10px;border-radius:10px;margin-top:8px}
 .comment-reacts button{margin:2px}
+.single-post-view{margin:10px 0;padding:8px 12px;border-radius:8px}
 
 </style>
 
@@ -1081,6 +1082,10 @@ async function loadPosts(){
  let arr=[];
  snap.forEach(d=>arr.push({id:d.id,...d.data()}));
  arr.sort((a,b)=>(b.time||0)-(a.time||0));
+ const onlyPost=getPostIdFromUrl ? getPostIdFromUrl() : null;
+ if(onlyPost){
+   arr=arr.filter(x=>x.id===onlyPost);
+ }
 
  const box=document.getElementById("postsContainer");
  const admin=document.getElementById("postsAdminList");
@@ -1106,6 +1111,9 @@ ${p.video ? `<video controls style="width:100%;border-radius:12px;margin-bottom:
      <button onclick="reactPost('${p.id}','book')">📚 ${p.book||0}</button>
      <button onclick="reactPost('${p.id}','like')">👍🏻 ${p.like||0}</button>
      <button onclick="reactPost('${p.id}','heart')">🫀 ${p.heart||0}</button>
+   </div>
+   <div style="margin-top:8px">
+   <button onclick="sharePost('${p.id}')">📤 مشاركة المنشور</button>
    </div>
  
 <div style="margin-top:10px">
@@ -1195,6 +1203,21 @@ window.reactPost = async function(id,type){
  loadPosts();
 };
 
+
+window.sharePost=function(postId){
+ const url=location.origin+location.pathname+'?post='+postId;
+ if(navigator.share){
+   navigator.share({title:'منشور',url});
+ }else{
+   navigator.clipboard.writeText(url);
+   alert('تم نسخ رابط المنشور');
+ }
+};
+
+function getPostIdFromUrl(){
+ return new URLSearchParams(location.search).get('post');
+}
+
 loadPosts();
 
 async function loadCommentsForPost(postId){
@@ -1202,6 +1225,10 @@ async function loadCommentsForPost(postId){
  let arr=[];
  snap.forEach(d=>arr.push({id:d.id,...d.data()}));
  arr.sort((a,b)=>(b.time||0)-(a.time||0));
+ const onlyPost=getPostIdFromUrl ? getPostIdFromUrl() : null;
+ if(onlyPost){
+   arr=arr.filter(x=>x.id===onlyPost);
+ }
  return arr;
 }
 
