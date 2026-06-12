@@ -1093,7 +1093,7 @@ async function loadPosts(){
  for(const p of arr){
  const comments=await loadCommentsForPost(p.id);
  postsHtml+=`
- <div class="fawaid-item">
+ <div class="fawaid-item" id="post-${p.id}">
    
 ${p.image ? `<img src="${p.image}" style="width:100%;border-radius:12px;margin-bottom:10px;max-height:400px;object-fit:cover;">` : ""}
 
@@ -1139,11 +1139,11 @@ const commentsAdmin=document.getElementById("commentsAdminList");
 if(commentsAdmin){
  const cs=await getDocs(collection(db,"comments"));
  let ca=[]; cs.forEach(d=>ca.push({id:d.id,...d.data()}));
- commentsAdmin.innerHTML=ca.map(c=>`<div class="fawaid-item">${c.text}<br><button onclick="deleteCommentItem('${c.id}')">حذف الرد</button></div>`).join('');
+ commentsAdmin.innerHTML=ca.map(c=>`<div class="fawaid-item" id="post-${p.id}">${c.text}<br><button onclick="deleteCommentItem('${c.id}')">حذف الرد</button></div>`).join('');
 }
 if(admin){
  admin.innerHTML=arr.map(p=>`
- <div class="fawaid-item">
+ <div class="fawaid-item" id="post-${p.id}">
    <div>${p.text||""}</div>
    <button onclick="editPost('${p.id}')">تعديل</button>
    <button onclick="deletePostItem('${p.id}')">حذف</button>
@@ -1257,16 +1257,23 @@ function focusSharedPost(){
  btn.className='back-posts-btn';
  btn.textContent='🏠 العودة لجميع المنشورات';
  btn.onclick=()=>location.href=location.pathname;
- const container=document.getElementById('postsContainer');
- if(container) container.before(btn);
 
- setTimeout(()=>{
+ const container=document.getElementById('postsContainer');
+ if(container && !document.querySelector('.back-posts-btn')){
+   container.before(btn);
+ }
+
+ let tries=0;
+ const timer=setInterval(()=>{
    const el=document.getElementById('post-'+postId);
+   tries++;
    if(el){
+      clearInterval(timer);
       el.classList.add('highlight-post');
       el.scrollIntoView({behavior:'smooth',block:'center'});
    }
- },1200);
+   if(tries>20) clearInterval(timer);
+ },500);
 }
 
 /* ===== نهاية المنشورات ===== */
