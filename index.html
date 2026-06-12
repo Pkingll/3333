@@ -406,6 +406,10 @@ border-radius:10px;
 margin-bottom:10px;
 }
 
+
+.comment-item{background:rgba(255,255,255,.04);padding:10px;border-radius:10px;margin-top:8px}
+.comment-reacts button{margin:2px}
+
 </style>
 
 </head>
@@ -687,7 +691,7 @@ placeholder="اكتب الفائدة هنا...">
 
 <button onclick="addPost()">إضافة منشور</button>
 
-<div class="fawaid-list" id="postsAdminList" style="max-height:300px;overflow:auto;"></div>
+<div class="fawaid-list" id="postsAdminList" style="max-height:300px;overflow:auto;"></div><h3 style="color:#f5e6b3">📬 إدارة الردود</h3><div class="fawaid-list" id="commentsAdminList"></div>
 
 </div>
 
@@ -796,7 +800,9 @@ collection,
 addDoc,
 getDocs,
 deleteDoc,
-updateDoc
+updateDoc,
+query,
+where
 }
 from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
@@ -1080,7 +1086,10 @@ async function loadPosts(){
  const admin=document.getElementById("postsAdminList");
 
  if(box){
- box.innerHTML=arr.map(p=>`
+ let postsHtml='';
+ for(const p of arr){
+ const comments=await loadCommentsForPost(p.id);
+ postsHtml+=`
  <div class="fawaid-item">
    
 ${p.image ? `<img src="${p.image}" style="width:100%;border-radius:12px;margin-bottom:10px;max-height:400px;object-fit:cover;">` : ""}
@@ -1098,10 +1107,35 @@ ${p.video ? `<video controls style="width:100%;border-radius:12px;margin-bottom:
      <button onclick="reactPost('${p.id}','like')">👍🏻 ${p.like||0}</button>
      <button onclick="reactPost('${p.id}','heart')">🫀 ${p.heart||0}</button>
    </div>
- </div>`).join("");
+ 
+<div style="margin-top:10px">
+<input id="comment_${p.id}" placeholder="اكتب رداً..." style="width:100%;padding:8px;border-radius:8px">
+<button onclick="addComment('${p.id}')">إرسال</button>
+${comments.map(c=>`
+<div class="comment-item">
+${c.text}
+<div class="comment-reacts">
+<button onclick="reactComment('${c.id}','like')">👍🏻 ${c.like||0}</button>
+<button onclick="reactComment('${c.id}','rose')">🌹 ${c.rose||0}</button>
+<button onclick="reactComment('${c.id}','heart')">🫀 ${c.heart||0}</button>
+<button onclick="reactComment('${c.id}','book')">📚 ${c.book||0}</button>
+<button onclick="reactComment('${c.id}','leaf')">🍂 ${c.leaf||0}</button>
+</div>
+</div>`).join('')}
+</div>
+</div>`;
+ }
+ box.innerHTML=postsHtml;
  }
 
- if(admin){
+ 
+const commentsAdmin=document.getElementById("commentsAdminList");
+if(commentsAdmin){
+ const cs=await getDocs(collection(db,"comments"));
+ let ca=[]; cs.forEach(d=>ca.push({id:d.id,...d.data()}));
+ commentsAdmin.innerHTML=ca.map(c=>`<div class="fawaid-item">${c.text}<br><button onclick="deleteCommentItem('${c.id}')">حذف الرد</button></div>`).join('');
+}
+if(admin){
  admin.innerHTML=arr.map(p=>`
  <div class="fawaid-item">
    <div>${p.text||""}</div>
@@ -1162,6 +1196,41 @@ window.reactPost = async function(id,type){
 };
 
 loadPosts();
+
+async function loadCommentsForPost(postId){
+ const snap=await getDocs(query(collection(db,"comments"),where("postId","==",postId)));
+ let arr=[];
+ snap.forEach(d=>arr.push({id:d.id,...d.data()}));
+ arr.sort((a,b)=>(b.time||0)-(a.time||0));
+ return arr;
+}
+
+window.addComment=async function(postId){
+ const el=document.getElementById("comment_"+postId);
+ if(!el || !el.value.trim()) return;
+ await addDoc(collection(db,"comments"),{
+   postId:postId,
+   text:el.value.trim(),
+   time:Date.now(),
+   like:0,rose:0,heart:0,book:0,leaf:0
+ });
+ el.value="";
+ loadPosts();
+};
+
+window.reactComment=async function(id,type){
+ const s=await getDoc(doc(db,"comments",id));
+ if(!s.exists()) return;
+ const d=s.data();
+ await updateDoc(doc(db,"comments",id),{[type]:(d[type]||0)+1});
+ loadPosts();
+};
+
+window.deleteCommentItem=async function(id){
+ await deleteDoc(doc(db,"comments",id));
+ loadPosts();
+};
+
 /* ===== نهاية المنشورات ===== */
 
 
