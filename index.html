@@ -409,6 +409,9 @@ margin-bottom:10px;
 
 .comment-item{background:rgba(255,255,255,.04);padding:10px;border-radius:10px;margin-top:8px}
 .comment-reacts button{margin:2px}
+.highlight-post{border:2px solid #d4af37!important;box-shadow:0 0 20px rgba(212,175,55,.45)}
+.back-posts-btn{margin:10px auto;display:block;padding:10px 14px;border:none;border-radius:10px;background:#d4af37;font-weight:bold;cursor:pointer}
+
 
 </style>
 
@@ -994,7 +997,7 @@ async function loadFawaid(){
 
  fawaid.forEach(item=>{
    box.innerHTML += `
-   <div class="fawaid-item">
+   <div class="fawaid-item" id="post-${p.id}">
      <div style="margin-bottom:10px;">${item.text}</div>
      <button onclick="editFawaid('${item.id}')">تعديل</button>
      <button onclick="deleteFawaid('${item.id}')">حذف</button>
@@ -1107,6 +1110,9 @@ ${p.video ? `<video controls style="width:100%;border-radius:12px;margin-bottom:
      <button onclick="reactPost('${p.id}','like')">👍🏻 ${p.like||0}</button>
      <button onclick="reactPost('${p.id}','heart')">🫀 ${p.heart||0}</button>
    </div>
+   <div style="margin-top:8px">
+      <button onclick="sharePost('${p.id}')">📤 مشاركة المنشور</button>
+   </div>
  
 <div style="margin-top:10px">
 <input id="comment_${p.id}" placeholder="اكتب رداً..." style="width:100%;padding:8px;border-radius:8px">
@@ -1169,6 +1175,7 @@ window.addPost = async function(){
  document.getElementById("postVideo").value="";
 
  loadPosts();
+setTimeout(focusSharedPost,1500);
 };
 
 window.editPost = async function(id){
@@ -1230,6 +1237,37 @@ window.deleteCommentItem=async function(id){
  await deleteDoc(doc(db,"comments",id));
  loadPosts();
 };
+
+
+window.sharePost=function(postId){
+ const url=location.origin+location.pathname+'?post='+postId;
+ if(navigator.share){
+   navigator.share({title:'منشور',url:url});
+ }else{
+   navigator.clipboard.writeText(url);
+   alert('تم نسخ رابط المنشور');
+ }
+};
+
+function focusSharedPost(){
+ const postId=new URLSearchParams(location.search).get('post');
+ if(!postId) return;
+
+ const btn=document.createElement('button');
+ btn.className='back-posts-btn';
+ btn.textContent='🏠 العودة لجميع المنشورات';
+ btn.onclick=()=>location.href=location.pathname;
+ const container=document.getElementById('postsContainer');
+ if(container) container.before(btn);
+
+ setTimeout(()=>{
+   const el=document.getElementById('post-'+postId);
+   if(el){
+      el.classList.add('highlight-post');
+      el.scrollIntoView({behavior:'smooth',block:'center'});
+   }
+ },1200);
+}
 
 /* ===== نهاية المنشورات ===== */
 
