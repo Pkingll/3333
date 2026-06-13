@@ -997,7 +997,7 @@ async function loadFawaid(){
 
  fawaid.forEach(item=>{
    box.innerHTML += `
-   <div class="fawaid-item" id="post-${p.id}">
+   <div class="fawaid-item" id="fawaid-${item.id}">
      <div style="margin-bottom:10px;">${item.text}</div>
      <button onclick="editFawaid('${item.id}')">تعديل</button>
      <button onclick="deleteFawaid('${item.id}')">حذف</button>
@@ -1139,7 +1139,7 @@ const commentsAdmin=document.getElementById("commentsAdminList");
 if(commentsAdmin){
  const cs=await getDocs(collection(db,"comments"));
  let ca=[]; cs.forEach(d=>ca.push({id:d.id,...d.data()}));
- commentsAdmin.innerHTML=ca.map(c=>`<div class="fawaid-item" id="post-${p.id}">${c.text}<br><button onclick="deleteCommentItem('${c.id}')">حذف الرد</button></div>`).join('');
+ commentsAdmin.innerHTML=ca.map(c=>`<div class="fawaid-item" id="comment-${c.id}">${c.text}<br><button onclick="deleteCommentItem('${c.id}')">حذف الرد</button></div>`).join('');
 }
 if(admin){
  admin.innerHTML=arr.map(p=>`
@@ -1188,6 +1188,15 @@ window.editPost = async function(id){
 };
 
 window.deletePostItem = async function(id){
+
+ const commentsSnap = await getDocs(
+ query(collection(db,"comments"),where("postId","==",id))
+ );
+
+ for(const c of commentsSnap.docs){
+   await deleteDoc(doc(db,"comments",c.id));
+ }
+
  await deleteDoc(doc(db,"posts",id));
  loadPosts();
 };
@@ -1250,30 +1259,30 @@ window.sharePost=function(postId){
 };
 
 function focusSharedPost(){
+
  const postId=new URLSearchParams(location.search).get('post');
  if(!postId) return;
 
- const btn=document.createElement('button');
- btn.className='back-posts-btn';
- btn.textContent='🏠 العودة لجميع المنشورات';
- btn.onclick=()=>location.href=location.pathname;
-
- const container=document.getElementById('postsContainer');
- if(container && !document.querySelector('.back-posts-btn')){
-   container.before(btn);
- }
-
  let tries=0;
+
  const timer=setInterval(()=>{
+
    const el=document.getElementById('post-'+postId);
+
    tries++;
+
    if(el){
       clearInterval(timer);
       el.classList.add('highlight-post');
-      el.scrollIntoView({behavior:'smooth',block:'center'});
+      setTimeout(()=>{
+        el.scrollIntoView({behavior:'smooth',block:'center'});
+      },500);
    }
-   if(tries>20) clearInterval(timer);
- },500);
+
+   if(tries>30) clearInterval(timer);
+
+ },300);
+
 }
 
 /* ===== نهاية المنشورات ===== */
