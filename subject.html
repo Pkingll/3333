@@ -122,7 +122,6 @@ width:100%;
 border-radius:10px;
 }
 
-/* ================== إضافة الفصول ================== */
 .box{
 width:92%;
 max-width:900px;
@@ -150,7 +149,6 @@ border-radius:10px;
 cursor:pointer;
 }
 
-/* ================== إضافات البحث والاختبارات ================== */
 .search-box{
 width:92%;
 max-width:900px;
@@ -520,36 +518,29 @@ justify-content:flex-end;
 <h1 id="title">المادة</h1>
 </div>
 
-<!-- أزرار التنقل -->
 <div class="nav-btns">
 <button class="nav-btn" onclick="openExamSection()">✏️ الاختبارات</button>
 <button class="nav-btn" onclick="openParticipantsSection()">🏆 مشاركات في الاختبارات</button>
 </div>
 
-<!-- البحث -->
 <div class="search-box">
 <input type="text" id="searchInput" placeholder="🔍 ابحث عن فصل أو درس..." oninput="performSearch()">
 </div>
 
-<!-- القسم الرئيسي: الفصول + الدروس + المحتوى -->
 <div id="section-main">
-<!-- 📂 الفصول -->
 <div class="box">
 <h3 style="color:#f5e6b3">📂 الفصول</h3>
 <div id="chaptersList"></div>
 </div>
 
-<!-- 📖 الدروس -->
 <div class="box" id="lessonsBox" style="display:none">
 <h3 style="color:#f5e6b3">📖 الدروس</h3>
 <div id="lessonsList"></div>
 </div>
 
-<!-- المحتوى القديم بدون تغيير -->
 <div class="content" id="content"></div>
 </div>
 
-<!-- قسم الاختبارات -->
 <div id="section-exam" style="display:none">
 <button class="back-btn" onclick="backToMain()">⬅ العودة للمحتوى</button>
 
@@ -603,7 +594,6 @@ justify-content:flex-end;
 </div>
 </div>
 
-<!-- قسم المشاركين -->
 <div id="section-participants" style="display:none">
 <button class="back-btn" onclick="backToMain()">⬅ العودة للمحتوى</button>
 
@@ -613,7 +603,6 @@ justify-content:flex-end;
 </div>
 </div>
 
-<!-- نافذة الاختبار -->
 <div class="modal-overlay" id="examModal">
 <div class="modal">
 <button class="close-modal" onclick="closeExamModal()">✕</button>
@@ -623,7 +612,6 @@ justify-content:flex-end;
 </div>
 </div>
 
-<!-- نافذة النتيجة -->
 <div class="modal-overlay" id="resultModal">
 <div class="modal">
 <div id="resultContent"></div>
@@ -634,7 +622,6 @@ justify-content:flex-end;
 ⬅ الرجوع
 </button>
 
-<!-- إشعار -->
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -666,7 +653,6 @@ const db = getFirestore(app);
 const params = new URLSearchParams(location.search);
 const id = params.get("id");
 
-/* ================= اسم المادة ================= */
 const names = {
 aqida:"العقيدة",
 hadith:"الحديث",
@@ -685,36 +671,28 @@ tafsir:"التفسير"
 document.getElementById("title").textContent =
 names[id] || "المادة";
 
-/* ================= المحتوى القديم ================= */
 const snap = await getDoc(doc(db,"subjects",id));
 
 const content = document.getElementById("content");
 
 if(snap.exists()){
  const data = snap.data();
-
  (data.items || []).forEach(item=>{
-
  if(item.type==="title"){
  content.innerHTML += `<h2>${item.text}</h2>`;
  }
-
  if(item.type==="text"){
  content.innerHTML += `<p>${item.text}</p>`;
  }
-
  if(item.type==="image"){
  content.innerHTML += `<img src="${item.url}">`;
  }
-
  if(item.type==="book"){
  content.innerHTML += `<a href="${item.url}" target="_blank">📚 ${item.name}</a>`;
  }
-
  if(item.type==="link"){
  content.innerHTML += `<a href="${item.url}" target="_blank">🔗 ${item.name}</a>`;
  }
-
  if(item.type==="audio"){
  content.innerHTML += `
  <div class="audio-box">
@@ -722,10 +700,8 @@ if(snap.exists()){
  <audio controls src="${item.url}"></audio>
  </div>`;
  }
-
  });
 }
-
 
 try{
 const qLatest = query(collection(db,"lessons"),where("subject","==",id));
@@ -738,32 +714,23 @@ sLatest.forEach(d=>{
 localStorage.setItem("seenTime_"+id, latestTime);
 }catch(e){console.log(e);}
 
-/* ================= الفصول + الدروس ================= */
-
 let chaptersList = document.getElementById("chaptersList");
 let lessonsList = document.getElementById("lessonsList");
 
 async function loadChapters(){
-
 const q = query(
 collection(db,"chapters"),
 where("subject","==",id)
 );
-
 const snap = await getDocs(q);
-
 chaptersList.innerHTML = "";
-
 let arr=[];
 snap.forEach(docu=>{
 arr.push({id:docu.id,...docu.data()});
 });
-
 arr.sort((a,b)=>(a.order||0)-(b.order||0));
-
 arr.forEach(data=>{
 const chapterId = data.id;
-
 chaptersList.innerHTML += `
 <div class="itemBtn" onclick="openChapter('${chapterId}')">
 📂 ${data.title}
@@ -772,27 +739,19 @@ chaptersList.innerHTML += `
 }
 
 window.openChapter = async (chapterId)=>{
-
 document.getElementById("lessonsBox").style.display="block";
-
 const q = query(
 collection(db,"lessons"),
 where("chapterId","==",chapterId)
 );
-
 const snap = await getDocs(q);
-
 lessonsList.innerHTML = "";
-
 let arr=[];
 snap.forEach(docu=>{
 arr.push(docu.data());
 });
-
 arr.sort((a,b)=>(a.order||0)-(b.order||0));
-
 arr.forEach(data=>{
-
 lessonsList.innerHTML += `
 <div class="lessonBtn" onclick='openLesson(${JSON.stringify(data)})'>
 📖 ${data.title}
@@ -800,26 +759,20 @@ lessonsList.innerHTML += `
 });
 };
 
-/* فتح درس داخل نفس الصفحة */
 window.openLesson = (d)=>{
-
 content.innerHTML = `
 <h2 style="color:#f5e6b3">${d.title}</h2>
 <p>${d.text || ""}</p>
-
 ${d.image ? `<img src="${d.image}">` : ""}
-
 ${d.audio ? `
 <div class="audio-box">
 <div class="audio-title">🎧 ${d.title}</div>
 <audio controls src="${d.audio}"></audio>
 </div>` : ""}
-
 ${d.link ? `<a href="${d.link}" target="_blank">🔗 ${d.link}</a>` : ""}
 `;
 };
 
-/* ================= البحث ================= */
 window.performSearch = function() {
 const query = document.getElementById('searchInput').value.trim().toLowerCase();
 if (!query) {
@@ -828,21 +781,17 @@ el.style.display = 'block';
 });
 return;
 }
-
 document.querySelectorAll('.itemBtn').forEach(el => {
 const text = el.textContent.toLowerCase();
 el.style.display = text.includes(query) ? 'block' : 'none';
 });
-
 document.querySelectorAll('.lessonBtn').forEach(el => {
 const text = el.textContent.toLowerCase();
 el.style.display = text.includes(query) ? 'block' : 'none';
 });
-
 document.getElementById('lessonsBox').style.display = 'block';
 };
 
-/* ================= التنقل بين الأقسام ================= */
 window.openExamSection = function() {
 document.getElementById('section-main').style.display = 'none';
 document.getElementById('section-participants').style.display = 'none';
@@ -868,7 +817,6 @@ document.getElementById('section-participants').style.display = 'none';
 document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
 };
 
-/* ================= إنشاء الاختبار ================= */
 let examQuestions = [];
 let currentExam = {};
 let examTimerInterval;
@@ -889,29 +837,24 @@ window.loadExamChapters = async function() {
 const subject = document.getElementById('examSubjectSelect').value;
 const select = document.getElementById('examChaptersSelect');
 select.innerHTML = '';
-
 if (!subject) {
 select.innerHTML = '<option value="">اختر المادة أولاً</option>';
 return;
 }
-
 const q = query(collection(db, 'chapters'), where('subject', '==', subject));
 const snap = await getDocs(q);
 let arr = [];
 snap.forEach(docu => arr.push({id: docu.id, ...docu.data()}));
 arr.sort((a, b) => (a.order || 0) - (b.order || 0));
-
 if (arr.length === 0) {
 select.innerHTML = '<option value="">لا توجد فصول في هذه المادة</option>';
 return;
 }
-
 arr.forEach(ch => {
 select.innerHTML += `<option value="${ch.id}">📂 ${ch.title}</option>`;
 });
 };
 
-/* ================= بدء الاختبار - توليد من الدروس ================= */
 window.startExam = async function() {
 console.log('=== بدء الاختبار ===');
 try {
@@ -929,7 +872,6 @@ if (selectedChapters.length === 0) { showToast('❌ الرجاء اختيار ف
 
 showToast('⏳ جاري تحميل الدروس...');
 
-// جمع الدروس من الفصول المختارة (الفصول العادية)
 let lessons = [];
 for (const chId of selectedChapters) {
 const q = query(collection(db, 'lessons'), where('chapterId', '==', chId));
@@ -954,12 +896,11 @@ return;
 
 showToast('⏳ جاري إنشاء الأسئلة...');
 
-// توليد الأسئلة من الدروس
-examQuestions = generateQuestionsFromLessons(lessons, Math.min(questionCount, lessons.length * 3));
+examQuestions = generateQuestionsFromLessons(lessons, questionCount);
 console.log('عدد الأسئلة المُنشأة:', examQuestions.length);
 
 if (examQuestions.length === 0) { 
-showToast('❌ لا يمكن إنشاء أسئلة من هذه الدروس - تأكد من وجود نصوص كافية'); 
+showToast('❌ لا يمكن إنشاء أسئلة من هذه الدروس'); 
 return; 
 }
 
@@ -973,7 +914,6 @@ duration: duration,
 startTime: Date.now()
 };
 
-console.log('عرض الاختبار...');
 renderExam();
 document.getElementById('examModal').classList.add('show');
 startTimer(duration * 60);
@@ -984,150 +924,180 @@ showToast('❌ حدث خطأ: ' + error.message);
 }
 };
 
-/* ================= توليد أسئلة منطقية من الدروس ================= */
 function generateQuestionsFromLessons(lessons, count) {
 console.log('توليد', count, 'سؤال من', lessons.length, 'درس');
 let questions = [];
+let attemptsPerLesson = Math.max(5, Math.ceil(count / Math.max(1, lessons.length)));
 
-// خلط الدروس
 const shuffledLessons = [...lessons].sort(() => Math.random() - 0.5);
 
 for (const lesson of shuffledLessons) {
 if (questions.length >= count) break;
 
 const text = (lesson.text || '').trim();
-if (text.length < 50) continue; // تجاهل النصوص القصيرة جداً
+if (text.length < 30) continue;
 
-// تقسيم النص إلى جمل منطقية
-const sentences = extractMeaningfulSentences(text);
+const sentences = extractSentences(text);
 if (sentences.length === 0) continue;
 
-// محاولة توليد أسئلة من الجمل
+let lessonQuestions = 0;
+
 for (const sentence of sentences) {
 if (questions.length >= count) break;
+if (lessonQuestions >= attemptsPerLesson) break;
 
 const question = createQuestionFromSentence(sentence, text, lesson.title);
-if (question && isValidQuestion(question)) {
+if (question) {
 questions.push(question);
+lessonQuestions++;
 }
 }
+
+if (lessonQuestions < 2 && questions.length < count) {
+const conceptQuestions = createConceptQuestions(text, lesson.title);
+for (const q of conceptQuestions) {
+if (questions.length >= count) break;
+questions.push(q);
+}
+}
+}
+
+let loopCount = 0;
+while (questions.length < count && questions.length > 0 && loopCount < 50) {
+const original = questions[loopCount % questions.length];
+const variation = createVariation(original, text);
+if (variation) questions.push(variation);
+loopCount++;
 }
 
 return questions.slice(0, count);
 }
 
-/* ================= استخراج جمل ذات معنى ================= */
-function extractMeaningfulSentences(text) {
-// تقسيم النص إلى جمل كاملة
-const rawSentences = text.split(/[.!؟]+/)
+function extractSentences(text) {
+const raw = text.split(/[.!؟\n]+/)
 .map(s => s.trim())
-.filter(s => s.length >= 30 && s.length <= 200); // جمل متوسطة الطول
+.filter(s => s.length >= 20 && s.length <= 300);
 
-const meaningful = [];
-
-for (const sentence of rawSentences) {
-// تجاهل الجمل التي لا تحتوي على معلومة واضحة
-if (!hasClearInformation(sentence)) continue;
-
-// تجاهل الجمل التي تحتوي على روابط أو أكواد
-if (sentence.includes('http') || sentence.includes('www')) continue;
-if (sentence.includes('function') || sentence.includes('var ') || sentence.includes('const ')) continue;
-
-meaningful.push(sentence);
+const sentences = [];
+for (const s of raw) {
+const words = s.split(/\s+/).filter(w => w.length > 2);
+if (words.length < 4) continue;
+if (s.includes('http') || s.includes('www') || s.includes('function')) continue;
+if (isVagueSentence(s)) continue;
+sentences.push(s);
 }
 
-return meaningful;
+return sentences;
 }
 
-/* ================= التحقق من وجود معلومة واضحة ================= */
-function hasClearInformation(sentence) {
-// يجب أن تحتوي الجملة على كلمات ذات معنى
-const meaningfulWords = sentence.split(/\s+/).filter(w => w.length > 3);
-if (meaningfulWords.length < 4) return false;
-
-// يجب أن تحتوي على فعل أو اسم
-const hasVerb = /(هو|هي|يكون|تكون|يعني|تعني|يقوم|تقوم|يشمل|تشمل|يفيد|تفيد|يدل|تدل|يعد|تعد|يعتبر|تعتبر|يسمى|تسمى|يُعرّف|تُعرّف|يُعرّف|تُعرّف)/.test(sentence);
-const hasNoun = sentence.length > 20;
-
-return hasVerb || hasNoun;
+function isVagueSentence(sentence) {
+const vagueWords = ['شيء', 'أمر', 'كذا', 'إلخ', 'وهكذا', '...', 'إلخ'];
+const words = sentence.split(/\s+/);
+const meaningfulWords = words.filter(w => w.length > 3 && !vagueWords.includes(w));
+return meaningfulWords.length < 3;
 }
 
-/* ================= إنشاء سؤال من جملة ================= */
 function createQuestionFromSentence(sentence, fullText, lessonTitle) {
-// محاولة 1: تعريف (الشيء هو...)
-const defMatch = sentence.match(/(.{3,30}?)(?:\s+هو|\s+هي|\s+يعني|\s+تعني|\s+يُعرّف|\s+تُعرّف|\s+يُعرّف|\s+تُعرّف)\s+(.{10,100})/);
-if (defMatch) {
-const term = defMatch[1].trim();
-const definition = defMatch[2].trim();
-if (term.length >= 3 && definition.length >= 15 && !isVague(definition)) {
-const wrongAnswers = generateWrongAnswers(fullText, sentence, definition);
-if (wrongAnswers.length >= 2) {
-return buildMCQ(`ما هو تعريف "${term}"؟`, definition, wrongAnswers, lessonTitle);
+const defPatterns = [
+/(.{3,40}?)(?:\s+هو|\s+هي|\s+يعني|\s+تعني|\s+يُعرّف|\s+تُعرّف|\s+يقصد|\s+تقصد)\s+(.{10,120})/,
+/(.{3,40}?)\s+(?:هو|هي)\s+(.{10,120})/,
+/(.{3,40}?)\s+(?:يعني|تعني)\s+(.{10,120})/
+];
+
+for (const pattern of defPatterns) {
+const match = sentence.match(pattern);
+if (match) {
+const term = cleanText(match[1]);
+const definition = cleanText(match[2]);
+if (term.length >= 3 && definition.length >= 10 && !isVague(definition)) {
+const wrong = generateWrongAnswers(fullText, sentence, definition, 2);
+if (wrong.length >= 1) {
+return buildQuestion(`ما هو تعريف "${term}"؟`, definition, wrong, lessonTitle);
+}
 }
 }
 }
 
-// محاولة 2: سبب (لأن...)
-const reasonMatch = sentence.match(/(.{5,40}?)\s+(?:لأن|لِ)\s+(.{10,100})/);
+const reasonMatch = sentence.match(/(.{5,50}?)\s+(?:لأن|لِ|بسبب|نظراً ل)\s+(.{10,120})/);
 if (reasonMatch) {
-const action = reasonMatch[1].trim();
-const reason = reasonMatch[2].trim();
-if (action.length >= 5 && reason.length >= 15 && !isVague(reason)) {
-const wrongAnswers = generateWrongAnswers(fullText, sentence, reason);
-if (wrongAnswers.length >= 2) {
-return buildMCQ(`لماذا ${action}؟`, reason, wrongAnswers, lessonTitle);
+const action = cleanText(reasonMatch[1]);
+const reason = cleanText(reasonMatch[2]);
+if (action.length >= 5 && reason.length >= 10 && !isVague(reason)) {
+const wrong = generateWrongAnswers(fullText, sentence, reason, 2);
+if (wrong.length >= 1) {
+return buildQuestion(`لماذا ${action}؟`, reason, wrong, lessonTitle);
 }
 }
 }
 
-// محاولة 3: شرط (إذا... ف...)
-const conditionMatch = sentence.match(/(?:إذا|من|كل من)\s+(.{5,40}?)\s+(?:فـ|فإن|فعليه|يجب عليه|فيجب|فيتوجب)\s+(.{10,100})/);
+const conditionMatch = sentence.match(/(?:إذا|من|كل من|حين|عندما)\s+(.{5,50}?)\s+(?:فـ|فإن|فعليه|يجب عليه|فيجب|فيتوجب|فيتعين)\s+(.{10,120})/);
 if (conditionMatch) {
-const condition = conditionMatch[1].trim();
-const result = conditionMatch[2].trim();
-if (condition.length >= 5 && result.length >= 15 && !isVague(result)) {
-const wrongAnswers = generateWrongAnswers(fullText, sentence, result);
-if (wrongAnswers.length >= 2) {
-return buildMCQ(`ما هو الشيء الواجب عند ${condition}؟`, result, wrongAnswers, lessonTitle);
+const condition = cleanText(conditionMatch[1]);
+const result = cleanText(conditionMatch[2]);
+if (condition.length >= 5 && result.length >= 10 && !isVague(result)) {
+const wrong = generateWrongAnswers(fullText, sentence, result, 2);
+if (wrong.length >= 1) {
+return buildQuestion(`ما هو الشيء الواجب عند ${condition}؟`, result, wrong, lessonTitle);
 }
 }
 }
 
-// محاولة 4: يتكون من / يشمل
-const partsMatch = sentence.match(/(.{3,30}?)\s+(?:يتكون من|تتكون من|يشمل|تشمل|يحتوي على|تحتوي على|فيه|فيهما)\s+(.{10,100})/);
+const partsMatch = sentence.match(/(.{3,40}?)\s+(?:يتكون من|تتكون من|يشمل|تشمل|يحتوي على|تحتوي على|فيه|فيهما|يتضمن|تتضمن)\s+(.{10,120})/);
 if (partsMatch) {
-const term = partsMatch[1].trim();
-const parts = partsMatch[2].trim();
-if (term.length >= 3 && parts.length >= 15 && !isVague(parts)) {
-const wrongAnswers = generateWrongAnswers(fullText, sentence, parts);
-if (wrongAnswers.length >= 2) {
-return buildMCQ(`ما هي أجزاء/محتوى "${term}"؟`, parts, wrongAnswers, lessonTitle);
+const term = cleanText(partsMatch[1]);
+const parts = cleanText(partsMatch[2]);
+if (term.length >= 3 && parts.length >= 10 && !isVague(parts)) {
+const wrong = generateWrongAnswers(fullText, sentence, parts, 2);
+if (wrong.length >= 1) {
+return buildQuestion(`ما هي أجزاء/محتوى "${term}"؟`, parts, wrong, lessonTitle);
 }
 }
 }
 
-// محاولة 5: وقت/مكان (يكون في/عند/بعد)
-const timeMatch = sentence.match(/(.{3,30}?)\s+(?:يكون|تكون|يقع|تقع|يحدث|تحدث)\s+(?:في|عند|بعد|قبل|عندما|إذا)\s+(.{10,100})/);
+const timeMatch = sentence.match(/(.{3,40}?)\s+(?:يكون|تكون|يقع|تقع|يحدث|تحدث|يوجد|توجد)\s+(?:في|عند|بعد|قبل|عندما|إذا|خلال|أثناء)\s+(.{10,120})/);
 if (timeMatch) {
-const term = timeMatch[1].trim();
-const time = timeMatch[2].trim();
-if (term.length >= 3 && time.length >= 15 && !isVague(time)) {
-const wrongAnswers = generateWrongAnswers(fullText, sentence, time);
-if (wrongAnswers.length >= 2) {
-return buildMCQ(`متى/أين يكون ${term}؟`, time, wrongAnswers, lessonTitle);
+const term = cleanText(timeMatch[1]);
+const time = cleanText(timeMatch[2]);
+if (term.length >= 3 && time.length >= 10 && !isVague(time)) {
+const wrong = generateWrongAnswers(fullText, sentence, time, 2);
+if (wrong.length >= 1) {
+return buildQuestion(`متى/أين يكون ${term}؟`, time, wrong, lessonTitle);
 }
 }
 }
 
-// محاولة 6: فعل + مفعول به واضح
-const actionMatch = sentence.match(/(.{3,25}?)\s+(?:يفعل|تفعل|يقوم|تقوم|يؤدي|تؤدي|يسبب|تسبب|ينتج|تنتج)\s+(.{10,100})/);
+const actionMatch = sentence.match(/(.{3,40}?)\s+(?:يؤدي|تؤدي|يسبب|تسبب|ينتج|تنتج|يؤثر|تؤثر|يترتب|تترتب)\s+(?:على|في|من|إلى)\s+(.{10,120})/);
 if (actionMatch) {
-const actor = actionMatch[1].trim();
-const result = actionMatch[2].trim();
-if (actor.length >= 3 && result.length >= 15 && !isVague(result)) {
-const wrongAnswers = generateWrongAnswers(fullText, sentence, result);
-if (wrongAnswers.length >= 2) {
-return buildMCQ(`ما هو نتيجة/أثر ${actor}؟`, result, wrongAnswers, lessonTitle);
+const actor = cleanText(actionMatch[1]);
+const result = cleanText(actionMatch[2]);
+if (actor.length >= 3 && result.length >= 10 && !isVague(result)) {
+const wrong = generateWrongAnswers(fullText, sentence, result, 2);
+if (wrong.length >= 1) {
+return buildQuestion(`ما هو نتيجة/أثر ${actor}؟`, result, wrong, lessonTitle);
+}
+}
+}
+
+const purposeMatch = sentence.match(/(.{3,40}?)\s+(?:لِ|من أجل|بهدف|لأجل|لغرض)\s+(.{10,120})/);
+if (purposeMatch) {
+const thing = cleanText(purposeMatch[1]);
+const purpose = cleanText(purposeMatch[2]);
+if (thing.length >= 3 && purpose.length >= 10 && !isVague(purpose)) {
+const wrong = generateWrongAnswers(fullText, sentence, purpose, 2);
+if (wrong.length >= 1) {
+return buildQuestion(`ما هو الغرض/الهدف من ${thing}؟`, purpose, wrong, lessonTitle);
+}
+}
+}
+
+const featureMatch = sentence.match(/(.{3,40}?)\s+(?:يتميز|تتميز|يتصف|تتصف|يُعتبر|تُعتبر|يُعرف|تُعرف)\s+(?:بـ|بأنه|بأنها|ب)\s+(.{10,120})/);
+if (featureMatch) {
+const term = cleanText(featureMatch[1]);
+const feature = cleanText(featureMatch[2]);
+if (term.length >= 3 && feature.length >= 10 && !isVague(feature)) {
+const wrong = generateWrongAnswers(fullText, sentence, feature, 2);
+if (wrong.length >= 1) {
+return buildQuestion(`ما هي صفة/خاصية "${term}"؟`, feature, wrong, lessonTitle);
 }
 }
 }
@@ -1135,10 +1105,99 @@ return buildMCQ(`ما هو نتيجة/أثر ${actor}؟`, result, wrongAnswers, 
 return null;
 }
 
-/* ================= بناء سؤال اختياري ================= */
-function buildMCQ(questionText, correctAnswer, wrongAnswers, source) {
+function createConceptQuestions(text, lessonTitle) {
+const questions = [];
+const sentences = extractSentences(text);
+if (sentences.length === 0) return questions;
+
+const allWords = text.split(/\s+/)
+.map(w => w.replace(/[،,؛;:.!؟"'()\[\]{}]/g, ''))
+.filter(w => w.length >= 4 && w.length <= 20);
+
+const wordFreq = {};
+for (const word of allWords) {
+const lower = word.toLowerCase();
+if (!wordFreq[lower]) wordFreq[lower] = 0;
+wordFreq[lower]++;
+}
+
+const keywords = Object.entries(wordFreq)
+.filter(([w, c]) => c >= 2)
+.map(([w]) => w)
+.slice(0, 5);
+
+for (const keyword of keywords) {
+if (questions.length >= 2) break;
+
+const relevantSentence = sentences.find(s => s.includes(keyword));
+if (!relevantSentence) continue;
+
+const context = extractContext(relevantSentence, keyword);
+if (context && context.length >= 15) {
+const wrong = generateWrongAnswers(text, relevantSentence, context, 2);
+if (wrong.length >= 1) {
+questions.push(buildQuestion(`ما المقصود بـ "${keyword}" في الدرس؟`, context, wrong, lessonTitle));
+}
+}
+}
+
+return questions;
+}
+
+function extractContext(sentence, keyword) {
+const idx = sentence.indexOf(keyword);
+if (idx === -1) return null;
+
+const start = Math.max(0, idx - 30);
+const end = Math.min(sentence.length, idx + keyword.length + 50);
+let context = sentence.substring(start, end).trim();
+
+context = context.replace(new RegExp(keyword, 'g'), '...').trim();
+if (context.startsWith('...')) context = context.substring(3).trim();
+if (context.endsWith('...')) context = context.substring(0, context.length - 3).trim();
+
+return context.length >= 10 ? context : null;
+}
+
+function createVariation(original, fullText) {
+if (!original || !original.question) return null;
+
+let newQuestion = original.question;
+if (newQuestion.startsWith('ما هو')) {
+newQuestion = newQuestion.replace('ما هو', 'ما هي');
+} else if (newQuestion.startsWith('ما هي')) {
+newQuestion = newQuestion.replace('ما هي', 'ما هو');
+} else if (newQuestion.startsWith('لماذا')) {
+newQuestion = newQuestion.replace('لماذا', 'ما السبب في');
+} else if (newQuestion.startsWith('ما السبب')) {
+newQuestion = newQuestion.replace('ما السبب في', 'لماذا');
+}
+
+if (newQuestion === original.question) {
+const sentences = extractSentences(fullText);
+if (sentences.length > 0) {
+const randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
+return createQuestionFromSentence(randomSentence, fullText, original.source);
+}
+}
+
+return {
+question: newQuestion,
+choices: [...original.choices].sort(() => Math.random() - 0.5),
+correct: original.correct,
+source: original.source
+};
+}
+
+function buildQuestion(questionText, correctAnswer, wrongAnswers, source) {
+if (!correctAnswer || correctAnswer.length < 5) return null;
+if (!wrongAnswers || wrongAnswers.length < 1) return null;
+
 const allChoices = [correctAnswer, ...wrongAnswers.slice(0, 3)];
-const shuffled = allChoices.sort(() => Math.random() - 0.5);
+const uniqueChoices = [...new Set(allChoices.map(c => c.trim()))];
+if (uniqueChoices.length < 2) return null;
+
+const shuffled = uniqueChoices.sort(() => Math.random() - 0.5);
 
 return {
 question: questionText,
@@ -1148,68 +1207,66 @@ source: source || 'سؤال'
 };
 }
 
-/* ================= توليد إجابات خاطئة ================= */
-function generateWrongAnswers(fullText, correctSentence, correctAnswer) {
+function generateWrongAnswers(fullText, correctSentence, correctAnswer, minCount = 2) {
 const wrongAnswers = [];
-const allSentences = fullText.split(/[.!؟]+/)
+const allSentences = fullText.split(/[.!؟\n]+/)
 .map(s => s.trim())
-.filter(s => s.length >= 30 && s !== correctSentence);
+.filter(s => s.length >= 20 && s !== correctSentence);
 
-// استخراج معلومات من جمل أخرى
 for (const sentence of allSentences) {
-// محاولة استخراج معلومة مشابهة
-const info = extractInfoFromSentence(sentence);
+if (wrongAnswers.length >= 5) break;
+
+const info = extractAnyInfo(sentence);
 if (info && info !== correctAnswer && info.length >= 10 && info.length <= 100) {
-// التأكد من أن الإجابة الخاطئة مختلفة بشكل واضح
-if (similarity(info, correctAnswer) < 0.5) {
+if (similarity(info, correctAnswer) < 0.6) {
 wrongAnswers.push(info);
 }
 }
-if (wrongAnswers.length >= 6) break;
 }
 
-// إذا لم تكفِ، استخدام أجزاء من جمل أخرى
-if (wrongAnswers.length < 2) {
+if (wrongAnswers.length < minCount) {
 for (const sentence of allSentences) {
+if (wrongAnswers.length >= 5) break;
 const clean = sentence.replace(/[،,؛;:.!؟"']/g, '').trim();
 if (clean.length >= 15 && clean.length <= 80 && clean !== correctAnswer) {
-if (similarity(clean, correctAnswer) < 0.5) {
+if (similarity(clean, correctAnswer) < 0.6) {
 wrongAnswers.push(clean);
 }
 }
-if (wrongAnswers.length >= 6) break;
 }
 }
 
 return wrongAnswers.slice(0, 3);
 }
 
-/* ================= استخراج معلومة من جملة ================= */
-function extractInfoFromSentence(sentence) {
+function extractAnyInfo(sentence) {
 const patterns = [
-/(.{3,30}?)(?:\s+هو|\s+هي|\s+يعني|\s+تعني)\s+(.{10,100})/,
-/(.{5,40}?)\s+(?:لأن|لِ)\s+(.{10,100})/,
-/(?:إذا|من|كل من)\s+(.{5,40}?)\s+(?:فـ|فإن|فعليه|يجب عليه)\s+(.{10,100})/,
-/(.{3,30}?)\s+(?:يتكون من|تتكون من|يشمل|تشمل)\s+(.{10,100})/,
-/(.{3,30}?)\s+(?:يكون|تكون|يقع|تقع)\s+(?:في|عند|بعد|قبل)\s+(.{10,100})/
+/(.{3,40}?)(?:\s+هو|\s+هي|\s+يعني|\s+تعني)\s+(.{10,100})/,
+/(.{5,50}?)\s+(?:لأن|لِ|بسبب)\s+(.{10,100})/,
+/(?:إذا|من|كل من)\s+(.{5,50}?)\s+(?:فـ|فإن|فعليه|يجب عليه)\s+(.{10,100})/,
+/(.{3,40}?)\s+(?:يتكون من|تتكون من|يشمل|تشمل)\s+(.{10,100})/,
+/(.{3,40}?)\s+(?:يكون|تكون|يقع|تقع)\s+(?:في|عند|بعد|قبل)\s+(.{10,100})/,
+/(.{3,40}?)\s+(?:يؤدي|تؤدي|يسبب|تسبب)\s+(?:على|في|إلى)\s+(.{10,100})/
 ];
 
 for (const pattern of patterns) {
 const match = sentence.match(pattern);
-if (match) {
-return match[2].trim();
+if (match) return cleanText(match[2]);
 }
+
+const words = sentence.split(/\s+/).filter(w => w.length > 3);
+if (words.length >= 5) {
+return words.slice(0, 8).join(' ');
 }
 
 return null;
 }
 
-/* ================= حساب التشابه بين نصين ================= */
 function similarity(text1, text2) {
-if (!text1 || !text2) return 0;
+if (!text1 || !text2) return 1;
 const words1 = text1.toLowerCase().split(/\s+/).filter(w => w.length > 2);
 const words2 = text2.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-if (words1.length === 0 || words2.length === 0) return 0;
+if (words1.length === 0 || words2.length === 0) return 1;
 
 const set1 = new Set(words1);
 const set2 = new Set(words2);
@@ -1219,40 +1276,25 @@ const union = new Set([...set1, ...set2]);
 return intersection.length / union.size;
 }
 
-/* ================= التحقق من صحة السؤال ================= */
-function isValidQuestion(question) {
-if (!question || !question.question || !question.choices) return false;
-if (question.choices.length < 3) return false; // يجب 3 خيارات على الأقل
-if (question.question.length < 10) return false; // سؤال قصير جداً
-
-// التأكد من أن الإجابة الصحيحة واضحة
-if (question.correct.length < 5) return false;
-
-// التأكد من أن جميع الخيارات مختلفة بشكل واضح
-const uniqueChoices = new Set(question.choices.map(c => c.toLowerCase().trim()));
-if (uniqueChoices.size < question.choices.length) return false;
-
-return true;
+function cleanText(text) {
+if (!text) return '';
+return text
+.replace(/[،,؛;:.!؟"'()\[\]{}]/g, ' ')
+.replace(/\s+/g, ' ')
+.trim()
+.substring(0, 120);
 }
 
-/* ================= التحقق من أن النص ليس غامضاً ================= */
 function isVague(text) {
 if (!text || text.length < 10) return true;
-
-// تجاهل النصوص التي تحتوي على كلمات غامضة
-const vagueWords = ['شيء', 'أمر', 'كذا', 'كذا', 'إلخ', '...', 'وهكذا', 'إلخ'];
+const vagueWords = ['شيء', 'أمر', 'كذا', 'إلخ', 'وهكذا', '...', 'إلخ', 'إلى آخره'];
 for (const word of vagueWords) {
 if (text.includes(word)) return true;
 }
-
-// التأكد من أن النص يحتوي على كلمات ذات معنى
 const words = text.split(/\s+/).filter(w => w.length > 3);
-if (words.length < 3) return true;
-
-return false;
+return words.length < 3;
 }
 
-/* ================= عرض الاختبار ================= */
 function renderExam() {
 const container = document.getElementById('examContent');
 container.innerHTML = '';
@@ -1381,7 +1423,6 @@ window.closeResult = function() {
 document.getElementById('resultModal').classList.remove('show');
 };
 
-/* ================= حفظ وعرض النتائج ================= */
 function saveResult(result) {
 let results = JSON.parse(localStorage.getItem('examResults') || '[]');
 results.push(result);
@@ -1454,7 +1495,6 @@ const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
 window.open(url, '_blank');
 };
 
-/* ================= إشعارات ================= */
 window.showToast = function(message) {
 const toast = document.getElementById('toast');
 toast.textContent = message;
@@ -1462,7 +1502,6 @@ toast.classList.add('show');
 setTimeout(() => toast.classList.remove('show'), 3000);
 };
 
-/* تشغيل */
 loadChapters();
 
 </script>
