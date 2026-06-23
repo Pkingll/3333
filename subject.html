@@ -219,7 +219,7 @@ background:#0d2033;
 border:1px solid rgba(255,255,255,.15);
 border-radius:20px;
 width:100%;
-max-width:600px;
+max-width:700px;
 max-height:90vh;
 overflow-y:auto;
 padding:25px;
@@ -232,7 +232,7 @@ margin-bottom:20px;
 text-align:center;
 }
 
-.modal input, .modal select{
+.modal input, .modal select, .modal textarea{
 width:100%;
 padding:12px;
 margin:8px 0;
@@ -242,6 +242,13 @@ background:#06131f;
 color:#fff;
 font-size:16px;
 outline:none;
+}
+
+.modal textarea{
+min-height:100px;
+resize:vertical;
+font-family:Cairo,sans-serif;
+line-height:1.8;
 }
 
 .modal label{
@@ -451,6 +458,16 @@ border-radius:10px;
 cursor:pointer;
 }
 
+.btn-danger{
+background:#c0392b;
+color:#fff;
+border:none;
+padding:10px 20px;
+border-radius:10px;
+cursor:pointer;
+font-weight:700;
+}
+
 .timer{
 text-align:center;
 font-size:20px;
@@ -575,6 +592,72 @@ background:#d4af37;
 color:#06131f;
 }
 
+/* ======== لوحة الإدارة ======== */
+.admin-panel{
+width:92%;
+max-width:900px;
+margin:15px auto;
+}
+
+.admin-question-item{
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:14px;
+padding:15px;
+margin:10px 0;
+}
+
+.admin-question-item .q-text{
+color:#f5e6b3;
+font-weight:700;
+margin-bottom:8px;
+}
+
+.admin-question-item .q-answer{
+color:#aaa;
+font-size:14px;
+margin-bottom:10px;
+line-height:1.8;
+}
+
+.admin-question-item .q-actions{
+display:flex;
+gap:8px;
+}
+
+.admin-question-item .q-actions button{
+padding:6px 12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:14px;
+}
+
+.edit-btn{
+background:#d4af37;
+color:#06131f;
+}
+
+.add-question-form{
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:14px;
+padding:20px;
+margin:15px 0;
+}
+
+.add-question-form h3{
+color:#f5e6b3;
+margin-bottom:15px;
+}
+
+.pin-input{
+width:200px;
+text-align:center;
+font-size:24px;
+letter-spacing:10px;
+}
+
 ::-webkit-scrollbar{
 width:8px;
 }
@@ -617,7 +700,8 @@ justify-content:flex-end;
 
 <div class="nav-btns">
 <button class="nav-btn" onclick="openExamSection()">✏️ الاختبارات</button>
-<button class="nav-btn" onclick="openParticipantsSection()">🏆 مشاركات في الاختبارات</button>
+<button class="nav-btn" onclick="openParticipantsSection()">🏆 مشاركات</button>
+<button class="nav-btn" onclick="openAdminLogin()">🔐 إدارة الاختبارات</button>
 </div>
 
 <div class="search-box">
@@ -638,6 +722,7 @@ justify-content:flex-end;
 <div class="content" id="content"></div>
 </div>
 
+<!-- قسم الاختبارات -->
 <div id="section-exam" style="display:none">
 <button class="back-btn" onclick="backToMain()">⬅ العودة للمحتوى</button>
 
@@ -671,6 +756,8 @@ justify-content:flex-end;
 <option value="10" selected>10 أسئلة</option>
 <option value="15">15 سؤالاً</option>
 <option value="20">20 سؤالاً</option>
+<option value="30">30 سؤالاً</option>
+<option value="50">50 سؤالاً</option>
 </select>
 </div>
 
@@ -682,6 +769,7 @@ justify-content:flex-end;
 <option value="15" selected>15 دقيقة</option>
 <option value="30">30 دقيقة</option>
 <option value="60">60 دقيقة</option>
+<option value="90">90 دقيقة</option>
 </select>
 </div>
 
@@ -691,6 +779,7 @@ justify-content:flex-end;
 </div>
 </div>
 
+<!-- قسم المشاركين -->
 <div id="section-participants" style="display:none">
 <button class="back-btn" onclick="backToMain()">⬅ العودة للمحتوى</button>
 
@@ -700,6 +789,56 @@ justify-content:flex-end;
 </div>
 </div>
 
+<!-- نافذة تسجيل دخول الإدارة -->
+<div class="modal-overlay" id="adminLoginModal">
+<div class="modal">
+<button class="close-modal" onclick="closeAdminLogin()">✕</button>
+<h2>🔐 دخول الإدارة</h2>
+<div style="text-align:center;margin:20px 0">
+<p style="color:#aaa;margin-bottom:15px">أدخل رمز الدخول:</p>
+<input type="password" id="adminPin" class="pin-input" placeholder="••••" maxlength="4" style="width:200px;text-align:center;font-size:24px;letter-spacing:10px">
+<div style="margin-top:20px">
+<button class="btn-primary" onclick="checkAdminPin()">دخول</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- قسم إدارة الاختبارات -->
+<div id="section-admin" style="display:none">
+<button class="back-btn" onclick="backToMain()">⬅ العودة للمحتوى</button>
+
+<div class="box">
+<h3 style="color:#f5e6b3">🔐 إدارة أسئلة الاختبارات</h3>
+
+<div style="margin:15px 0">
+<label style="color:#f5e6b3;display:block;margin-bottom:5px">📚 اختر المادة:</label>
+<select id="adminSubjectSelect" onchange="loadAdminQuestions()" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
+<option value="">-- اختر المادة --</option>
+</select>
+</div>
+
+<div class="add-question-form">
+<h3>➕ إضافة سؤال جديد</h3>
+<div style="margin:10px 0">
+<label style="color:#f5e6b3">السؤال:</label>
+<textarea id="newQuestionText" placeholder="اكتب السؤال هنا..."></textarea>
+</div>
+<div style="margin:10px 0">
+<label style="color:#f5e6b3">الإجابة النموذجية:</label>
+<textarea id="newQuestionAnswer" placeholder="اكتب الإجابة النموذجية هنا..."></textarea>
+</div>
+<button class="btn-primary" onclick="addQuestion()" style="width:100%">➕ إضافة السؤال</button>
+</div>
+
+<div id="adminQuestionsList" style="margin-top:20px">
+<h3 style="color:#f5e6b3;margin-bottom:15px">📋 الأسئلة المضافة</h3>
+<div id="adminQuestionsContainer"></div>
+</div>
+</div>
+</div>
+
+<!-- نافذة الاختبار -->
 <div class="modal-overlay" id="examModal">
 <div class="modal">
 <button class="close-modal" onclick="closeExamModal()">✕</button>
@@ -714,6 +853,7 @@ justify-content:flex-end;
 </div>
 </div>
 
+<!-- نافذة النتيجة -->
 <div class="modal-overlay" id="resultModal">
 <div class="modal">
 <div id="resultContent"></div>
@@ -737,7 +877,11 @@ getDoc,
 collection,
 query,
 where,
-getDocs
+getDocs,
+addDoc,
+deleteDoc,
+updateDoc,
+serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -897,6 +1041,7 @@ document.getElementById('lessonsBox').style.display = 'block';
 window.openExamSection = function() {
 document.getElementById('section-main').style.display = 'none';
 document.getElementById('section-participants').style.display = 'none';
+document.getElementById('section-admin').style.display = 'none';
 document.getElementById('section-exam').style.display = 'block';
 document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
 event.target.classList.add('active');
@@ -906,6 +1051,7 @@ loadSubjectsForExam();
 window.openParticipantsSection = function() {
 document.getElementById('section-main').style.display = 'none';
 document.getElementById('section-exam').style.display = 'none';
+document.getElementById('section-admin').style.display = 'none';
 document.getElementById('section-participants').style.display = 'block';
 document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
 event.target.classList.add('active');
@@ -916,9 +1062,206 @@ window.backToMain = function() {
 document.getElementById('section-main').style.display = 'block';
 document.getElementById('section-exam').style.display = 'none';
 document.getElementById('section-participants').style.display = 'none';
+document.getElementById('section-admin').style.display = 'none';
 document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
 };
 
+// ==================== نظام الإدارة ====================
+const ADMIN_PIN = '1997';
+
+window.openAdminLogin = function() {
+document.getElementById('adminLoginModal').classList.add('show');
+document.getElementById('adminPin').value = '';
+document.getElementById('adminPin').focus();
+};
+
+window.closeAdminLogin = function() {
+document.getElementById('adminLoginModal').classList.remove('show');
+};
+
+window.checkAdminPin = function() {
+const pin = document.getElementById('adminPin').value;
+if (pin === ADMIN_PIN) {
+document.getElementById('adminLoginModal').classList.remove('show');
+openAdminPanel();
+showToast('✅ تم الدخول بنجاح!');
+} else {
+showToast('❌ رمز الدخول غير صحيح!');
+document.getElementById('adminPin').value = '';
+document.getElementById('adminPin').focus();
+}
+};
+
+window.openAdminPanel = function() {
+document.getElementById('section-main').style.display = 'none';
+document.getElementById('section-exam').style.display = 'none';
+document.getElementById('section-participants').style.display = 'none';
+document.getElementById('section-admin').style.display = 'block';
+document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+const select = document.getElementById('adminSubjectSelect');
+select.innerHTML = '<option value="">-- اختر المادة --</option>';
+for (const [key, name] of Object.entries(names)) {
+select.innerHTML += `<option value="${key}">${name}</option>`;
+}
+if (id && names[id]) {
+select.value = id;
+loadAdminQuestions();
+}
+};
+
+// ==================== إدارة الأسئلة في Firebase ====================
+window.addQuestion = async function() {
+const subject = document.getElementById('adminSubjectSelect').value;
+const questionText = document.getElementById('newQuestionText').value.trim();
+const answerText = document.getElementById('newQuestionAnswer').value.trim();
+
+if (!subject) { showToast('❌ اختر المادة أولاً'); return; }
+if (!questionText) { showToast('❌ أدخل السؤال'); return; }
+if (!answerText) { showToast('❌ أدخل الإجابة'); return; }
+
+showToast('⏳ جاري حفظ السؤال...');
+
+try {
+await addDoc(collection(db, 'examQuestions'), {
+ subject: subject,
+ question: questionText,
+ answer: answerText,
+ createdAt: serverTimestamp()
+});
+
+// تفريغ الحقول
+document.getElementById('newQuestionText').value = '';
+document.getElementById('newQuestionAnswer').value = '';
+
+showToast('✅ تم إضافة السؤال بنجاح!');
+loadAdminQuestions();
+} catch (error) {
+console.error('خطأ:', error);
+showToast('❌ حدث خطأ أثناء الحفظ: ' + error.message);
+}
+};
+
+window.loadAdminQuestions = async function() {
+const subject = document.getElementById('adminSubjectSelect').value;
+const container = document.getElementById('adminQuestionsContainer');
+
+if (!subject) {
+container.innerHTML = '<p style="color:#aaa;text-align:center">اختر المادة لعرض الأسئلة</p>';
+return;
+}
+
+showToast('⏳ جاري تحميل الأسئلة...');
+
+try {
+const q = query(collection(db, 'examQuestions'), where('subject', '==', subject));
+const snap = await getDocs(q);
+
+if (snap.empty) {
+container.innerHTML = '<p style="color:#aaa;text-align:center">لا توجد أسئلة مضافة لهذه المادة</p>';
+return;
+}
+
+container.innerHTML = '';
+let index = 0;
+snap.forEach(docu => {
+const data = docu.data();
+index++;
+container.innerHTML += `
+<div class="admin-question-item" id="q-item-${docu.id}">
+<div class="q-text">س${index}: ${data.question}</div>
+<div class="q-answer">📖 ${data.answer}</div>
+<div class="q-actions">
+<button class="edit-btn" onclick="editQuestion('${docu.id}')">✏️ تعديل</button>
+<button class="delete-btn" onclick="deleteQuestion('${docu.id}')">🗑️ حذف</button>
+</div>
+</div>
+`;
+});
+
+showToast(`✅ تم تحميل ${index} سؤال`);
+} catch (error) {
+console.error('خطأ:', error);
+container.innerHTML = '<p style="color:#c0392b;text-align:center">حدث خطأ في تحميل الأسئلة</p>';
+}
+};
+
+window.editQuestion = async function(questionId) {
+const subject = document.getElementById('adminSubjectSelect').value;
+
+try {
+const docRef = doc(db, 'examQuestions', questionId);
+const docSnap = await getDoc(docRef);
+
+if (!docSnap.exists()) {
+showToast('❌ السؤال غير موجود');
+return;
+}
+
+const data = docSnap.data();
+
+// تحويل العنصر إلى نموذج تعديل
+const item = document.getElementById(`q-item-${questionId}`);
+item.innerHTML = `
+<div style="margin-bottom:10px">
+<textarea id="edit-q-${questionId}" style="width:100%;min-height:60px">${data.question}</textarea>
+</div>
+<div style="margin-bottom:10px">
+<textarea id="edit-a-${questionId}" style="width:100%;min-height:80px">${data.answer}</textarea>
+</div>
+<div class="q-actions">
+<button class="btn-primary" onclick="saveEdit('${questionId}')">💾 حفظ</button>
+<button class="btn-secondary" onclick="loadAdminQuestions()">❌ إلغاء</button>
+</div>
+`;
+} catch (error) {
+console.error('خطأ:', error);
+showToast('❌ حدث خطأ');
+}
+};
+
+window.saveEdit = async function(questionId) {
+const newQuestion = document.getElementById(`edit-q-${questionId}`).value.trim();
+const newAnswer = document.getElementById(`edit-a-${questionId}`).value.trim();
+
+if (!newQuestion || !newAnswer) {
+showToast('❌ لا يمكن ترك الحقول فارغة');
+return;
+}
+
+showToast('⏳ جاري الحفظ...');
+
+try {
+await updateDoc(doc(db, 'examQuestions', questionId), {
+ question: newQuestion,
+ answer: newAnswer,
+ updatedAt: serverTimestamp()
+});
+
+showToast('✅ تم التعديل بنجاح!');
+loadAdminQuestions();
+} catch (error) {
+console.error('خطأ:', error);
+showToast('❌ حدث خطأ أثناء الحفظ');
+}
+};
+
+window.deleteQuestion = async function(questionId) {
+if (!confirm('هل أنت متأكد من حذف هذا السؤال؟')) return;
+
+showToast('⏳ جاري الحذف...');
+
+try {
+await deleteDoc(doc(db, 'examQuestions', questionId));
+showToast('🗑️ تم حذف السؤال');
+loadAdminQuestions();
+} catch (error) {
+console.error('خطأ:', error);
+showToast('❌ حدث خطأ أثناء الحذف');
+}
+};
+
+// ==================== نظام الاختبار ====================
 let examQuestions = [];
 let currentExam = {};
 let examTimerInterval;
@@ -976,21 +1319,25 @@ if (selectedChapters.length === 0) { showToast('❌ الرجاء اختيار ف
 
 showToast('⏳ جاري تحميل الأسئلة...');
 
-let allQuestions = [];
-for (const chId of selectedChapters) {
-const q = query(collection(db, 'lessons'), where('chapterId', '==', chId));
+// جمع الأسئلة من Firebase
+const q = query(collection(db, 'examQuestions'), where('subject', '==', subject));
 const snap = await getDocs(q);
+
+let allQuestions = [];
 snap.forEach(docu => {
 const data = docu.data();
-const extracted = extractQuestionsFromLesson(data);
-allQuestions = allQuestions.concat(extracted);
+allQuestions.push({
+ id: docu.id,
+ question: data.question,
+ answer: data.answer,
+ isOpenEnded: true
 });
-}
+});
 
-console.log('عدد الأسئلة المحملة:', allQuestions.length);
+console.log('عدد الأسئلة المحملة من Firebase:', allQuestions.length);
 
 if (allQuestions.length === 0) { 
-showToast('❌ لا توجد أسئلة في الفصول المختارة - تأكد من وجود أسئلة في الدروس'); 
+showToast('❌ لا توجد أسئلة مضافة لهذه المادة - أضف أسئلة من لوحة الإدارة'); 
 return; 
 }
 
@@ -1022,52 +1369,6 @@ console.error('خطأ:', error);
 showToast('❌ حدث خطأ: ' + error.message);
 }
 };
-
-// استخراج الأسئلة المقالية من الدرس
-function extractQuestionsFromLesson(lesson) {
-const questions = [];
-const text = (lesson.text || '').trim();
-const title = lesson.title || '';
-
-if (!text) return questions;
-
-// صيغة 1: أسئلة في حقل questions (مصفوفة)
-if (lesson.questions && Array.isArray(lesson.questions)) {
-for (const q of lesson.questions) {
-if (q.question && q.answer) {
-questions.push({
-question: q.question,
-correct: q.answer,
-isOpenEnded: true,
-source: title
-});
-}
-}
-}
-
-// صيغة 2: نص مفصول بـ | (سؤال | إجابة)
-const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-for (const line of lines) {
-if (line.includes('|')) {
-const parts = line.split('|').map(p => p.trim()).filter(p => p.length > 0);
-if (parts.length >= 2) {
-const questionText = parts[0];
-const answerText = parts[1];
-// التأكد من أنه سؤال (ينتهي بـ ؟ أو يحتوي على كلمات استفهام)
-if (questionText.includes('؟') || /^(ما|من|لماذا|كيف|متى|أين|هل|ما هي|ما هو)/.test(questionText)) {
-questions.push({
-question: questionText,
-correct: answerText,
-isOpenEnded: true,
-source: title
-});
-}
-}
-}
-}
-
-return questions;
-}
 
 function renderCurrentQuestion() {
 const container = document.getElementById('examContent');
@@ -1155,7 +1456,7 @@ q.userAnswer = userAnswer;
 
 if (userAnswer.length > 0) {
 answeredCount++;
-const score = calculateOpenScore(userAnswer, q.correct);
+const score = calculateOpenScore(userAnswer, q.answer);
 q.score = score;
 totalScore += score;
 } else {
@@ -1264,7 +1565,7 @@ reviewHtml += `
 <p style="color:${statusColor};margin:8px 0;font-size:14px">${statusText} (${score}%)</p>
 <p style="color:#fff;background:rgba(255,255,255,.05);padding:10px;border-radius:8px;line-height:1.8;margin:8px 0">${q.userAnswer || 'لم تُجب'}</p>
 <p style="color:#d4af37;margin:8px 0;font-size:14px">📖 الإجابة النموذجية:</p>
-<p style="color:#aaa;background:rgba(255,255,255,.05);padding:10px;border-radius:8px;line-height:1.8">${q.correct}</p>
+<p style="color:#aaa;background:rgba(255,255,255,.05);padding:10px;border-radius:8px;line-height:1.8;white-space:pre-line">${q.answer}</p>
 </div>
 `;
 });
