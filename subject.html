@@ -961,32 +961,55 @@ if (q && !questions.some(existing => existing.question === q.question)) question
 return questions.slice(0, count);
 }
 
+/* ================= أنواع الأسئلة المتعددة ================= */
+
 function createQuestionFromLesson(lesson) {
 const text = lesson.text || '';
-const title = lesson.title || '';
+if (!text) return null;
 
-if (!text && !title) return null;
-
-const sentences = text.split(/[.!؟\n]+/).filter(s => s.trim().length > 10);
+const sentences = text.split(/[.!؟\n]+/).filter(s => s.trim().length > 15);
 if (sentences.length === 0) return null;
 
+// اختيار نوع السؤال عشوائياً
+const types = ['fill_blank', 'true_false', 'word_meaning', 'beginning'];
+const type = types[Math.floor(Math.random() * types.length)];
+
+switch(type) {
+case 'fill_blank':
+return createFillBlankQuestion(sentences);
+case 'true_false':
+return createTrueFalseQuestion(sentences);
+case 'word_meaning':
+return createWordMeaningQuestion(text, sentences);
+case 'beginning':
+return createBeginningQuestion(sentences);
+default:
+return createFillBlankQuestion(sentences);
+}
+}
+
+// نوع 1: إكمال الجملة (حذف كلمة)
+function createFillBlankQuestion(sentences) {
 const sentence = sentences[Math.floor(Math.random() * sentences.length)].trim();
 const words = sentence.split(/\s+/).filter(w => w.length > 3);
 
-if (words.length < 3) return null;
+if (words.length < 4) return null;
 
-const missingWordIndex = Math.floor(Math.random() * words.length);
-const missingWord = words[missingWordIndex];
-const maskedSentence = sentence.replace(missingWord, '_____');
+const importantWords = words.filter(w => !['التي','الذي','التي','فهو','وهو','وهي','لكن','لذلك','حيث','عندما','بعد','قبل','أيضاً'].includes(w));
+const targetWord = importantWords.length > 0 
+? importantWords[Math.floor(Math.random() * importantWords.length)]
+: words[Math.floor(Math.random() * words.length)];
 
-let choices = [missingWord];
-const otherWords = words.filter(w => w !== missingWord);
+const maskedSentence = sentence.replace(targetWord, '________');
+
+let choices = [targetWord];
+const otherWords = words.filter(w => w !== targetWord && w.length > 3);
 while (choices.length < 4 && otherWords.length > 0) {
 const w = otherWords[Math.floor(Math.random() * otherWords.length)];
 if (!choices.includes(w)) choices.push(w);
 }
 
-const fillers = ['العلم', 'الدين', 'القرآن', 'السنة', 'الإيمان', 'العمل', 'الصدق', 'البر', 'التقوى', 'الصلاة', 'الجهاد', 'الصبر', 'التوحيد', 'الشريعة', 'المسلمين'];
+const fillers = ['العلم', 'الدين', 'القرآن', 'السنة', 'الإيمان', 'العمل', 'الصدق', 'البر', 'التقوى', 'الصلاة', 'الجهاد', 'الصبر', 'التوحيد', 'الشريعة', 'المسلمين', 'العبادة', 'الطاعة', 'الرحمة', 'العدل', 'الحكمة'];
 while (choices.length < 4) {
 const f = fillers[Math.floor(Math.random() * fillers.length)];
 if (!choices.includes(f)) choices.push(f);
@@ -995,10 +1018,123 @@ if (!choices.includes(f)) choices.push(f);
 choices = choices.sort(() => Math.random() - 0.5);
 
 return {
-question: `أكمل الجملة التالية:\n"${maskedSentence}"`,
+question: `أكمل الجملة التالية باختيار الكلمة المناسبة:\n\n"${maskedSentence}"`,
 choices: choices,
-correct: missingWord,
-lessonTitle: title
+correct: targetWord,
+type: 'fill_blank'
+};
+}
+
+// نوع 2: صح أو خطأ
+function createTrueFalseQuestion(sentences) {
+const sentence = sentences[Math.floor(Math.random() * sentences.length)].trim();
+const isTrue = Math.random() > 0.5;
+
+let questionSentence;
+if (isTrue) {
+questionSentence = sentence;
+} else {
+// تعديل الجملة لتصبح خاطئة
+const words = sentence.split(/\s+/);
+if (words.length > 5) {
+const idx = Math.floor(Math.random() * (words.length - 2)) + 1;
+const antonyms = {
+'العلم': 'الجهل', 'الخير': 'الشر', 'النور': 'الظلام', 'الحق': 'الباطل',
+'الصدق': 'الكذب', 'العدل': 'الظلم', 'الرحمة': 'الغضب', 'السلام': 'الحرب',
+'الإيمان': 'الكفر', 'الطاعة': 'المعصية', 'الجنة': 'النار', 'الحلال': 'الحرام'
+};
+const word = words[idx];
+const antonym = antonyms[word] || antonyms[Object.keys(antonyms)[Math.floor(Math.random() * Object.keys(antonyms).length)]];
+if (antonym) {
+words[idx] = antonym;
+questionSentence = words.join(' ');
+} else {
+questionSentence = sentence;
+}
+} else {
+questionSentence = sentence;
+}
+}
+
+return {
+question: `حدد ما إذا كانت الجملة التالية صحيحة أم خاطئة:\n\n"${questionSentence}"`,
+choices: ['صح', 'خطأ'],
+correct: isTrue ? 'صح' : 'خطأ',
+type: 'true_false'
+};
+}
+
+// نوع 3: معنى كلمة
+function createWordMeaningQuestion(text, sentences) {
+const sentence = sentences[Math.floor(Math.random() * sentences.length)].trim();
+const words = sentence.split(/\s+/).filter(w => w.length > 4);
+
+if (words.length < 3) return null;
+
+const targetWord = words[Math.floor(Math.random() * words.length)];
+const cleanWord = targetWord.replace(/[،,؛;:.!؟]/g, '');
+
+// استخراج سياق الكلمة
+const context = sentence.replace(targetWord, '________');
+
+const meanings = {
+'التوحيد': ['إفراد الله بالعبادة', 'الإيمان بالرسل', 'الصلاة لله وحده', 'الإخلاص لله'],
+'الشريعة': ['منهج الله للبشر', 'القوانين الوضعية', 'العادات والتقاليد', 'النظم الاجتماعية'],
+'العبادة': ['تعظيم الله بالطاعة', 'الصلاة فقط', 'الذكر فقط', 'الصيام فقط'],
+'الإيمان': ['التصديق الجازم بالقلب', 'العمل بالأركان', 'القول باللسان', 'الإحسان'],
+'الإحسان': ['أن تعبد الله كأنك تراه', 'إحسان الخلق', 'الصدقة', 'البر بالوالدين'],
+'الجهاد': ['بذل الوسع في طاعة الله', 'القتال فقط', 'الصبر على البلاء', 'الدعوة للإسلام'],
+'الصبر': ['حبس النفس على الطاعة', 'السكوت على الظلم', 'الاستسلام', 'التأخير'],
+'التقوى': ['اتقاء الله بفعل أوامره', 'الخوف فقط', 'الرجاء فقط', 'الحذر'],
+'العلم': ['الفهم والإدراك', 'الحفظ فقط', 'القراءة', 'الكتابة'],
+'العدل': ['وضع الشيء في موضعه', 'المساواة', 'الرحمة', 'الغفران']
+};
+
+const choices = meanings[cleanWord] || [
+'مفهوم إسلامي أساسي',
+'عمل من أعمال البر',
+'صفة من صفات المؤمنين',
+'ركن من أركان الإسلام'
+];
+
+const shuffledChoices = [...choices].sort(() => Math.random() - 0.5);
+
+return {
+question: `ما معنى كلمة "${cleanWord}" في سياق الجملة التالية؟\n\n"${context}"`,
+choices: shuffledChoices,
+correct: choices[0],
+type: 'word_meaning'
+};
+}
+
+// نوع 4: بداية الجملة
+function createBeginningQuestion(sentences) {
+const sentence = sentences[Math.floor(Math.random() * sentences.length)].trim();
+const words = sentence.split(/\s+/);
+
+if (words.length < 6) return null;
+
+// أخذ بداية الجملة (أول 3-4 كلمات)
+const cutPoint = Math.min(4, Math.floor(words.length / 2));
+const beginning = words.slice(0, cutPoint).join(' ');
+const rest = words.slice(cutPoint).join(' ');
+
+// إنشاء بدايات خاطئة
+const wrongBeginnings = [
+'قال الله تعالى',
+'ورد في الحديث',
+'ذكر العلماء',
+'يُقال في ذلك'
+];
+
+const choices = [beginning, ...wrongBeginnings.slice(0, 3)];
+const shuffledChoices = choices.sort(() => Math.random() - 0.5);
+
+return {
+question: `أكمل بداية الجملة التالية:\n\n"... ${rest}"`,
+choices: shuffledChoices,
+correct: beginning,
+type: 'beginning'
 };
 }
 
@@ -1012,9 +1148,10 @@ q.choices.forEach((choice) => {
 choicesHtml += `<div class="choice" onclick="selectAnswer(${index}, '${choice.replace(/'/g, "\\'")}', this)">${choice}</div>`;
 });
 
+// إخفاء اسم الدرس - عرض رقم السؤال فقط
 container.innerHTML += `
 <div class="question-box" id="q-${index}">
-<h4>السؤال ${index + 1} من ${examQuestions.length} ${q.lessonTitle ? `<small style="color:#aaa">(${q.lessonTitle})</small>` : ''}</h4>
+<h4>السؤال ${index + 1} من ${examQuestions.length}</h4>
 <p style="margin-bottom:15px;color:#fff;line-height:1.8">${q.question}</p>
 <div class="choices" id="choices-${index}">
 ${choicesHtml}
