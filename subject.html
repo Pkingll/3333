@@ -278,6 +278,13 @@ color:#f5e6b3;
 margin-bottom:15px;
 }
 
+.question-text{
+margin-bottom:15px;
+color:#fff;
+line-height:1.8;
+font-size:16px;
+}
+
 .choices{
 display:flex;
 flex-direction:column;
@@ -285,12 +292,14 @@ gap:10px;
 }
 
 .choice{
-padding:12px;
+padding:14px;
 background:#0d2033;
 border:1px solid rgba(255,255,255,.1);
 border-radius:10px;
 cursor:pointer;
 transition:.3s;
+text-align:right;
+font-size:15px;
 }
 
 .choice:hover{
@@ -859,7 +868,7 @@ document.getElementById('section-participants').style.display = 'none';
 document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
 };
 
-/* ================= إنشاء الاختبار (لكل الم materials) ================= */
+/* ================= إنشاء الاختبار ================= */
 let examQuestions = [];
 let currentExam = {};
 let examTimerInterval;
@@ -902,7 +911,7 @@ select.innerHTML += `<option value="${ch.id}">📂 ${ch.title}</option>`;
 });
 };
 
-/* ================= بدء الاختبار - نسخة مبسطة ومجربة ================= */
+/* ================= بدء الاختبار - نسخة محسنة ================= */
 window.startExam = async function() {
 console.log('=== بدء الاختبار ===');
 try {
@@ -914,7 +923,7 @@ const selectedChaptersNames = Array.from(chaptersSelect.selectedOptions).map(o =
 const questionCount = parseInt(document.getElementById('examQuestionCount').value);
 const duration = parseInt(document.getElementById('examDuration').value);
 
-console.log('البيانات:', {name, subject, selectedChapters, questionCount, duration});
+console.log('البيانات:', {name, subject, selectedChapters: selectedChapters.length, questionCount, duration});
 
 if (!name) { showToast('❌ الرجاء إدخال اسم المشارك'); return; }
 if (!subject) { showToast('❌ الرجاء اختيار المادة'); return; }
@@ -925,10 +934,17 @@ showToast('⏳ جاري تحميل الدروس...');
 // جمع الدروس
 let lessons = [];
 for (const chId of selectedChapters) {
-console.log('جاري جلب الدروس للفصل:', chId);
 const q = query(collection(db, 'lessons'), where('chapterId', '==', chId));
 const snap = await getDocs(q);
-snap.forEach(docu => lessons.push({id: docu.id, ...docu.data()}));
+snap.forEach(docu => {
+const data = docu.data();
+lessons.push({
+id: docu.id,
+title: data.title || '',
+text: data.text || '',
+...data
+});
+});
 }
 
 console.log('عدد الدروس:', lessons.length);
@@ -938,11 +954,20 @@ showToast('❌ لا توجد دروس في الفصول المختارة');
 return; 
 }
 
+// التحقق من وجود نصوص كافية
+const lessonsWithText = lessons.filter(l => l.text && l.text.length > 50);
+console.log('دروس بها نصوص كافية:', lessonsWithText.length);
+
+if (lessonsWithText.length === 0) {
+showToast('❌ الدروس لا تحتوي على نصوص كافية لإنشاء أسئلة');
+return;
+}
+
 showToast('⏳ جاري إنشاء الأسئلة...');
 
 // توليد الأسئلة
-examQuestions = generateQuestions(lessons, Math.min(questionCount, lessons.length * 3));
-console.log('عدد الأسئلة:', examQuestions.length);
+examQuestions = generateQuestions(lessonsWithText, Math.min(questionCount, lessonsWithText.length * 2));
+console.log('عدد الأسئلة المُنشأة:', examQuestions.length);
 
 if (examQuestions.length === 0) { 
 showToast('❌ لا يمكن إنشاء أسئلة كافية من هذه الدروس'); 
@@ -970,26 +995,27 @@ showToast('❌ حدث خطأ: ' + error.message);
 }
 };
 
+/* ================= نظام أسئلة احترافي ================= */
+
 function generateQuestions(lessons, count) {
 console.log('توليد الأسئلة من', lessons.length, 'درس');
 let questions = [];
-const shuffled = [...lessons].sort(() => Math.random() - 0.5);
 
-for (let i = 0; i < Math.min(count, shuffled.length); i++) {
-const lesson = shuffled[i];
-console.log('معالجة الدرس:', lesson.title, 'نص:', lesson.text ? lesson.text.substring(0, 50) : 'لا يوجد');
-const q = createQuestionFromLesson(lesson);
-if (q) {
-console.log('تم إنشاء سؤال:', q.question.substring(0, 50));
-questions.push(q);
-}
+// ترتيب الدروس عشوائياً
+const shuffledLessons = [...lessons].sort(() => Math.random() - 0.5);
+
+// محاولة إنشاء سؤال من كل درس
+for (const lesson of shuffledLessons) {
+if (questions.length >= count) break;
+const q = createProfessionalQuestion(lesson);
+if (q) questions.push(q);
 }
 
-// إذا لم تكفِ الدروس
+// إذا لم تكفِ، إعادة المحاولة
 let attempts = 0;
-while (questions.length < count && shuffled.length > 0 && attempts < 50) {
-const lesson = shuffled[questions.length % shuffled.length];
-const q = createQuestionFromLesson(lesson);
+while (questions.length < count && attempts < 100) {
+const lesson = shuffledLessons[attempts % shuffledLessons.length];
+const q = createProfessionalQuestion(lesson);
 if (q && !questions.some(existing => existing.question === q.question)) {
 questions.push(q);
 }
@@ -1000,346 +1026,332 @@ console.log('إجمالي الأسئلة:', questions.length);
 return questions.slice(0, count);
 }
 
-/* ================= أنواع الأسئلة الكاملة والمنطقية ================= */
+/* ================= إنشاء سؤال احترافي من درس ================= */
 
-function createQuestionFromLesson(lesson) {
+function createProfessionalQuestion(lesson) {
 const text = lesson.text || '';
-if (!text || text.length < 50) {
-console.log('نص الدرس قصير جداً أو غير موجود');
+const title = lesson.title || '';
+
+console.log('معالجة الدرس:', title, 'طول النص:', text.length);
+
+if (!text || text.length < 80) {
+console.log('نص قصير جداً');
 return null;
 }
 
-// استخراج جمل كاملة ذات معنى
-const sentences = extractMeaningfulSentences(text);
-if (sentences.length === 0) {
-console.log('لم يتم العثور على جمل ذات معنى');
+// تقسيم النص إلى فقرات مفيدة
+const paragraphs = extractUsefulParagraphs(text);
+console.log('عدد الفقرات المفيدة:', paragraphs.length);
+
+if (paragraphs.length === 0) {
+console.log('لا توجد فقرات مفيدة');
 return null;
 }
 
-console.log('عدد الجمل المفيدة:', sentences.length);
+// اختيار فقرة عشوائية
+const paragraph = paragraphs[Math.floor(Math.random() * paragraphs.length)];
+console.log('الفقرة المختارة:', paragraph.substring(0, 80));
 
-// اختيار نوع السؤال عشوائياً
-const types = ['concept', 'true_false', 'definition', 'comparison'];
-const type = types[Math.floor(Math.random() * types.length)];
-console.log('نوع السؤال:', type);
+// استخراج المفهوم الرئيسي من الفقرة
+const concept = extractMainConceptFromParagraph(paragraph, text);
+if (!concept) {
+console.log('لم يتم استخراج مفهوم');
+return null;
+}
 
-let question;
+console.log('المفهوم:', concept);
+
+// إنشاء سؤال احترافي
+return buildProfessionalQuestion(concept, paragraph, text, title);
+}
+
+/* ================= استخراج فقرات مفيدة ================= */
+
+function extractUsefulParagraphs(text) {
+// تقسيم النص إلى فقرات (باستخدام نقاط أو سطور جديدة)
+const rawParagraphs = text.split(/\n+/).map(p => p.trim()).filter(p => p.length > 0);
+const useful = [];
+
+for (const para of rawParagraphs) {
+// الفقرة يجب أن تكون مفيدة (30-200 كلمة)
+const words = para.split(/\s+/).filter(w => w.length > 0);
+if (words.length >= 15 && words.length <= 80) {
+// يجب أن تحتوي على معلومة دينية/علمية
+if (containsUsefulInfo(para)) {
+useful.push(para);
+}
+}
+}
+
+// إذا لم توجد فقرات كافية، استخدم الجمل الطويلة
+if (useful.length < 3) {
+const sentences = text.split(/[.!؟]+/).map(s => s.trim()).filter(s => s.length > 30);
+for (const sent of sentences) {
+const words = sent.split(/\s+/).filter(w => w.length > 0);
+if (words.length >= 12 && words.length <= 40) {
+if (containsUsefulInfo(sent)) {
+useful.push(sent);
+}
+}
+}
+}
+
+return useful;
+}
+
+function containsUsefulInfo(text) {
+// كلمات مفتاحية دينية/علمية
+const keywords = [
+'الله', 'الرسول', 'النبي', 'محمد', 'الإسلام', 'القرآن', 'السنة', 'الحديث',
+'الصلاة', 'الصيام', 'الزكاة', 'الحج', 'الجهاد', 'الدعوة',
+'الإيمان', 'التوحيد', 'الشريعة', 'العبادة', 'التقوى', 'الإخلاص',
+'العلم', 'العمل', 'الصدق', 'الأمانة', 'البر', 'الرحمة',
+'الجنة', 'النار', 'الحساب', 'الجزاء', 'الآخرة',
+'المسلم', 'المؤمن', 'الكافر', 'المنافق', 'الفاسق',
+'العدل', 'الظلم', 'الحق', 'الباطل', 'الخير', 'الشر',
+'الصحابة', 'الخليفة', 'الإمام', 'الشيخ', 'العالم',
+'فرض', 'واجب', 'مستحب', 'مباح', 'مكروه', 'حرام',
+'حلال', 'طهارة', 'صلاة', 'زكاة', 'صوم', 'حج'
+];
+
+return keywords.some(kw => text.includes(kw));
+}
+
+/* ================= استخراج المفهوم الرئيسي ================= */
+
+function extractMainConceptFromParagraph(paragraph, fullText) {
+// البحث عن تعريفات صريحة
+const definitionPatterns = [
+/(?:هو|هي|يعني|تعني|تعريف|يقصد|المقصود)\s+(.+?)(?:،|\.|؛)/,
+/(.+?)\s+(?:هو|هي)\s+(.+?)(?:،|\.|؛)/,
+/(?:ال[^\s]+)\s+(?:هو|هي)\s+(.+?)(?:،|\.|؛)/
+];
+
+for (const pattern of definitionPatterns) {
+const match = paragraph.match(pattern);
+if (match) {
+return {
+type: 'definition',
+term: match[1] ? match[1].trim().substring(0, 50) : paragraph.substring(0, 50),
+context: paragraph
+};
+}
+}
+
+// البحث عن أحكام/أركان
+const rulingPatterns = [
+/(?:حكم|ركن|شرط|واجب|فرض)\s+(.+?)(?:،|\.|؛)/,
+/(.+?)\s+(?:واجب|فرض|مستحب|مباح|مكروه|حرام)/
+];
+
+for (const pattern of rulingPatterns) {
+const match = paragraph.match(pattern);
+if (match) {
+return {
+type: 'ruling',
+term: match[1] ? match[1].trim().substring(0, 50) : paragraph.substring(0, 50),
+context: paragraph
+};
+}
+}
+
+// البحث عن صفات/أوصاف
+const attributePatterns = [
+/(?:صفة|وصف|خاصة|علامة)\s+(.+?)(?:،|\.|؛)/,
+/(.+?)\s+(?:يتميز|يُعرف|يشتهر)\s+(.+?)(?:،|\.|؛)/
+];
+
+for (const pattern of attributePatterns) {
+const match = paragraph.match(pattern);
+if (match) {
+return {
+type: 'attribute',
+term: match[1] ? match[1].trim().substring(0, 50) : paragraph.substring(0, 50),
+context: paragraph
+};
+}
+}
+
+// إذا لم يوجد نمط واضح، استخدم الفقرة كاملة
+const keySentence = paragraph.split(/[.!؟]/).find(s => s.length > 20 && s.length < 150);
+if (keySentence) {
+return {
+type: 'general',
+term: keySentence.trim().substring(0, 60),
+context: paragraph
+};
+}
+
+return null;
+}
+
+/* ================= بناء سؤال احترافي ================= */
+
+function buildProfessionalQuestion(concept, paragraph, fullText, lessonTitle) {
+const { type, term, context } = concept;
+
+// إنشاء السؤال حسب النوع
+let questionText, correctAnswer, wrongAnswers;
+
 switch(type) {
-case 'concept':
-question = createConceptQuestion(sentences, text);
-break;
-case 'true_false':
-question = createTrueFalseQuestion(sentences, text);
-break;
 case 'definition':
-question = createDefinitionQuestion(sentences, text);
+questionText = `ما هو تعريف "${term}"؟`;
+correctAnswer = extractFullDefinition(context, term) || context.substring(0, 120);
+wrongAnswers = generateWrongAnswers(fullText, context, term, 'definition');
 break;
-case 'comparison':
-question = createComparisonQuestion(sentences, text);
+
+case 'ruling':
+questionText = `ما حكم "${term}"؟`;
+correctAnswer = extractRuling(context, term) || context.substring(0, 120);
+wrongAnswers = generateWrongAnswers(fullText, context, term, 'ruling');
 break;
+
+case 'attribute':
+questionText = `ما هي صفة "${term}"؟`;
+correctAnswer = extractAttribute(context, term) || context.substring(0, 120);
+wrongAnswers = generateWrongAnswers(fullText, context, term, 'attribute');
+break;
+
 default:
-question = createConceptQuestion(sentences, text);
+questionText = `ما المقصود بقوله تعالى/قول النبي ﷺ: "${term}"؟`;
+correctAnswer = context.substring(0, 120);
+wrongAnswers = generateWrongAnswers(fullText, context, term, 'general');
 }
 
-if (question) {
-console.log('تم إنشاء سؤال:', question.question.substring(0, 60));
-}
+// التأكد من أن الإجابة ليست طويلة جداً
+const maxLen = 100;
+const finalCorrect = correctAnswer.length > maxLen ? correctAnswer.substring(0, maxLen) + '...' : correctAnswer;
 
-return question;
-}
+// تنسيق الخيارات
+const allChoices = [finalCorrect, ...wrongAnswers.slice(0, 3)].map(c => 
+c.length > maxLen ? c.substring(0, maxLen) + '...' : c
+);
 
-// استخراج جمل كاملة ذات معنى
-function extractMeaningfulSentences(text) {
-const rawSentences = text.split(/[.!؟\n]+/).map(s => s.trim()).filter(s => s.length > 0);
-const meaningful = [];
+const uniqueChoices = [...new Set(allChoices)];
+if (uniqueChoices.length < 2) return null;
 
-for (const sentence of rawSentences) {
-const words = sentence.split(/\s+/).filter(w => w.length > 0);
-if (words.length >= 8 && words.length <= 30) {
-if (hasCompleteMeaning(sentence)) {
-meaningful.push(sentence);
-}
-}
-}
-
-return meaningful;
-}
-
-// التحقق من اكتمال المعنى
-function hasCompleteMeaning(sentence) {
-const completePatterns = [
-/الله/, /الرسول/, /النبي/, /الإسلام/, /القرآن/, /السنة/,
-/الصلاة/, /الصيام/, /الزكاة/, /الحج/, /الجهاد/,
-/الإيمان/, /التوحيد/, /الشريعة/, /العبادة/,
-/العلم/, /العمل/, /الصدق/, /الأمانة/, /البر/, /التقوى/,
-/الجنة/, /النار/, /الحساب/, /الجزاء/,
-/المسلم/, /المؤمن/, /الكافر/, /الفاسق/,
-/العدل/, /الظلم/, /الرحمة/, /المغفرة/,
-/الدنيا/, /الآخرة/, /الحياة/, /الموت/
-];
-
-return completePatterns.some(pattern => pattern.test(sentence));
-}
-
-// نوع 1: سؤال مفهومي
-function createConceptQuestion(sentences, fullText) {
-const sentence = sentences[Math.floor(Math.random() * sentences.length)];
-const keyWords = extractKeyWords(sentence);
-if (keyWords.length === 0) return null;
-
-const targetWord = keyWords[Math.floor(Math.random() * keyWords.length)];
-const cleanWord = targetWord.replace(/[،,؛;:.!؟]/g, '').trim();
-
-const questionPatterns = [
-`ما المقصود بـ "${cleanWord}" في ضوء ما درست؟`,
-`ما تعريف "${cleanWord}"؟`,
-`ما هو "${cleanWord}"؟`,
-`بما يُعرَّف "${cleanWord}"؟`
-];
-
-const questionText = questionPatterns[Math.floor(Math.random() * questionPatterns.length)];
-const correctAnswer = extractDefinition(sentence, cleanWord) || `هو ${sentence.substring(0, 60)}...`;
-const wrongAnswers = generateWrongDefinitions(fullText, cleanWord, sentence);
-
-const choices = [correctAnswer, ...wrongAnswers].slice(0, 4);
-const shuffledChoices = choices.sort(() => Math.random() - 0.5);
+const shuffledChoices = uniqueChoices.sort(() => Math.random() - 0.5);
 
 return {
 question: questionText,
 choices: shuffledChoices,
-correct: correctAnswer,
-type: 'concept'
+correct: finalCorrect,
+type: type,
+source: lessonTitle // للتتبع فقط، لا يُعرض
 };
 }
 
-// نوع 2: صح أو خطأ
-function createTrueFalseQuestion(sentences, fullText) {
-const sentence = sentences[Math.floor(Math.random() * sentences.length)];
-const isTrue = Math.random() > 0.4;
+/* ================= استخراج الإجابات ================= */
 
-let statement;
-if (isTrue) {
-statement = sentence;
-} else {
-statement = createFalseStatement(sentence, fullText);
-if (!statement) return null;
-}
-
-return {
-question: `حدد صحة العبارة التالية:\n\n"${statement}"`,
-choices: ['صحيحة', 'خاطئة'],
-correct: isTrue ? 'صحيحة' : 'خاطئة',
-type: 'true_false'
-};
-}
-
-// نوع 3: سؤال تعريفي
-function createDefinitionQuestion(sentences, fullText) {
-const sentence = sentences[Math.floor(Math.random() * sentences.length)];
-const names = extractNamesAndTerms(sentence);
-if (names.length === 0) return null;
-
-const targetName = names[Math.floor(Math.random() * names.length)];
-
-const questionPatterns = [
-`من هو "${targetName}"؟`,
-`ما هي صفة "${targetName}"؟`,
-`ما دور "${targetName}"؟`,
-`بماذا اشتهر "${targetName}"؟`
-];
-
-const questionText = questionPatterns[Math.floor(Math.random() * questionPatterns.length)];
-const correctAnswer = extractInfoAbout(sentence, targetName) || sentence.substring(0, 80);
-const wrongAnswers = generateWrongDefinitions(fullText, targetName, sentence);
-
-const choices = [correctAnswer, ...wrongAnswers].slice(0, 4);
-const shuffledChoices = choices.sort(() => Math.random() - 0.5);
-
-return {
-question: questionText,
-choices: shuffledChoices,
-correct: correctAnswer,
-type: 'definition'
-};
-}
-
-// نوع 4: سؤال مقارنة
-function createComparisonQuestion(sentences, fullText) {
-if (sentences.length < 2) return null;
-
-const idx1 = Math.floor(Math.random() * sentences.length);
-let idx2 = Math.floor(Math.random() * sentences.length);
-while (idx2 === idx1) idx2 = Math.floor(Math.random() * sentences.length);
-
-const sent1 = sentences[idx1];
-const sent2 = sentences[idx2];
-
-const concept1 = extractMainConcept(sent1);
-const concept2 = extractMainConcept(sent2);
-
-if (!concept1 || !concept2) return null;
-
-const questionText = `ما العلاقة بين "${concept1}" و "${concept2}"؟`;
-
-const correctAnswer = `كلاهما من المفاهيم الإسلامية المهمة، فـ"${concept1}" ${sent1.substring(0, 50)}... و"${concept2}" ${sent2.substring(0, 50)}...`;
-
-const wrongAnswers = [
-`لا علاقة بينهما`,
-`"${concept1}" ينفي "${concept2}"`,
-`"${concept2}" هو جزء من "${concept1}" فقط`
-];
-
-const choices = [correctAnswer, ...wrongAnswers].slice(0, 4);
-const shuffledChoices = choices.sort(() => Math.random() - 0.5);
-
-return {
-question: questionText,
-choices: shuffledChoices,
-correct: correctAnswer,
-type: 'comparison'
-};
-}
-
-/* ================= دوال مساعدة ================= */
-
-function extractKeyWords(sentence) {
-const words = sentence.split(/\s+/);
-const keyWords = [];
-const commonWords = new Set(['هو', 'هي', 'التي', 'الذي', 'التي', 'فهو', 'وهو', 'وهي', 'لكن', 'لذلك', 'حيث', 'عندما', 'بعد', 'قبل', 'أيضاً', 'كان', 'كانت', 'يكون', 'تكون', 'في', 'من', 'إلى', 'على', 'عن', 'مع', 'إلى', 'على', 'هذا', 'هذه', 'ذلك', 'التي', 'الذين', 'اللواتي']);
-
-for (const word of words) {
-const clean = word.replace(/[،,؛;:.!؟]/g, '').trim();
-if (clean.length > 3 && !commonWords.has(clean)) {
-keyWords.push(clean);
-}
-}
-
-return [...new Set(keyWords)];
-}
-
-function extractDefinition(sentence, word) {
+function extractFullDefinition(text, term) {
+// استخراج الجملة التعريفية
 const patterns = [
-new RegExp(`${word} هو (.+?)(?:،|\\.|$)`),
-new RegExp(`${word} هي (.+?)(?:،|\\.|$)`),
-new RegExp(`${word}:?\\s*(.+?)(?:،|\\.|$)`),
-new RegExp(`يعني ${word} (.+?)(?:،|\\.|$)`),
-new RegExp(`${word} يعني (.+?)(?:،|\\.|$)`)
+new RegExp(`${term}\\s*(?:هو|هي|تعني|يعني)\\s*(.+?)(?:،|\\.|؛|$)`),
+new RegExp(`(?:هو|هي|تعريف)\\s*${term}\\s*(?:هو|هي|:)?\\s*(.+?)(?:،|\\.|؛|$)`)
 ];
 
 for (const pattern of patterns) {
-const match = sentence.match(pattern);
-if (match) {
-return match[1].trim().substring(0, 100);
+const match = text.match(pattern);
+if (match) return match[1].trim();
+}
+
+// إذا لم يوجد، أخذ الجملة كاملة
+const sentences = text.split(/[.!؟]/);
+for (const sent of sentences) {
+if (sent.includes(term)) {
+return sent.trim();
 }
 }
 
-return sentence.replace(word, '').trim().substring(0, 100);
+return text.substring(0, 100);
 }
 
-function generateWrongDefinitions(fullText, correctWord, correctSentence) {
-const sentences = fullText.split(/[.!؟\n]+/).filter(s => s !== correctSentence && s.length > 20);
-const wrongAnswers = [];
-
-for (const sentence of sentences) {
-const def = sentence.substring(0, 100);
-if (def.length > 30 && !def.includes(correctWord)) {
-wrongAnswers.push(def);
-}
-}
-
-const generic = [
-`مفهوم إسلامي عام يتعلق بالعبادة والتقرب إلى الله`,
-`أحد الأحكام الشرعية التي يجب على المسلم معرفتها`,
-`صفة من صفات المؤمنين الصادقين`,
-`ركن من أركان الإسلام الخمسة`,
-`قاعدة شرعية يبني عليها فهم كثير من الأحكام`
+function extractRuling(text, term) {
+const patterns = [
+new RegExp(`${term}\\s*(?:واجب|فرض|مستحب|مباح|مكروه|حرام|سنة|مندوب|مكره)`),
+new RegExp(`(?:حكم|حكم شرعي)\\s*${term}\\s*(?:هو|هي)?\\s*(.+?)(?:،|\\.|؛|$)`)
 ];
 
-while (wrongAnswers.length < 3) {
-const g = generic[Math.floor(Math.random() * generic.length)];
+for (const pattern of patterns) {
+const match = text.match(pattern);
+if (match) {
+const fullMatch = match[0] || match[1];
+return fullMatch.trim();
+}
+}
+
+return text.substring(0, 100);
+}
+
+function extractAttribute(text, term) {
+const patterns = [
+new RegExp(`${term}\\s*(?:يتميز|يُعرف|يشتهر|يتصف)\\s*(?:بـ|ب)?\\s*(.+?)(?:،|\\.|؛|$)`),
+new RegExp(`(?:صفة|صفات)\\s*${term}\\s*(?:هي|تشمل)?\\s*(.+?)(?:،|\\.|؛|$)`)
+];
+
+for (const pattern of patterns) {
+const match = text.match(pattern);
+if (match) return match[1].trim();
+}
+
+return text.substring(0, 100);
+}
+
+/* ================= توليد إجابات خاطئة ================= */
+
+function generateWrongAnswers(fullText, correctContext, term, type) {
+const wrongAnswers = [];
+const allSentences = fullText.split(/[.!؟]+/).map(s => s.trim()).filter(s => s.length > 20);
+
+// استخراج جمل أخرى من نفس النص
+for (const sentence of allSentences) {
+if (sentence !== correctContext && !sentence.includes(term)) {
+const clean = sentence.substring(0, 100);
+if (clean.length > 30 && !wrongAnswers.includes(clean)) {
+wrongAnswers.push(clean);
+}
+if (wrongAnswers.length >= 6) break;
+}
+}
+
+// إذا لم تكفِ، استخدام تعريفات عامة حسب النوع
+const generics = {
+definition: [
+'مفهوم إسلامي يتعلق بالعقيدة والعبادة',
+'أحد الأحكام الشرعية المهمة في الإسلام',
+'قاعدة من قواعد الشريعة الإسلامية',
+'مبدأ أساسي في العقيدة الإسلامية'
+],
+ruling: [
+'فرض على كل مسلم بالغ عاقل',
+'مستحب ويثاب فاعله ولا يعاقب تاركه',
+'واجب عند القدرة ويسقط عند العجز',
+'حرام شرعاً ولا يجوز فعله'
+],
+attribute: [
+'صفة من صفات المؤمنين الصادقين',
+'علامة من علامات الإيمان الكامل',
+'وصف يتميز به أهل العلم والتقوى',
+'خاصة من خواص الصالحين'
+],
+general: [
+'مفهوم يتعلق بالعقيدة الإسلامية',
+'أصل من أصول الدين يجب الإيمان به',
+'حكم شرعي يبنى عليه فهم كثير من الأحكام',
+'مبدأ إسلامي يتعلق بالعبادة والتقرب إلى الله'
+]
+};
+
+const typeGenerics = generics[type] || generics.general;
+for (const g of typeGenerics) {
 if (!wrongAnswers.includes(g)) wrongAnswers.push(g);
+if (wrongAnswers.length >= 6) break;
 }
 
 return wrongAnswers.slice(0, 3);
 }
 
-function createFalseStatement(sentence, fullText) {
-const words = sentence.split(/\s+/);
-if (words.length < 5) return null;
-
-const antonyms = {
-'الخير': 'الشر', 'النور': 'الظلام', 'الحق': 'الباطل',
-'الصدق': 'الكذب', 'العدل': 'الظلم', 'الرحمة': 'الغضب',
-'السلام': 'الحرب', 'الإيمان': 'الكفر', 'الطاعة': 'المعصية',
-'الجنة': 'النار', 'الحلال': 'الحرام', 'الواجب': 'المستحب',
-'الفرض': 'السنة', 'الحسنات': 'السيئات', 'الثواب': 'العقاب',
-'الرزق': 'الفقر', 'الشكر': 'الكفران', 'الصبر': 'الجزع',
-'التواضع': 'الكبر', 'الأمانة': 'الخيانة'
-};
-
-for (let i = 0; i < words.length; i++) {
-const clean = words[i].replace(/[،,؛;:.!؟]/g, '');
-if (antonyms[clean]) {
-words[i] = words[i].replace(clean, antonyms[clean]);
-return words.join(' ');
-}
-}
-
-if (words.length > 6) {
-const idx1 = Math.floor(Math.random() * (words.length - 2)) + 1;
-const idx2 = Math.floor(Math.random() * (words.length - 2)) + 1;
-while (idx2 === idx1) idx2 = Math.floor(Math.random() * (words.length - 2)) + 1;
-[words[idx1], words[idx2]] = [words[idx2], words[idx1]];
-return words.join(' ');
-}
-
-return null;
-}
-
-function extractNamesAndTerms(sentence) {
-const names = [];
-const patterns = [
-/الإمام\s+(\S+)/, /الشيخ\s+(\S+)/, /الخليفة\s+(\S+)/,
-/الصحابي\s+(\S+)/, /التابعي\s+(\S+)/, /العالم\s+(\S+)/,
-/(\S+)\s+بن\s+(\S+)/, /أبو\s+(\S+)/, /أم\s+(\S+)/
-];
-
-for (const pattern of patterns) {
-const match = sentence.match(pattern);
-if (match) {
-names.push(match[0]);
-}
-}
-
-const words = sentence.split(/\s+/);
-for (const word of words) {
-const clean = word.replace(/[،,؛;:.!؟]/g, '');
-if (clean.startsWith('ال') && clean.length > 5 && clean.length < 15) {
-names.push(clean);
-}
-}
-
-return [...new Set(names)];
-}
-
-function extractInfoAbout(sentence, name) {
-const idx = sentence.indexOf(name);
-if (idx === -1) return sentence.substring(0, 100);
-
-const start = Math.max(0, idx - 20);
-const end = Math.min(sentence.length, idx + name.length + 80);
-return sentence.substring(start, end);
-}
-
-function extractMainConcept(sentence) {
-const words = sentence.split(/\s+/).filter(w => w.length > 4);
-const important = words.filter(w => {
-const clean = w.replace(/[،,؛;:.!؟]/g, '');
-return clean.startsWith('ال') && clean.length > 5;
-});
-
-return important.length > 0 ? important[0].replace(/[،,؛;:.!؟]/g, '') : null;
-}
+/* ================= عرض الاختبار ================= */
 
 function renderExam() {
 const container = document.getElementById('examContent');
@@ -1348,13 +1360,14 @@ container.innerHTML = '';
 examQuestions.forEach((q, index) => {
 let choicesHtml = '';
 q.choices.forEach((choice) => {
-choicesHtml += `<div class="choice" onclick="selectAnswer(${index}, '${choice.replace(/'/g, "\\'")}', this)">${choice}</div>`;
+const safeChoice = choice.replace(/'/g, "\\'").replace(/"/g, '\\"');
+choicesHtml += `<div class="choice" onclick="selectAnswer(${index}, '${safeChoice}', this)">${choice}</div>`;
 });
 
 container.innerHTML += `
 <div class="question-box" id="q-${index}">
 <h4>السؤال ${index + 1} من ${examQuestions.length}</h4>
-<p style="margin-bottom:15px;color:#fff;line-height:1.8;white-space:pre-line">${q.question}</p>
+<p class="question-text">${q.question}</p>
 <div class="choices" id="choices-${index}">
 ${choicesHtml}
 </div>
