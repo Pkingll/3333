@@ -480,6 +480,66 @@ max-width:900px;
 background:#1a3a5c;
 }
 
+/* ======== إضافات للأسئلة المقالية ======== */
+.open-answer{
+width:100%;
+padding:14px;
+border:1px solid rgba(255,255,255,.2);
+border-radius:12px;
+background:#06131f;
+color:#fff;
+font-size:16px;
+outline:none;
+min-height:120px;
+resize:vertical;
+font-family:Cairo,sans-serif;
+line-height:1.8;
+margin-top:10px;
+}
+
+.open-answer::placeholder{
+color:#888;
+}
+
+.open-answer.correct-answer{
+border-color:#27ae60;
+background:rgba(39,174,96,0.1);
+}
+
+.open-answer.partial-answer{
+border-color:#d4af37;
+background:rgba(212,175,55,0.1);
+}
+
+.open-answer.wrong-answer{
+border-color:#c0392b;
+background:rgba(192,57,43,0.1);
+}
+
+.answer-label{
+color:#f5e6b3;
+font-weight:700;
+margin-top:15px;
+margin-bottom:5px;
+font-size:15px;
+}
+
+.model-answer-box{
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.1);
+border-radius:12px;
+padding:15px;
+margin-top:15px;
+line-height:1.8;
+}
+
+.model-answer-title{
+color:#d4af37;
+font-weight:700;
+margin-bottom:10px;
+font-size:14px;
+}
+
 ::-webkit-scrollbar{
 width:8px;
 }
@@ -583,6 +643,8 @@ justify-content:flex-end;
 <option value="10" selected>10 أسئلة</option>
 <option value="15">15 سؤالاً</option>
 <option value="20">20 سؤالاً</option>
+<option value="30">30 سؤالاً</option>
+<option value="50">50 سؤالاً</option>
 </select>
 </div>
 
@@ -594,6 +656,7 @@ justify-content:flex-end;
 <option value="15" selected>15 دقيقة</option>
 <option value="30">30 دقيقة</option>
 <option value="60">60 دقيقة</option>
+<option value="90">90 دقيقة</option>
 </select>
 </div>
 
@@ -898,20 +961,26 @@ return;
 const q = query(collection(db, 'chapters'), where('subject', '==', subject));
 const snap = await getDocs(q);
 let arr = [];
-snap.forEach(docu => arr.push({id: docu.id, ...docu.data()}));
+snap.forEach(docu => {
+const data = docu.data();
+// فقط فصول الأسئلة (التي اسمها يبدأ بـ "أسئلة" أو "اسئلة")
+if (data.title && (data.title.startsWith('أسئلة') || data.title.startsWith('اسئلة'))) {
+arr.push({id: docu.id, ...data});
+}
+});
 arr.sort((a, b) => (a.order || 0) - (b.order || 0));
 
 if (arr.length === 0) {
-select.innerHTML = '<option value="">لا توجد فصول في هذه المادة</option>';
+select.innerHTML = '<option value="">لا توجد فصول أسئلة في هذه المادة</option>';
 return;
 }
 
 arr.forEach(ch => {
-select.innerHTML += `<option value="${ch.id}">📂 ${ch.title}</option>`;
+select.innerHTML += `<option value="${ch.id}">❓ ${ch.title}</option>`;
 });
 };
 
-/* ================= بدء الاختبار ================= */
+/* ================= بدء الاختبار - جلب الأسئلة كما هي ================= */
 window.startExam = async function() {
 console.log('=== بدء الاختبار ===');
 try {
@@ -919,7 +988,7 @@ const name = document.getElementById('examParticipantName').value.trim();
 const subject = document.getElementById('examSubjectSelect').value;
 const chaptersSelect = document.getElementById('examChaptersSelect');
 const selectedChapters = Array.from(chaptersSelect.selectedOptions).map(o => o.value);
-const selectedChaptersNames = Array.from(chaptersSelect.selectedOptions).map(o => o.text.replace('📂 ', ''));
+const selectedChaptersNames = Array.from(chaptersSelect.selectedOptions).map(o => o.text.replace('❓ ', '').replace('📂 ', ''));
 const questionCount = parseInt(document.getElementById('examQuestionCount').value);
 const duration = parseInt(document.getElementById('examDuration').value);
 
@@ -927,42 +996,39 @@ if (!name) { showToast('❌ الرجاء إدخال اسم المشارك'); ret
 if (!subject) { showToast('❌ الرجاء اختيار المادة'); return; }
 if (selectedChapters.length === 0) { showToast('❌ الرجاء اختيار فصل واحد على الأقل'); return; }
 
-showToast('⏳ جاري تحميل الدروس...');
+showToast('⏳ جاري تحميل الأسئلة...');
 
-// جمع الدروس
-let lessons = [];
+// جمع الدروس (الأسئلة) من فصول الأسئلة
+let allQuestions = [];
 for (const chId of selectedChapters) {
 const q = query(collection(db, 'lessons'), where('chapterId', '==', chId));
 const snap = await getDocs(q);
 snap.forEach(docu => {
 const data = docu.data();
-lessons.push({
-id: docu.id,
-title: data.title || '',
-text: data.text || '',
-questions: data.questions || null,
-...data
-});
+
+// تحديد نوع السؤال: مقالي (open) أو اختياري (mcq)
+const questionType = (data.type || 'mcq').toString().trim().toLowerCase();
+
+// استخراج السؤال من الدرس
+const questionObj = extractQuestionFromLesson(data);
+if (questionObj) {
+allQuestions.push(questionObj);
+}
 });
 }
 
-console.log('عدد الدروس:', lessons.length);
+console.log('عدد الأسئلة المحملة:', allQuestions.length);
 
-if (lessons.length === 0) { 
-showToast('❌ لا توجد دروس في الفصول المختارة'); 
+if (allQuestions.length === 0) { 
+showToast('❌ لا توجد أسئلة في الفصول المختارة'); 
 return; 
 }
 
-showToast('⏳ جاري إنشاء الأسئلة...');
+// خلط الأسئلة واختيار العدد المطلوب
+const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+examQuestions = shuffled.slice(0, Math.min(questionCount, allQuestions.length));
 
-// توليد الأسئلة
-examQuestions = generateQuestions(lessons, Math.min(questionCount, lessons.length * 3));
-console.log('عدد الأسئلة المُنشأة:', examQuestions.length);
-
-if (examQuestions.length === 0) { 
-showToast('❌ لا يمكن إنشاء أسئلة من هذه الدروس'); 
-return; 
-}
+console.log('عدد الأسئلة في الاختبار:', examQuestions.length);
 
 currentExam = {
 name,
@@ -974,7 +1040,6 @@ duration: duration,
 startTime: Date.now()
 };
 
-console.log('عرض الاختبار...');
 renderExam();
 document.getElementById('examModal').classList.add('show');
 startTimer(duration * 60);
@@ -985,274 +1050,74 @@ showToast('❌ حدث خطأ: ' + error.message);
 }
 };
 
-/* ================= نظام توليد أسئلة سليم من النص ================= */
+/* ================= استخراج السؤال من الدرس كما هو ================= */
+function extractQuestionFromLesson(lesson) {
+const title = (lesson.title || '').trim();
+const text = (lesson.text || '').trim();
+const type = (lesson.type || 'mcq').toString().trim().toLowerCase();
 
-function generateQuestions(lessons, count) {
-console.log('توليد', count, 'سؤال من', lessons.length, 'درس');
-let questions = [];
-const shuffled = [...lessons].sort(() => Math.random() - 0.5);
+if (!title) return null;
 
-for (const lesson of shuffled) {
-if (questions.length >= count) break;
-
-// المحاولة 1: الأسئلة المخصصة من Firebase
-if (lesson.questions && Array.isArray(lesson.questions) && lesson.questions.length > 0) {
-const customQuestions = getValidCustomQuestions(lesson.questions);
-for (const cq of customQuestions) {
-if (questions.length >= count) break;
-questions.push({
-question: cq.question,
-choices: [...cq.choices].sort(() => Math.random() - 0.5),
-correct: cq.correct,
-source: lesson.title
-});
-}
-}
-
-// المحاولة 2: التوليد التلقائي من النص
-if (questions.length < count && lesson.text && lesson.text.length > 100) {
-const autoQ = createSmartQuestion(lesson);
-if (autoQ) {
-questions.push(autoQ);
-}
-}
-}
-
-return questions.slice(0, count);
-}
-
-/* ================= التحقق من الأسئلة المخصصة ================= */
-
-function getValidCustomQuestions(questionsArray) {
-const valid = [];
-for (const q of questionsArray) {
-if (!q.question || !q.choices || !q.correct) continue;
-if (!Array.isArray(q.choices) || q.choices.length < 2) continue;
-if (!q.choices.includes(q.correct)) continue;
-valid.push({
-question: q.question,
-choices: q.choices,
-correct: q.correct
-});
-}
-return valid;
-}
-
-/* ================= توليد سؤال ذكي من النص ================= */
-
-function createSmartQuestion(lesson) {
-const text = lesson.text || '';
-const title = lesson.title || '';
-
-// تقسيم النص إلى جمل كاملة
-const sentences = text.split(/[.!؟]+/)
-.map(s => s.trim())
-.filter(s => s.length > 30 && s.length < 200);
-
-if (sentences.length === 0) return null;
-
-// اختيار جملة ذات معنى واضح
-const sentence = sentences[Math.floor(Math.random() * sentences.length)];
-console.log('الجملة المختارة:', sentence.substring(0, 80));
-
-// استخراج المعلومة من الجملة
-const info = extractClearInfo(sentence);
-if (!info) return null;
-
-console.log('المعلومة:', info);
-
-// بناء السؤال والإجابة
-return buildQuestion(info, sentence, text, title);
-}
-
-/* ================= استخراج معلومة واضحة من الجملة ================= */
-
-function extractClearInfo(sentence) {
-// نمط 1: "الشيء هو التعريف"
-const defMatch = sentence.match(/(.{5,40}?)\s+(?:هو|هي)\s+(.{15,120})/);
-if (defMatch) {
-const term = defMatch[1].trim();
-const definition = defMatch[2].trim();
-// التحقق من أن التعريف واضح وليس كلمة واحدة
-const defWords = definition.split(/\s+/).filter(w => w.length > 0);
-if (defWords.length >= 3 && term.length > 3) {
+// سؤال مقالي (مفتوح) - الإجابة في text
+if (type === 'open') {
 return {
-type: 'definition',
-term: cleanText(term),
-answer: cleanText(definition),
-fullSentence: sentence
+question: title,
+correct: text,
+isOpenEnded: true,
+source: lesson.title || 'سؤال مقالي'
 };
 }
-}
 
-// نمط 2: "يفعل الشيء لأن السبب"
-const reasonMatch = sentence.match(/(.{10,60}?)\s+(?:لأن|لِ)\s+(.{15,120})/);
-if (reasonMatch) {
-const action = reasonMatch[1].trim();
-const reason = reasonMatch[2].trim();
-const reasonWords = reason.split(/\s+/).filter(w => w.length > 0);
-if (reasonWords.length >= 3 && action.length > 5) {
+// سؤال اختياري (متعدد) - الخيارات مفصولة بـ |
+const choices = text.split('|').map(c => c.trim()).filter(c => c.length > 0);
+if (choices.length < 2) {
+// إذا لم يكن هناك خيارات كافية، نعتبره سؤال مقالي
 return {
-type: 'reason',
-term: cleanText(action),
-answer: cleanText(reason),
-fullSentence: sentence
+question: title,
+correct: text,
+isOpenEnded: true,
+source: lesson.title || 'سؤال'
 };
 }
-}
 
-// نمط 3: "الشيء يتكون من/يشمل"
-const partsMatch = sentence.match(/(.{5,40}?)\s+(?:يتكون من|يشمل|يحتوي على|فيه|فيهما)\s+(.{15,120})/);
-if (partsMatch) {
-const term = partsMatch[1].trim();
-const parts = partsMatch[2].trim();
-const partsWords = parts.split(/\s+/).filter(w => w.length > 0);
-if (partsWords.length >= 3 && term.length > 3) {
-return {
-type: 'parts',
-term: cleanText(term),
-answer: cleanText(parts),
-fullSentence: sentence
-};
-}
-}
+// الإجابة الصحيحة = الخيار الأول
+const correctAnswer = choices[0];
+const otherChoices = choices.slice(1);
 
-// نمط 4: "إذا الشرط فالنتيجة"
-const conditionMatch = sentence.match(/(?:إذا|من|كل من)\s+(.{10,60}?)\s+(?:فـ|فإن|فعليه|يجب عليه)\s+(.{15,120})/);
-if (conditionMatch) {
-const condition = conditionMatch[1].trim();
-const result = conditionMatch[2].trim();
-const resultWords = result.split(/\s+/).filter(w => w.length > 0);
-if (resultWords.length >= 3 && condition.length > 5) {
-return {
-type: 'condition',
-term: cleanText(condition),
-answer: cleanText(result),
-fullSentence: sentence
-};
-}
-}
-
-// نمط 5: "الشيء يكون في/عند/بعد"
-const timeMatch = sentence.match(/(.{5,40}?)\s+(?:يكون|يكون|يقع|يحدث)\s+(?:في|عند|بعد|قبل|عندما|إذا)\s+(.{15,120})/);
-if (timeMatch) {
-const term = timeMatch[1].trim();
-const time = timeMatch[2].trim();
-const timeWords = time.split(/\s+/).filter(w => w.length > 0);
-if (timeWords.length >= 3 && term.length > 3) {
-return {
-type: 'time',
-term: cleanText(term),
-answer: cleanText(time),
-fullSentence: sentence
-};
-}
-}
-
-return null;
-}
-
-/* ================= بناء السؤال والإجابة ================= */
-
-function buildQuestion(info, sentence, fullText, lessonTitle) {
-const { type, term, answer } = info;
-
-let questionText;
-
-switch(type) {
-case 'definition':
-questionText = `ما هو تعريف "${term}"؟`;
-break;
-case 'reason':
-questionText = `لماذا ${term}؟`;
-break;
-case 'parts':
-questionText = `ما هي أجزاء/محتوى "${term}"؟`;
-break;
-case 'condition':
-questionText = `ما هو الشيء الواجب عند ${term}؟`;
-break;
-case 'time':
-questionText = `متى/أين يكون ${term}؟`;
-break;
-default:
-questionText = `ما المقصود بـ "${term}" في الدرس؟`;
-}
-
-// توليد خيارات خاطئة من نفس الدرس
-const wrongAnswers = generateWrongAnswersFromText(fullText, sentence, answer);
-
-// دمج الإجابات
-const allAnswers = [answer, ...wrongAnswers];
-const uniqueAnswers = [...new Set(allAnswers)].filter(a => a !== answer);
-
-if (uniqueAnswers.length < 2) {
-console.log('خيارات غير كافية');
-return null;
-}
-
-const choices = [answer, ...uniqueAnswers.slice(0, 3)];
-const shuffled = choices.sort(() => Math.random() - 0.5);
+// خلط الخيارات
+const allChoices = [correctAnswer, ...otherChoices];
+const shuffled = allChoices.sort(() => Math.random() - 0.5);
 
 return {
-question: questionText,
+question: title,
 choices: shuffled,
-correct: answer,
-source: lessonTitle
+correct: correctAnswer,
+isOpenEnded: false,
+source: lesson.title || 'سؤال اختياري'
 };
-}
-
-/* ================= توليد إجابات خاطئة من نفس الدرس ================= */
-
-function generateWrongAnswersFromText(fullText, correctSentence, correctAnswer) {
-const wrongAnswers = [];
-const allSentences = fullText.split(/[.!؟]+/)
-.map(s => s.trim())
-.filter(s => s.length > 30 && s !== correctSentence);
-
-// استخراج معلومات من جمل أخرى
-for (const sentence of allSentences) {
-const info = extractClearInfo(sentence);
-if (info && info.answer !== correctAnswer && info.answer.length > 10) {
-wrongAnswers.push(info.answer);
-}
-if (wrongAnswers.length >= 6) break;
-}
-
-// إذا لم تكفِ، استخدام أجزاء من جمل أخرى
-if (wrongAnswers.length < 3) {
-for (const sentence of allSentences) {
-const clean = cleanText(sentence);
-if (clean.length > 15 && clean !== correctAnswer && !wrongAnswers.includes(clean)) {
-wrongAnswers.push(clean.substring(0, 80));
-}
-if (wrongAnswers.length >= 6) break;
-}
-}
-
-return wrongAnswers.slice(0, 3);
-}
-
-/* ================= تنظيف النصوص ================= */
-
-function cleanText(text) {
-return text
-.replace(/[،,؛;:.!؟"']/g, '')
-.replace(/\s+/g, ' ')
-.trim()
-.substring(0, 100);
 }
 
 /* ================= عرض الاختبار ================= */
-
 function renderExam() {
 const container = document.getElementById('examContent');
 container.innerHTML = '';
 
 examQuestions.forEach((q, index) => {
+if (q.isOpenEnded) {
+// سؤال مقالي
+container.innerHTML += `
+<div class="question-box" id="q-${index}">
+<h4>السؤال ${index + 1} من ${examQuestions.length}</h4>
+<p class="question-text">${q.question}</p>
+<div class="answer-label">✏️ اكتب إجابتك:</div>
+<textarea class="open-answer" id="answer-${index}" placeholder="اكتب إجابتك هنا..." rows="4"></textarea>
+</div>
+`;
+} else {
+// سؤال اختياري
 let choicesHtml = '';
 q.choices.forEach((choice) => {
-const safeChoice = choice.replace(/'/g, "\\'").replace(/"/g, '\\"');
+const safeChoice = choice.replace(/'/g, "\'").replace(/"/g, '\"');
 choicesHtml += `<div class="choice" onclick="selectAnswer(${index}, '${safeChoice}', this)">${choice}</div>`;
 });
 
@@ -1265,6 +1130,7 @@ ${choicesHtml}
 </div>
 </div>
 `;
+}
 });
 
 container.innerHTML += `
@@ -1307,8 +1173,45 @@ document.getElementById('examModal').classList.remove('show');
 window.submitExam = function() {
 clearInterval(examTimerInterval);
 
-let correct = 0;
+let correctMCQ = 0;
+let mcqTotal = 0;
+let openTotal = 0;
+let openScoreSum = 0;
+
 examQuestions.forEach((q, i) => {
+if (q.isOpenEnded) {
+// سؤال مقالي
+const userAnswer = document.getElementById(`answer-${i}`).value.trim();
+q.userAnswer = userAnswer;
+
+const score = calculateOpenScore(userAnswer, q.correct);
+q.score = score;
+openScoreSum += score;
+openTotal++;
+
+// تلوين الحقل
+const textarea = document.getElementById(`answer-${i}`);
+if (score >= 70) {
+textarea.classList.add('correct-answer');
+} else if (score >= 40) {
+textarea.classList.add('partial-answer');
+} else {
+textarea.classList.add('wrong-answer');
+}
+
+// إضافة الإجابة النموذجية بعد التصحيح
+const modelAnswerDiv = document.createElement('div');
+modelAnswerDiv.className = 'model-answer-box';
+modelAnswerDiv.innerHTML = `
+<div class="model-answer-title">📖 الإجابة النموذجية:</div>
+<div style="color:#aaa;line-height:1.8">${q.correct || 'لا يوجد إجابة نموذجية'}</div>
+<div style="margin-top:10px;color:#f5e6b3;font-size:14px">✓ نسبة التطابق: ${score}%</div>
+`;
+textarea.parentNode.appendChild(modelAnswerDiv);
+
+} else {
+// سؤال اختياري
+mcqTotal++;
 const box = document.getElementById(`choices-${i}`);
 if (!box) return;
 
@@ -1317,12 +1220,26 @@ if (c.textContent === q.correct) c.classList.add('correct');
 if (c.textContent === q.userAnswer && q.userAnswer !== q.correct) c.classList.add('wrong');
 });
 
-if (q.userAnswer === q.correct) correct++;
+if (q.userAnswer === q.correct) correctMCQ++;
+}
 });
 
-const score = correct;
-const total = examQuestions.length;
-const percent = Math.round((score / total) * 100);
+// حساب النتيجة النهائية
+const mcqPercent = mcqTotal > 0 ? Math.round((correctMCQ / mcqTotal) * 100) : 100;
+const openPercent = openTotal > 0 ? Math.round(openScoreSum / openTotal) : 100;
+
+// الوزن: 50% اختياري + 50% مقالي (إذا وجد النوعان)
+let finalPercent;
+if (mcqTotal > 0 && openTotal > 0) {
+finalPercent = Math.round((mcqPercent + openPercent) / 2);
+} else if (mcqTotal > 0) {
+finalPercent = mcqPercent;
+} else {
+finalPercent = openPercent;
+}
+
+const totalQuestions = examQuestions.length;
+const totalCorrect = correctMCQ + Math.round((openScoreSum / 100) * openTotal);
 
 const result = {
 id: Date.now(),
@@ -1330,9 +1247,13 @@ name: currentExam.name,
 subject: currentExam.subject,
 subjectKey: currentExam.subjectKey,
 chapters: currentExam.chapters,
-score: score,
-total: total,
-percent: percent,
+score: totalCorrect,
+total: totalQuestions,
+percent: finalPercent,
+mcqScore: correctMCQ,
+mcqTotal: mcqTotal,
+openScore: openTotal > 0 ? Math.round(openScoreSum / openTotal) : 0,
+openTotal: openTotal,
 date: new Date().toLocaleString('ar-SA')
 };
 
@@ -1341,10 +1262,101 @@ document.getElementById('examModal').classList.remove('show');
 showResult(result);
 };
 
+/* ================= تصحيح الأسئلة المقالية - مقارنة ذكية ================= */
+function calculateOpenScore(userAnswer, modelAnswer) {
+if (!userAnswer || userAnswer.length < 3) return 0;
+if (!modelAnswer || modelAnswer.length < 3) return 0;
+
+// تنظيف النصوص
+const cleanUser = cleanTextForComparison(userAnswer);
+const cleanModel = cleanTextForComparison(modelAnswer);
+
+// تقسيم الإجابة النموذجية إلى نقاط/جمل
+const modelSentences = modelAnswer.split(/[.!؟\n]+/)
+.map(s => s.trim())
+.filter(s => s.length > 5);
+
+const totalPoints = modelSentences.length || 1;
+let matchedPoints = 0;
+
+const userWords = cleanUser.split(/\s+/).filter(w => w.length > 2);
+
+modelSentences.forEach(sentence => {
+const sentenceWords = cleanTextForComparison(sentence).split(/\s+/).filter(w => w.length > 2);
+if (sentenceWords.length === 0) return;
+
+// حساب عدد الكلمات المشتركة
+let commonWords = 0;
+sentenceWords.forEach(word => {
+if (userWords.includes(word)) commonWords++;
+});
+
+// نسبة التطابق للنقطة
+const matchRatio = commonWords / sentenceWords.length;
+if (matchRatio >= 0.3) matchedPoints++;
+});
+
+// حساب نسبة التطابق العامة
+const sentenceScore = Math.round((matchedPoints / totalPoints) * 100);
+
+// مقارنة النص كامل (للتعابير القصيرة)
+const fullTextScore = calculateTextSimilarity(cleanUser, cleanModel);
+
+// أخذ أعلى درجة
+return Math.max(sentenceScore, fullTextScore);
+}
+
+function calculateTextSimilarity(text1, text2) {
+if (!text1 || !text2) return 0;
+
+const words1 = text1.split(/\s+/).filter(w => w.length > 2);
+const words2 = text2.split(/\s+/).filter(w => w.length > 2);
+
+if (words1.length === 0 || words2.length === 0) return 0;
+
+const set1 = new Set(words1);
+const set2 = new Set(words2);
+
+const intersection = [...set1].filter(w => set2.has(w));
+const union = new Set([...set1, ...set2]);
+
+return Math.round((intersection.length / union.size) * 100);
+}
+
+function cleanTextForComparison(text) {
+return text
+.toLowerCase()
+.replace(/[،,؛;:.!؟"'()\[\]{}]/g, ' ')
+.replace(/\s+/g, ' ')
+.trim();
+}
+
 function showResult(result) {
 const container = document.getElementById('resultContent');
 let emoji = result.percent >= 90 ? '🏆' : result.percent >= 80 ? '🎉' : result.percent >= 60 ? '👍' : result.percent >= 40 ? '💪' : '📚';
 let message = result.percent >= 90 ? 'ممتاز! بارك الله فيك' : result.percent >= 80 ? 'أحسنت! تقدم رائع' : result.percent >= 60 ? 'جيد! واصل التقدم' : result.percent >= 40 ? 'حاول مراجعة الدروس' : 'حاول مرة أخرى';
+
+// بناء تفاصيل الأسئلة المقالية
+let openReview = '';
+const openQuestions = examQuestions.filter(q => q.isOpenEnded);
+if (openQuestions.length > 0) {
+openReview = `
+<div style="margin-top:25px;text-align:right">
+<h3 style="color:#f5e6b3;margin-bottom:15px">📋 مراجعة الأسئلة المقالية</h3>
+${openQuestions.map((q, i) => `
+<div style="margin:15px 0;padding:15px;background:#06131f;border-radius:12px;border:1px solid rgba(255,255,255,.1)">
+<p style="color:#f5e6b3;font-weight:bold;margin-bottom:10px">${q.question}</p>
+<p style="color:${q.score >= 70 ? '#27ae60' : q.score >= 40 ? '#d4af37' : '#c0392b'};margin:8px 0;font-size:14px">
+${q.score >= 70 ? '✓ إجابة صحيحة' : q.score >= 40 ? '⚠ إجابة مقبولة' : '✗ إجابة خاطئة'} 
+(${q.score}%)
+</p>
+<p style="color:#fff;background:rgba(255,255,255,.05);padding:10px;border-radius:8px;line-height:1.8">${q.userAnswer || 'لم تُجب'}</p>
+<p style="color:#d4af37;margin:8px 0;font-size:14px">📖 الإجابة النموذجية:</p>
+<p style="color:#aaa;background:rgba(255,255,255,.05);padding:10px;border-radius:8px;line-height:1.8;white-space:pre-line">${q.correct}</p>
+</div>
+`).join('')}
+</div>`;
+}
 
 container.innerHTML = `
 <div class="result-box">
@@ -1352,9 +1364,16 @@ container.innerHTML = `
 <h2 style="color:#f5e6b3;margin-bottom:20px">${message}</h2>
 <div class="result-score">${result.score}/${result.total}</div>
 <div class="result-percent">${result.percent}%</div>
+
+${result.mcqTotal > 0 ? `<p style="color:#27ae60;margin:10px 0">✅ اختياري: ${result.mcqScore}/${result.mcqTotal}</p>` : ''}
+${result.openTotal > 0 ? `<p style="color:#d4af37;margin:10px 0">📝 مقالي: ${result.openScore}%</p>` : ''}
+
 <p style="color:#aaa;margin:15px 0">المادة: ${result.subject}</p>
 <p style="color:#aaa;margin:5px 0">الفصول: ${result.chapters.join(' • ')}</p>
 <p style="color:#aaa;margin:5px 0">التاريخ: ${result.date}</p>
+
+${openReview}
+
 <div style="margin-top:25px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
 <button class="btn-primary" onclick="shareResult(${result.id})">
 📤 مشاركة عبر واتساب
@@ -1400,11 +1419,21 @@ results = results.reverse();
 
 container.innerHTML = '';
 results.forEach(r => {
+let details = '';
+if (r.mcqTotal > 0 && r.openTotal > 0) {
+details = `<div style="color:#aaa;font-size:13px">✅ اختياري: ${r.mcqScore}/${r.mcqTotal} | 📝 مقالي: ${r.openScore}%</div>`;
+} else if (r.mcqTotal > 0) {
+details = `<div style="color:#aaa;font-size:13px">✅ اختياري: ${r.mcqScore}/${r.mcqTotal}</div>`;
+} else if (r.openTotal > 0) {
+details = `<div style="color:#aaa;font-size:13px">📝 مقالي: ${r.openScore}%</div>`;
+}
+
 container.innerHTML += `
 <div class="participant-item">
 <div class="participant-info">
 <div class="participant-name">👤 ${r.name}</div>
 <div class="participant-chapters">📚 ${r.subject} | 📂 ${r.chapters.join(' • ')}</div>
+${details}
 <div class="participant-chapters">📅 ${r.date}</div>
 </div>
 <div class="participant-score">${r.score}/${r.total} (${r.percent}%)</div>
@@ -1432,11 +1461,21 @@ let results = JSON.parse(localStorage.getItem('examResults') || '[]');
 const result = results.find(r => r.id === resultId);
 if (!result) return;
 
+let details = '';
+if (result.mcqTotal > 0) {
+details += `✅ اختياري: ${result.mcqScore}/${result.mcqTotal}
+`;
+}
+if (result.openTotal > 0) {
+details += `📝 مقالي: ${result.openScore}%
+`;
+}
+
 const text = `🎓 نتيجة الاختبار
 👤 الاسم: ${result.name}
 📚 المادة: ${result.subject}
 📂 الفصول: ${result.chapters.join(' • ')}
-✅ النتيجة: ${result.score}/${result.total}
+${details}✅ النتيجة: ${result.score}/${result.total}
 📊 النسبة: ${result.percent}%
 📅 التاريخ: ${result.date}
 
