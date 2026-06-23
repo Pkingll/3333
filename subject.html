@@ -478,6 +478,103 @@ max-width:900px;
 background:#1a3a5c;
 }
 
+/* ======== أسئلة مقالية ======== */
+.open-answer{
+width:100%;
+padding:14px;
+border:1px solid rgba(255,255,255,.2);
+border-radius:12px;
+background:#06131f;
+color:#fff;
+font-size:16px;
+outline:none;
+min-height:120px;
+resize:vertical;
+font-family:Cairo,sans-serif;
+line-height:1.8;
+margin-top:10px;
+}
+
+.open-answer::placeholder{
+color:#888;
+}
+
+.open-answer.correct-answer{
+border-color:#27ae60;
+background:rgba(39,174,96,0.1);
+}
+
+.open-answer.partial-answer{
+border-color:#d4af37;
+background:rgba(212,175,55,0.1);
+}
+
+.open-answer.wrong-answer{
+border-color:#c0392b;
+background:rgba(192,57,43,0.1);
+}
+
+.answer-label{
+color:#f5e6b3;
+font-weight:700;
+margin-top:15px;
+margin-bottom:5px;
+font-size:15px;
+}
+
+.model-answer-box{
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.1);
+border-radius:12px;
+padding:15px;
+margin-top:15px;
+line-height:1.8;
+}
+
+.model-answer-title{
+color:#d4af37;
+font-weight:700;
+margin-bottom:10px;
+font-size:14px;
+}
+
+.question-counter{
+text-align:center;
+color:#f5e6b3;
+font-size:18px;
+margin-bottom:15px;
+padding:10px;
+background:rgba(212,175,55,0.1);
+border-radius:10px;
+}
+
+.nav-question-btns{
+display:flex;
+gap:10px;
+justify-content:center;
+margin-top:20px;
+}
+
+.nav-question-btn{
+padding:10px 20px;
+border:none;
+border-radius:10px;
+background:#0d2033;
+color:#f5e6b3;
+cursor:pointer;
+font-weight:700;
+}
+
+.nav-question-btn:disabled{
+opacity:0.5;
+cursor:not-allowed;
+}
+
+.nav-question-btn.primary{
+background:#d4af37;
+color:#06131f;
+}
+
 ::-webkit-scrollbar{
 width:8px;
 }
@@ -608,7 +705,12 @@ justify-content:flex-end;
 <button class="close-modal" onclick="closeExamModal()">✕</button>
 <h2>📝 الاختبار</h2>
 <div class="timer" id="examTimer">⏱️ 15:00</div>
+<div class="question-counter" id="questionCounter">السؤال 1 من 10</div>
 <div id="examContent"></div>
+<div class="nav-question-btns" id="navQuestionBtns">
+<button class="nav-question-btn" id="prevBtn" onclick="prevQuestion()" disabled>⬅ السابق</button>
+<button class="nav-question-btn primary" id="nextBtn" onclick="nextQuestion()">التالي ➡</button>
+</div>
 </div>
 </div>
 
@@ -820,6 +922,8 @@ document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('activ
 let examQuestions = [];
 let currentExam = {};
 let examTimerInterval;
+let currentQuestionIndex = 0;
+let userAnswers = {};
 
 async function loadSubjectsForExam() {
 const select = document.getElementById('examSubjectSelect');
@@ -870,40 +974,31 @@ if (!name) { showToast('❌ الرجاء إدخال اسم المشارك'); ret
 if (!subject) { showToast('❌ الرجاء اختيار المادة'); return; }
 if (selectedChapters.length === 0) { showToast('❌ الرجاء اختيار فصل واحد على الأقل'); return; }
 
-showToast('⏳ جاري تحميل الدروس...');
+showToast('⏳ جاري تحميل الأسئلة...');
 
-let lessons = [];
+let allQuestions = [];
 for (const chId of selectedChapters) {
 const q = query(collection(db, 'lessons'), where('chapterId', '==', chId));
 const snap = await getDocs(q);
 snap.forEach(docu => {
 const data = docu.data();
-lessons.push({
-id: docu.id,
-title: data.title || '',
-text: data.text || '',
-questions: data.questions || null,
-...data
-});
+const extracted = extractQuestionsFromLesson(data);
+allQuestions = allQuestions.concat(extracted);
 });
 }
 
-console.log('عدد الدروس المحملة:', lessons.length);
+console.log('عدد الأسئلة المحملة:', allQuestions.length);
 
-if (lessons.length === 0) { 
-showToast('❌ لا توجد دروس في الفصول المختارة'); 
+if (allQuestions.length === 0) { 
+showToast('❌ لا توجد أسئلة في الفصول المختارة - تأكد من وجود أسئلة في الدروس'); 
 return; 
 }
 
-showToast('⏳ جاري إنشاء الأسئلة...');
+// خلط الأسئلة واختيار العدد المطلوب
+const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+examQuestions = shuffled.slice(0, Math.min(questionCount, allQuestions.length));
 
-examQuestions = generateQuestions(lessons, questionCount);
-console.log('عدد الأسئلة المُنشأة:', examQuestions.length);
-
-if (examQuestions.length === 0) { 
-showToast('❌ لا يمكن إنشاء أسئلة من هذه الدروس - تأكد من وجود أسئلة في الدروس'); 
-return; 
-}
+console.log('عدد الأسئلة في الاختبار:', examQuestions.length);
 
 currentExam = {
 name,
@@ -915,7 +1010,10 @@ duration: duration,
 startTime: Date.now()
 };
 
-renderExam();
+currentQuestionIndex = 0;
+userAnswers = {};
+
+renderCurrentQuestion();
 document.getElementById('examModal').classList.add('show');
 startTimer(duration * 60);
 
@@ -925,84 +1023,45 @@ showToast('❌ حدث خطأ: ' + error.message);
 }
 };
 
-function generateQuestions(lessons, count) {
-console.log('توليد', count, 'سؤال من', lessons.length, 'درس');
-let questions = [];
-const shuffled = [...lessons].sort(() => Math.random() - 0.5);
-
-for (const lesson of shuffled) {
-if (questions.length >= count) break;
-
-// المحاولة 1: الأسئلة المخزنة في حقل questions (مصفوفة)
-if (lesson.questions && Array.isArray(lesson.questions) && lesson.questions.length > 0) {
-const validQuestions = getValidQuestions(lesson.questions);
-for (const cq of validQuestions) {
-if (questions.length >= count) break;
-questions.push({
-question: cq.question,
-choices: [...cq.choices].sort(() => Math.random() - 0.5),
-correct: cq.correct,
-source: lesson.title
-});
-}
-}
-
-// المحاولة 2: استخراج من النص إذا كان يحتوي على | (صيغة سؤال/إجابة)
-if (questions.length < count && lesson.text && lesson.text.includes('|')) {
-const extracted = extractQuestionsFromText(lesson.text, lesson.title);
-for (const q of extracted) {
-if (questions.length >= count) break;
-questions.push(q);
-}
-}
-}
-
-return questions.slice(0, count);
-}
-
-function getValidQuestions(questionsArray) {
-const valid = [];
-for (const q of questionsArray) {
-if (!q || typeof q !== 'object') continue;
-const questionObj = q.toJSON ? q.toJSON() : q;
-if (!questionObj.question || !questionObj.choices || !questionObj.correct) continue;
-let choices = questionObj.choices;
-if (choices && typeof choices === 'object' && !Array.isArray(choices)) {
-choices = Object.values(choices);
-}
-if (!Array.isArray(choices) || choices.length < 2) continue;
-const correctStr = String(questionObj.correct).trim();
-const choicesStr = choices.map(c => String(c).trim());
-if (!choicesStr.includes(correctStr)) continue;
-valid.push({
-question: String(questionObj.question).trim(),
-choices: choicesStr,
-correct: correctStr
-});
-}
-return valid;
-}
-
-function extractQuestionsFromText(text, lessonTitle) {
+// استخراج الأسئلة المقالية من الدرس
+function extractQuestionsFromLesson(lesson) {
 const questions = [];
-const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+const text = (lesson.text || '').trim();
+const title = lesson.title || '';
 
-for (let i = 0; i < lines.length; i++) {
-const line = lines[i];
+if (!text) return questions;
+
+// صيغة 1: أسئلة في حقل questions (مصفوفة)
+if (lesson.questions && Array.isArray(lesson.questions)) {
+for (const q of lesson.questions) {
+if (q.question && q.answer) {
+questions.push({
+question: q.question,
+correct: q.answer,
+isOpenEnded: true,
+source: title
+});
+}
+}
+}
+
+// صيغة 2: نص مفصول بـ | (سؤال | إجابة)
+const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+for (const line of lines) {
 if (line.includes('|')) {
 const parts = line.split('|').map(p => p.trim()).filter(p => p.length > 0);
-if (parts.length >= 3) {
+if (parts.length >= 2) {
 const questionText = parts[0];
-const correctAnswer = parts[1];
-const otherChoices = parts.slice(2);
-const allChoices = [correctAnswer, ...otherChoices];
-const shuffled = allChoices.sort(() => Math.random() - 0.5);
+const answerText = parts[1];
+// التأكد من أنه سؤال (ينتهي بـ ؟ أو يحتوي على كلمات استفهام)
+if (questionText.includes('؟') || /^(ما|من|لماذا|كيف|متى|أين|هل|ما هي|ما هو)/.test(questionText)) {
 questions.push({
 question: questionText,
-choices: shuffled,
-correct: correctAnswer,
-source: lessonTitle
+correct: answerText,
+isOpenEnded: true,
+source: title
 });
+}
 }
 }
 }
@@ -1010,40 +1069,53 @@ source: lessonTitle
 return questions;
 }
 
-function renderExam() {
+function renderCurrentQuestion() {
 const container = document.getElementById('examContent');
-container.innerHTML = '';
+const counter = document.getElementById('questionCounter');
+const q = examQuestions[currentQuestionIndex];
 
-examQuestions.forEach((q, index) => {
-let choicesHtml = '';
-q.choices.forEach((choice) => {
-const safeChoice = choice.replace(/'/g, "\'").replace(/"/g, '\"');
-choicesHtml += `<div class="choice" onclick="selectAnswer(${index}, '${safeChoice}', this)">${choice}</div>`;
-});
+// تحديث العداد
+counter.textContent = `السؤال ${currentQuestionIndex + 1} من ${examQuestions.length}`;
 
-container.innerHTML += `
-<div class="question-box" id="q-${index}">
-<h4>السؤال ${index + 1} من ${examQuestions.length}</h4>
+// تحديث أزرار التنقل
+document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+const nextBtn = document.getElementById('nextBtn');
+if (currentQuestionIndex === examQuestions.length - 1) {
+nextBtn.textContent = '✅ إنهاء الاختبار';
+nextBtn.onclick = submitExam;
+} else {
+nextBtn.textContent = 'التالي ➡';
+nextBtn.onclick = nextQuestion;
+}
+
+// عرض السؤال
+const savedAnswer = userAnswers[currentQuestionIndex] || '';
+container.innerHTML = `
+<div class="question-box">
+<h4>السؤال ${currentQuestionIndex + 1} من ${examQuestions.length}</h4>
 <p class="question-text">${q.question}</p>
-<div class="choices" id="choices-${index}">
-${choicesHtml}
+<div class="answer-label">✏️ اكتب إجابتك:</div>
+<textarea class="open-answer" id="answer-${currentQuestionIndex}" placeholder="اكتب إجابتك هنا..." rows="6" oninput="saveAnswer(${currentQuestionIndex}, this.value)">${savedAnswer}</textarea>
 </div>
-</div>
-`;
-});
-
-container.innerHTML += `
-<button class="btn-primary" onclick="submitExam()" style="width:100%;margin-top:20px">
-✅ إنهاء الاختبار وتصحيح
-</button>
 `;
 }
 
-window.selectAnswer = function(qIndex, choice, element) {
-const box = document.getElementById(`choices-${qIndex}`);
-box.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
-element.classList.add('selected');
-examQuestions[qIndex].userAnswer = choice;
+window.saveAnswer = function(index, value) {
+userAnswers[index] = value.trim();
+};
+
+window.nextQuestion = function() {
+if (currentQuestionIndex < examQuestions.length - 1) {
+currentQuestionIndex++;
+renderCurrentQuestion();
+}
+};
+
+window.prevQuestion = function() {
+if (currentQuestionIndex > 0) {
+currentQuestionIndex--;
+renderCurrentQuestion();
+}
 };
 
 function startTimer(seconds) {
@@ -1065,29 +1137,34 @@ showToast('⏰ انتهى وقت الاختبار!');
 }
 
 window.closeExamModal = function() {
+if (confirm('هل أنت متأكد من إغلاق الاختبار؟ سيتم فقدان تقدمك!')) {
 clearInterval(examTimerInterval);
 document.getElementById('examModal').classList.remove('show');
+}
 };
 
 window.submitExam = function() {
 clearInterval(examTimerInterval);
 
-let correct = 0;
+let totalScore = 0;
+let answeredCount = 0;
+
 examQuestions.forEach((q, i) => {
-const box = document.getElementById(`choices-${i}`);
-if (!box) return;
+const userAnswer = userAnswers[i] || '';
+q.userAnswer = userAnswer;
 
-box.querySelectorAll('.choice').forEach(c => {
-if (c.textContent === q.correct) c.classList.add('correct');
-if (c.textContent === q.userAnswer && q.userAnswer !== q.correct) c.classList.add('wrong');
+if (userAnswer.length > 0) {
+answeredCount++;
+const score = calculateOpenScore(userAnswer, q.correct);
+q.score = score;
+totalScore += score;
+} else {
+q.score = 0;
+}
 });
 
-if (q.userAnswer === q.correct) correct++;
-});
-
-const score = correct;
-const total = examQuestions.length;
-const percent = Math.round((score / total) * 100);
+const avgScore = answeredCount > 0 ? Math.round(totalScore / answeredCount) : 0;
+const totalQuestions = examQuestions.length;
 
 const result = {
 id: Date.now(),
@@ -1095,9 +1172,10 @@ name: currentExam.name,
 subject: currentExam.subject,
 subjectKey: currentExam.subjectKey,
 chapters: currentExam.chapters,
-score: score,
-total: total,
-percent: percent,
+score: Math.round(totalScore / 100 * totalQuestions),
+total: totalQuestions,
+percent: avgScore,
+answeredCount: answeredCount,
 date: new Date().toLocaleString('ar-SA')
 };
 
@@ -1106,20 +1184,106 @@ document.getElementById('examModal').classList.remove('show');
 showResult(result);
 };
 
+// تصحيح ذكي للأسئلة المقالية
+function calculateOpenScore(userAnswer, modelAnswer) {
+if (!userAnswer || userAnswer.length < 3) return 0;
+if (!modelAnswer || modelAnswer.length < 3) return 0;
+
+const cleanUser = cleanTextForComparison(userAnswer);
+const cleanModel = cleanTextForComparison(modelAnswer);
+
+// تقسيم الإجابة النموذجية إلى نقاط
+const modelPoints = modelAnswer.split(/[.!؟\n]+/)
+.map(s => s.trim())
+.filter(s => s.length > 5);
+
+const totalPoints = modelPoints.length || 1;
+let matchedPoints = 0;
+
+const userWords = cleanUser.split(/\s+/).filter(w => w.length > 2);
+
+modelPoints.forEach(sentence => {
+const sentenceWords = cleanTextForComparison(sentence).split(/\s+/).filter(w => w.length > 2);
+if (sentenceWords.length === 0) return;
+
+let commonWords = 0;
+sentenceWords.forEach(word => {
+if (userWords.includes(word)) commonWords++;
+});
+
+const matchRatio = commonWords / sentenceWords.length;
+if (matchRatio >= 0.3) matchedPoints++;
+});
+
+const sentenceScore = Math.round((matchedPoints / totalPoints) * 100);
+const fullTextScore = calculateTextSimilarity(cleanUser, cleanModel);
+
+return Math.max(sentenceScore, fullTextScore);
+}
+
+function calculateTextSimilarity(text1, text2) {
+if (!text1 || !text2) return 0;
+
+const words1 = text1.split(/\s+/).filter(w => w.length > 2);
+const words2 = text2.split(/\s+/).filter(w => w.length > 2);
+
+if (words1.length === 0 || words2.length === 0) return 0;
+
+const set1 = new Set(words1);
+const set2 = new Set(words2);
+
+const intersection = [...set1].filter(w => set2.has(w));
+const union = new Set([...set1, ...set2]);
+
+return Math.round((intersection.length / union.size) * 100);
+}
+
+function cleanTextForComparison(text) {
+return text
+.toLowerCase()
+.replace(/[،,؛;:.!؟"'()\[\]{}]/g, ' ')
+.replace(/\s+/g, ' ')
+.trim();
+}
+
 function showResult(result) {
 const container = document.getElementById('resultContent');
 let emoji = result.percent >= 90 ? '🏆' : result.percent >= 80 ? '🎉' : result.percent >= 60 ? '👍' : result.percent >= 40 ? '💪' : '📚';
 let message = result.percent >= 90 ? 'ممتاز! بارك الله فيك' : result.percent >= 80 ? 'أحسنت! تقدم رائع' : result.percent >= 60 ? 'جيد! واصل التقدم' : result.percent >= 40 ? 'حاول مراجعة الدروس' : 'حاول مرة أخرى';
 
+// بناء مراجعة الأسئلة
+let reviewHtml = '';
+examQuestions.forEach((q, i) => {
+const score = q.score || 0;
+const statusColor = score >= 70 ? '#27ae60' : score >= 40 ? '#d4af37' : '#c0392b';
+const statusText = score >= 70 ? '✓ إجابة صحيحة' : score >= 40 ? '⚠ إجابة مقبولة' : '✗ إجابة خاطئة';
+
+reviewHtml += `
+<div style="margin:15px 0;padding:15px;background:#06131f;border-radius:12px;border:1px solid rgba(255,255,255,.1);text-align:right">
+<p style="color:#f5e6b3;font-weight:bold;margin-bottom:10px">السؤال ${i + 1}: ${q.question}</p>
+<p style="color:${statusColor};margin:8px 0;font-size:14px">${statusText} (${score}%)</p>
+<p style="color:#fff;background:rgba(255,255,255,.05);padding:10px;border-radius:8px;line-height:1.8;margin:8px 0">${q.userAnswer || 'لم تُجب'}</p>
+<p style="color:#d4af37;margin:8px 0;font-size:14px">📖 الإجابة النموذجية:</p>
+<p style="color:#aaa;background:rgba(255,255,255,.05);padding:10px;border-radius:8px;line-height:1.8">${q.correct}</p>
+</div>
+`;
+});
+
 container.innerHTML = `
 <div class="result-box">
 <div style="font-size:64px;margin-bottom:10px">${emoji}</div>
 <h2 style="color:#f5e6b3;margin-bottom:20px">${message}</h2>
-<div class="result-score">${result.score}/${result.total}</div>
-<div class="result-percent">${result.percent}%</div>
+<div class="result-score">${result.percent}%</div>
+<div class="result-percent">${result.answeredCount}/${result.total} أسئلة تمت الإجابة عليها</div>
 <p style="color:#aaa;margin:15px 0">المادة: ${result.subject}</p>
 <p style="color:#aaa;margin:5px 0">الفصول: ${result.chapters.join(' • ')}</p>
 <p style="color:#aaa;margin:5px 0">التاريخ: ${result.date}</p>
+
+<div style="margin-top:25px;text-align:right">
+<h3 style="color:#f5e6b3;margin-bottom:15px;text-align:center">📋 مراجعة الأسئلة</h3>
+${reviewHtml}
+</div>
+
 <div style="margin-top:25px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
 <button class="btn-primary" onclick="shareResult(${result.id})">
 📤 مشاركة عبر واتساب
@@ -1171,7 +1335,7 @@ container.innerHTML += `
 <div class="participant-chapters">📚 ${r.subject} | 📂 ${r.chapters.join(' • ')}</div>
 <div class="participant-chapters">📅 ${r.date}</div>
 </div>
-<div class="participant-score">${r.score}/${r.total} (${r.percent}%)</div>
+<div class="participant-score">${r.percent}%</div>
 <div class="participant-actions">
 <button class="share-btn" onclick="shareResult(${r.id})">📤 واتساب</button>
 <button class="delete-btn" onclick="deleteResult(${r.id})">🗑️ حذف</button>
@@ -1200,8 +1364,7 @@ const text = `🎓 نتيجة الاختبار
 👤 الاسم: ${result.name}
 📚 المادة: ${result.subject}
 📂 الفصول: ${result.chapters.join(' • ')}
-✅ النتيجة: ${result.score}/${result.total}
-📊 النسبة: ${result.percent}%
+✅ النتيجة: ${result.percent}%
 📅 التاريخ: ${result.date}
 
 🌟 تم الاختبار عبر تطبيق التعليم`;
