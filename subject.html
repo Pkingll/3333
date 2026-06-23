@@ -747,57 +747,6 @@ font-size:14px;
 color:#06131f;
 }
 
-/* ======== شريط التقدم ======== */
-.progress-bar-container{
-width:100%;
-height:8px;
-background:rgba(255,255,255,.1);
-border-radius:4px;
-margin:15px 0;
-overflow:hidden;
-}
-
-.progress-bar{
-height:100%;
-background:#d4af37;
-border-radius:4px;
-transition:width .3s;
-}
-
-/* ======== نتيجة التقريب ======== */
-.approx-badge{
-display:inline-block;
-padding:4px 12px;
-border-radius:20px;
-font-size:13px;
-font-weight:700;
-margin-top:5px;
-}
-
-.approx-badge.excellent{
-background:rgba(39,174,96,.2);
-color:#27ae60;
-border:1px solid #27ae60;
-}
-
-.approx-badge.good{
-background:rgba(212,175,55,.2);
-color:#d4af37;
-border:1px solid #d4af37;
-}
-
-.approx-badge.fair{
-background:rgba(230,126,34,.2);
-color:#e67e22;
-border:1px solid #e67e22;
-}
-
-.approx-badge.needs-work{
-background:rgba(192,57,43,.2);
-color:#c0392b;
-border:1px solid #c0392b;
-}
-
 ::-webkit-scrollbar{
 width:8px;
 }
@@ -1286,6 +1235,8 @@ container.innerHTML = '';
 snap.forEach(docu => {
 const data = docu.data();
 const chapterId = docu.id;
+
+// عدد الأسئلة
 const qCount = data.questionCount || 0;
 
 container.innerHTML += `
@@ -1347,6 +1298,7 @@ if (!confirm('هل أنت متأكد من حذف هذا الباب؟ سيتم ح
 showToast('⏳ جاري الحذف...');
 
 try {
+// حذف جميع الأسئلة التابعة للباب
 const q = query(collection(db, 'examQuestions'), where('chapterId', '==', chapterId));
 const snap = await getDocs(q);
 const batch = [];
@@ -1355,6 +1307,7 @@ snap.forEach(docu => {
 });
 await Promise.all(batch);
 
+// حذف الباب
 await deleteDoc(doc(db, 'examChapters', chapterId));
 showToast('🗑️ تم حذف الباب وأسئلته');
 loadAdminChapters();
@@ -1384,6 +1337,7 @@ await addDoc(collection(db, 'examQuestions'), {
  createdAt: serverTimestamp()
 });
 
+// تحديث عدد الأسئلة
 const chapterRef = doc(db, 'examChapters', currentAdminChapter);
 const chapterSnap = await getDoc(chapterRef);
 const currentCount = chapterSnap.data()?.questionCount || 0;
@@ -1508,6 +1462,7 @@ showToast('⏳ جاري الحذف...');
 try {
 await deleteDoc(doc(db, 'examQuestions', questionId));
 
+// تحديث عدد الأسئلة
 const chapterRef = doc(db, 'examChapters', currentAdminChapter);
 const chapterSnap = await getDoc(chapterRef);
 const currentCount = chapterSnap.data()?.questionCount || 0;
@@ -1530,7 +1485,6 @@ let examTimerInterval;
 let currentQuestionIndex = 0;
 let userAnswers = {};
 let selectedChapterId = '';
-let selectedChapterName = '';
 
 async function loadSubjectsForExam() {
 const select = document.getElementById('examSubjectSelect');
@@ -1549,11 +1503,9 @@ const subject = document.getElementById('examSubjectSelect').value;
 const box = document.getElementById('examChapterSelectBox');
 const list = document.getElementById('examChapterList');
 
-selectedChapterId = '';
-selectedChapterName = '';
-
 if (!subject) {
 box.style.display = 'none';
+selectedChapterId = '';
 return;
 }
 
@@ -1574,7 +1526,7 @@ snap.forEach(docu => {
 const data = docu.data();
 const qCount = data.questionCount || 0;
 list.innerHTML += `
-<div class="chapter-select-item" onclick="selectChapter(this, '${docu.id}', '${data.name}')" data-chapter="${docu.id}">
+<div class="chapter-select-item" onclick="selectChapter(this, '${docu.id}')" data-chapter="${docu.id}">
 <div>
 <strong style="color:#f5e6b3">📂 ${data.name}</strong>
 </div>
@@ -1590,13 +1542,12 @@ showToast('❌ حدث خطأ في تحميل الأبواب');
 }
 };
 
-window.selectChapter = function(el, chapterId, chapterName) {
+window.selectChapter = function(el, chapterId) {
 document.querySelectorAll('.chapter-select-item').forEach(item => {
 item.classList.remove('selected');
 });
 el.classList.add('selected');
 selectedChapterId = chapterId;
-selectedChapterName = chapterName;
 };
 
 window.startExam = async function() {
@@ -1612,6 +1563,7 @@ if (!selectedChapterId) { showToast('❌ الرجاء اختيار الباب');
 
 showToast('⏳ جاري تحميل الأسئلة...');
 
+// جمع أسئلة الباب المختار
 const q = query(collection(db, 'examQuestions'), where('chapterId', '==', selectedChapterId));
 const snap = await getDocs(q);
 
@@ -1633,6 +1585,7 @@ showToast('❌ لا توجد أسئلة مضافة لهذا الباب - أضف 
 return; 
 }
 
+// خلط الأسئلة
 const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
 examQuestions = shuffled;
 
@@ -1642,8 +1595,6 @@ currentExam = {
 name,
 subject: names[subject] || subject,
 subjectKey: subject,
-chapterName: selectedChapterName,
-chapterId: selectedChapterId,
 totalQuestions: examQuestions.length,
 duration: duration,
 startTime: Date.now()
@@ -1761,8 +1712,6 @@ id: Date.now(),
 name: currentExam.name,
 subject: currentExam.subject,
 subjectKey: currentExam.subjectKey,
-chapterName: currentExam.chapterName,
-chapterId: currentExam.chapterId,
 score: Math.round(totalScore / 100 * totalQuestions),
 total: totalQuestions,
 percent: avgScore,
@@ -1775,7 +1724,7 @@ document.getElementById('examModal').classList.remove('show');
 showResult(result);
 };
 
-// ==================== تصحيح ذكي معتمد على المعنى ====================
+// ==================== تصحيح ذكي ====================
 function calculateOpenScore(userAnswer, modelAnswer) {
 if (!userAnswer || userAnswer.length < 3) return 0;
 if (!modelAnswer || modelAnswer.length < 3) return 0;
@@ -1783,10 +1732,8 @@ if (!modelAnswer || modelAnswer.length < 3) return 0;
 const cleanUser = cleanTextForComparison(userAnswer);
 const cleanModel = cleanTextForComparison(modelAnswer);
 
-// 1. مقارنة النص كامل (30%)
 const fullTextScore = calculateTextSimilarity(cleanUser, cleanModel);
 
-// 2. تقسيم الإجابة النموذجية إلى نقاط رئيسية والتحقق من كل نقطة (40%)
 const modelPoints = extractKeyPoints(modelAnswer);
 const userPoints = extractKeyPoints(userAnswer);
 
@@ -1794,7 +1741,7 @@ let matchedPoints = 0;
 let totalPointsWeight = 0;
 
 modelPoints.forEach(modelPoint => {
-const pointWeight = Math.max(modelPoint.length, 10);
+const pointWeight = modelPoint.length;
 const pointScore = findBestMatch(modelPoint, userPoints);
 matchedPoints += pointScore * pointWeight;
 totalPointsWeight += pointWeight;
@@ -1802,24 +1749,17 @@ totalPointsWeight += pointWeight;
 
 const pointsScore = totalPointsWeight > 0 ? Math.round((matchedPoints / totalPointsWeight) * 100) : 0;
 
-// 3. مقارنة الكلمات المفتاحية (20%)
 const keywordsScore = compareKeywords(cleanUser, cleanModel);
 
-// 4. مقارنة الجذور (الكلمات الأساسية بدون حركات) (10%)
-const rootScore = compareRootWords(cleanUser, cleanModel);
-
-// الجمع المرجح
 const finalScore = Math.round(
- (fullTextScore * 0.30) + 
- (pointsScore * 0.40) + 
- (keywordsScore * 0.20) +
- (rootScore * 0.10)
+ (fullTextScore * 0.4) + 
+ (pointsScore * 0.4) + 
+ (keywordsScore * 0.2)
 );
 
 return Math.min(100, finalScore);
 }
 
-// استخراج النقاط الرئيسية من النص
 function extractKeyPoints(text) {
 const points = text
 .split(/[\n.،,;:.!؟"'()\[\]{}]+/)
@@ -1829,7 +1769,6 @@ const points = text
 return points;
 }
 
-// إيجاد أفضل تطابق لنقطة في قائمة نقاط
 function findBestMatch(modelPoint, userPoints) {
 let bestScore = 0;
 const modelWords = cleanTextForComparison(modelPoint).split(/\s+/).filter(w => w.length > 2);
@@ -1845,15 +1784,13 @@ modelWords.forEach(word => {
 if (userWords.includes(word)) commonWords++;
 });
 
-// السماح ببعض المرونة (80% تطابق كافٍ)
-const score = Math.min(commonWords / (modelWords.length * 0.8), 1);
+const score = commonWords / modelWords.length;
 if (score > bestScore) bestScore = score;
 });
 
 return bestScore;
 }
 
-// مقارنة الكلمات المفتاحية
 function compareKeywords(userText, modelText) {
 const userWords = userText.split(/\s+/).filter(w => w.length > 3);
 const modelWords = modelText.split(/\s+/).filter(w => w.length > 3);
@@ -1868,42 +1805,7 @@ modelSet.forEach(word => {
 if (userSet.has(word)) matchedKeywords++;
 });
 
-// السماح بـ 70% تطابق للحصول على الدرجة الكاملة
-return Math.min(Math.round((matchedKeywords / (modelSet.size * 0.7)) * 100), 100);
-}
-
-// مقارنة الجذور (الكلمات الأساسية بدون حركات)
-function compareRootWords(userText, modelText) {
-const userRoots = extractRoots(userText);
-const modelRoots = extractRoots(modelText);
-
-if (modelRoots.length === 0) return 0;
-
-const userSet = new Set(userRoots);
-const modelSet = new Set(modelRoots);
-
-let matchedRoots = 0;
-modelSet.forEach(root => {
-if (userSet.has(root)) matchedRoots++;
-});
-
-return Math.round((matchedRoots / modelSet.size) * 100);
-}
-
-// استخراج الجذور الأساسية (تبسيط للعربية)
-function extractRoots(text) {
-return text
-.split(/\s+/)
-.filter(w => w.length > 3)
-.map(w => {
- // إزالة الحركات والتنوين والأحرف الزائدة الشائعة
- let root = w
- .replace(/[ًٌٍَُِّْٰ]/g, '') // إزالة الحركات
- .replace(/^(ال|و|ف|ب|ك|ل|ت|ن|ي|ا|ه|إ|أ|آ)/g, '') // إزالة الأحرف الزائدة في البداية
- .replace(/(ة|ت|ان|ون|ين|وا|تم|تن|نا|ها|هم|هن|كما|كن|ني|ك|ه|ي)$/g, ''); // إزالة التصريفات في النهاية
- return root;
-})
-.filter(w => w.length > 2);
+return Math.round((matchedKeywords / modelSet.size) * 100);
 }
 
 function calculateTextSimilarity(text1, text2) {
@@ -1931,57 +1833,36 @@ return text
 .trim();
 }
 
-// ==================== عرض النتيجة ====================
-function getApproxLabel(percent) {
-if (percent >= 85) return { text: 'إجابة ممتازة ومقاربة للنموذج', class: 'excellent' };
-if (percent >= 70) return { text: 'إجابة جيدة وتقترب من المعنى', class: 'good' };
-if (percent >= 50) return { text: 'إجابة مقبولة لكن تحتاج تفصيل', class: 'fair' };
-return { text: 'إجابة تحتاج مراجعة', class: 'needs-work' };
-}
-
 function showResult(result) {
 const container = document.getElementById('resultContent');
 let emoji = result.percent >= 90 ? '🏆' : result.percent >= 80 ? '🎉' : result.percent >= 60 ? '👍' : result.percent >= 40 ? '💪' : '📚';
 let message = result.percent >= 90 ? 'ممتاز! بارك الله فيك' : result.percent >= 80 ? 'أحسنت! تقدم رائع' : result.percent >= 60 ? 'جيد! واصل التقدم' : result.percent >= 40 ? 'حاول مراجعة الدروس' : 'حاول مرة أخرى';
 
-// شريط التقدم
-const progressWidth = result.percent + '%';
-
 let reviewHtml = '';
 examQuestions.forEach((q, i) => {
 const score = q.score || 0;
-const approxLabel = getApproxLabel(score);
-const statusColor = score >= 70 ? '#27ae60' : score >= 50 ? '#d4af37' : '#c0392b';
+const statusColor = score >= 70 ? '#27ae60' : score >= 40 ? '#d4af37' : '#c0392b';
+const statusText = score >= 70 ? '✓ إجابة صحيحة' : score >= 40 ? '⚠ إجابة مقبولة' : '✗ إجابة خاطئة';
 
 reviewHtml += `
 <div style="margin:15px 0;padding:15px;background:#06131f;border-radius:12px;border:1px solid rgba(255,255,255,.1);text-align:right">
 <p style="color:#f5e6b3;font-weight:bold;margin-bottom:10px">السؤال ${i + 1}: ${q.question}</p>
-<div style="margin:8px 0">
-<span class="approx-badge ${approxLabel.class}">${approxLabel.text}</span>
-<span style="color:${statusColor};font-weight:700;margin-right:10px">${score}%</span>
-</div>
+<p style="color:${statusColor};margin:8px 0;font-size:14px">${statusText} (${score}%)</p>
 <p style="color:#fff;background:rgba(255,255,255,.05);padding:10px;border-radius:8px;line-height:1.8;margin:8px 0">${q.userAnswer || 'لم تُجب'}</p>
-<p style="color:#d4af37;margin:8px 0;font-size:14px">📖 الإجابة النموذجية (للمراجعة):</p>
+<p style="color:#d4af37;margin:8px 0;font-size:14px">📖 الإجابة النموذجية:</p>
 <p style="color:#aaa;background:rgba(255,255,255,.05);padding:10px;border-radius:8px;line-height:1.8;white-space:pre-line">${q.answer}</p>
 </div>
 `;
-};
+});
 
 container.innerHTML = `
 <div class="result-box">
 <div style="font-size:64px;margin-bottom:10px">${emoji}</div>
 <h2 style="color:#f5e6b3;margin-bottom:20px">${message}</h2>
-
-<div class="progress-bar-container">
-<div class="progress-bar" style="width:${progressWidth}"></div>
-</div>
-
 <div class="result-score">${result.percent}%</div>
 <div class="result-percent">${result.answeredCount}/${result.total} أسئلة تمت الإجابة عليها</div>
-
-<p style="color:#aaa;margin:10px 0">📚 المادة: ${result.subject}</p>
-<p style="color:#f5e6b3;font-weight:700;margin:5px 0">📂 الباب: ${result.chapterName}</p>
-<p style="color:#aaa;margin:5px 0">📅 التاريخ: ${result.date}</p>
+<p style="color:#aaa;margin:15px 0">المادة: ${result.subject}</p>
+<p style="color:#aaa;margin:5px 0">التاريخ: ${result.date}</p>
 
 <div style="margin-top:25px;text-align:right">
 <h3 style="color:#f5e6b3;margin-bottom:15px;text-align:center">📋 مراجعة الأسئلة</h3>
@@ -2021,7 +1902,6 @@ if (!result) return;
 const text = `🎓 نتيجة الاختبار
 👤 الاسم: ${result.name}
 📚 المادة: ${result.subject}
-📂 الباب: ${result.chapterName}
 ✅ النتيجة: ${result.percent}%
 📅 التاريخ: ${result.date}
 
