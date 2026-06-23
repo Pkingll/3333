@@ -658,6 +658,95 @@ font-size:24px;
 letter-spacing:10px;
 }
 
+/* ======== أقسام الأبواب ======== */
+.chapter-section{
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:14px;
+padding:15px;
+margin:15px 0;
+}
+
+.chapter-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:12px 15px;
+background:#0d2033;
+border-radius:10px;
+cursor:pointer;
+margin-bottom:10px;
+}
+
+.chapter-header h4{
+color:#f5e6b3;
+font-weight:700;
+}
+
+.chapter-header .toggle-icon{
+color:#d4af37;
+font-size:18px;
+}
+
+.chapter-questions{
+padding:10px 0;
+}
+
+.chapter-actions{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+.chapter-actions button{
+padding:6px 12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:14px;
+}
+
+.chapter-select-box{
+margin:15px 0;
+padding:15px;
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:14px;
+}
+
+.chapter-select-item{
+padding:12px;
+margin:8px 0;
+background:#0d2033;
+border:1px solid rgba(255,255,255,.1);
+border-radius:10px;
+cursor:pointer;
+transition:.3s;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.chapter-select-item:hover{
+background:#1a3a5c;
+border-color:#d4af37;
+}
+
+.chapter-select-item.selected{
+background:#d4af37;
+color:#06131f;
+border-color:#d4af37;
+}
+
+.chapter-select-item .q-count{
+color:#aaa;
+font-size:14px;
+}
+
+.chapter-select-item.selected .q-count{
+color:#06131f;
+}
+
 ::-webkit-scrollbar{
 width:8px;
 }
@@ -700,7 +789,6 @@ justify-content:flex-end;
 
 <div class="nav-btns">
 <button class="nav-btn" onclick="openExamSection()">✏️ الاختبارات</button>
-<button class="nav-btn" onclick="openParticipantsSection()">🏆 مشاركات</button>
 <button class="nav-btn" onclick="openAdminLogin()">🔐 إدارة الاختبارات</button>
 </div>
 
@@ -722,13 +810,13 @@ justify-content:flex-end;
 <div class="content" id="content"></div>
 </div>
 
-<!-- قسم الاختبارات - مبسط -->
+<!-- قسم الاختبارات -->
 <div id="section-exam" style="display:none">
 <button class="back-btn" onclick="backToMain()">⬅ العودة للمحتوى</button>
 
 <div class="box">
 <h3 style="color:#f5e6b3">✏️ إنشاء اختبار جديد</h3>
-<p style="color:#aaa;margin-bottom:15px">سيتم عرض جميع أسئلة المادة المختارة</p>
+<p style="color:#aaa;margin-bottom:15px">اختر الباب الذي تريد الاختبار فيه</p>
 
 <div style="margin:15px 0">
 <label style="color:#f5e6b3;display:block;margin-bottom:5px">👤 اسم المشارك:</label>
@@ -737,9 +825,16 @@ justify-content:flex-end;
 
 <div style="margin:15px 0">
 <label style="color:#f5e6b3;display:block;margin-bottom:5px">📚 اختر المادة:</label>
-<select id="examSubjectSelect" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
+<select id="examSubjectSelect" onchange="onExamSubjectChange()" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
 <option value="">-- اختر المادة --</option>
 </select>
+</div>
+
+<div id="examChapterSelectBox" style="display:none">
+<div class="chapter-select-box">
+<h3 style="color:#f5e6b3;margin-bottom:15px">📂 اختر الباب:</h3>
+<div id="examChapterList"></div>
+</div>
 </div>
 
 <div style="margin:15px 0">
@@ -757,16 +852,6 @@ justify-content:flex-end;
 <button class="btn-primary" onclick="window.startExam()" style="width:100%;margin-top:15px">
 🚀 بدء الاختبار
 </button>
-</div>
-</div>
-
-<!-- قسم المشاركين -->
-<div id="section-participants" style="display:none">
-<button class="back-btn" onclick="backToMain()">⬅ العودة للمحتوى</button>
-
-<div class="participants-box">
-<h3>🏆 قائمة المشاركين في الاختبارات</h3>
-<div id="participantsList"></div>
 </div>
 </div>
 
@@ -794,13 +879,26 @@ justify-content:flex-end;
 
 <div style="margin:15px 0">
 <label style="color:#f5e6b3;display:block;margin-bottom:5px">📚 اختر المادة:</label>
-<select id="adminSubjectSelect" onchange="loadAdminQuestions()" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
+<select id="adminSubjectSelect" onchange="onAdminSubjectChange()" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
 <option value="">-- اختر المادة --</option>
 </select>
 </div>
 
+<!-- إدارة الأبواب -->
+<div id="adminChapterBox" style="display:none">
+<div class="add-question-form">
+<h3>➕ إضافة باب جديد</h3>
+<input type="text" id="newChapterName" placeholder="اسم الباب (مثال: باب الصلاة)">
+<button class="btn-primary" onclick="addChapter()" style="width:100%;margin-top:10px">➕ إضافة الباب</button>
+</div>
+
+<div id="adminChaptersList" style="margin-top:20px"></div>
+</div>
+
+<div id="adminQuestionsBox" style="display:none;margin-top:20px">
 <div class="add-question-form">
 <h3>➕ إضافة سؤال جديد</h3>
+<p style="color:#aaa;margin-bottom:10px">الباب: <span id="currentChapterName" style="color:#f5e6b3;font-weight:700"></span></p>
 <div style="margin:10px 0">
 <label style="color:#f5e6b3">السؤال:</label>
 <textarea id="newQuestionText" placeholder="اكتب السؤال هنا..."></textarea>
@@ -810,11 +908,10 @@ justify-content:flex-end;
 <textarea id="newQuestionAnswer" placeholder="اكتب الإجابة النموذجية هنا..."></textarea>
 </div>
 <button class="btn-primary" onclick="addQuestion()" style="width:100%">➕ إضافة السؤال</button>
+<button class="btn-secondary" onclick="backToChapters()" style="width:100%;margin-top:10px">⬅ العودة للأبواب</button>
 </div>
 
-<div id="adminQuestionsList" style="margin-top:20px">
-<h3 style="color:#f5e6b3;margin-bottom:15px">📋 الأسئلة المضافة</h3>
-<div id="adminQuestionsContainer"></div>
+<div id="adminQuestionsContainer" style="margin-top:20px"></div>
 </div>
 </div>
 </div>
@@ -1021,7 +1118,6 @@ document.getElementById('lessonsBox').style.display = 'block';
 
 window.openExamSection = function() {
 document.getElementById('section-main').style.display = 'none';
-document.getElementById('section-participants').style.display = 'none';
 document.getElementById('section-admin').style.display = 'none';
 document.getElementById('section-exam').style.display = 'block';
 document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -1029,20 +1125,9 @@ event.target.classList.add('active');
 loadSubjectsForExam();
 };
 
-window.openParticipantsSection = function() {
-document.getElementById('section-main').style.display = 'none';
-document.getElementById('section-exam').style.display = 'none';
-document.getElementById('section-admin').style.display = 'none';
-document.getElementById('section-participants').style.display = 'block';
-document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-event.target.classList.add('active');
-loadParticipants();
-};
-
 window.backToMain = function() {
 document.getElementById('section-main').style.display = 'block';
 document.getElementById('section-exam').style.display = 'none';
-document.getElementById('section-participants').style.display = 'none';
 document.getElementById('section-admin').style.display = 'none';
 document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
 };
@@ -1076,7 +1161,6 @@ document.getElementById('adminPin').focus();
 window.openAdminPanel = function() {
 document.getElementById('section-main').style.display = 'none';
 document.getElementById('section-exam').style.display = 'none';
-document.getElementById('section-participants').style.display = 'none';
 document.getElementById('section-admin').style.display = 'block';
 document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
 
@@ -1087,17 +1171,158 @@ select.innerHTML += `<option value="${key}">${name}</option>`;
 }
 if (id && names[id]) {
 select.value = id;
-loadAdminQuestions();
+onAdminSubjectChange();
 }
 };
 
-// ==================== إدارة الأسئلة في Firebase ====================
-window.addQuestion = async function() {
+// ==================== إدارة الأبواب ====================
+let currentAdminSubject = '';
+let currentAdminChapter = null;
+
+window.onAdminSubjectChange = async function() {
 const subject = document.getElementById('adminSubjectSelect').value;
+currentAdminSubject = subject;
+
+if (!subject) {
+document.getElementById('adminChapterBox').style.display = 'none';
+document.getElementById('adminQuestionsBox').style.display = 'none';
+return;
+}
+
+document.getElementById('adminChapterBox').style.display = 'block';
+document.getElementById('adminQuestionsBox').style.display = 'none';
+loadAdminChapters();
+};
+
+window.addChapter = async function() {
+const name = document.getElementById('newChapterName').value.trim();
+if (!name) { showToast('❌ أدخل اسم الباب'); return; }
+if (!currentAdminSubject) { showToast('❌ اختر المادة أولاً'); return; }
+
+showToast('⏳ جاري إضافة الباب...');
+
+try {
+await addDoc(collection(db, 'examChapters'), {
+ subject: currentAdminSubject,
+ name: name,
+ createdAt: serverTimestamp()
+});
+document.getElementById('newChapterName').value = '';
+showToast('✅ تم إضافة الباب بنجاح!');
+loadAdminChapters();
+} catch (error) {
+console.error('خطأ:', error);
+showToast('❌ حدث خطأ: ' + error.message);
+}
+};
+
+window.loadAdminChapters = async function() {
+const container = document.getElementById('adminChaptersList');
+if (!currentAdminSubject) return;
+
+showToast('⏳ جاري تحميل الأبواب...');
+
+try {
+const q = query(collection(db, 'examChapters'), where('subject', '==', currentAdminSubject));
+const snap = await getDocs(q);
+
+if (snap.empty) {
+container.innerHTML = '<p style="color:#aaa;text-align:center">لا توجد أبواب مضافة لهذه المادة</p>';
+return;
+}
+
+container.innerHTML = '';
+snap.forEach(docu => {
+const data = docu.data();
+const chapterId = docu.id;
+
+// عدد الأسئلة
+const qCount = data.questionCount || 0;
+
+container.innerHTML += `
+<div class="chapter-section">
+<div class="chapter-header" onclick="openChapterQuestions('${chapterId}', '${data.name}')">
+<h4>📂 ${data.name}</h4>
+<span style="color:#aaa;font-size:14px">${qCount} سؤال</span>
+</div>
+<div class="chapter-actions">
+<button class="edit-btn" onclick="event.stopPropagation(); editChapterName('${chapterId}', '${data.name}')">✏️ تعديل الاسم</button>
+<button class="delete-btn" onclick="event.stopPropagation(); deleteChapter('${chapterId}')">🗑️ حذف</button>
+</div>
+</div>
+`;
+});
+
+showToast('✅ تم تحميل الأبواب');
+} catch (error) {
+console.error('خطأ:', error);
+container.innerHTML = '<p style="color:#c0392b;text-align:center">حدث خطأ في تحميل الأبواب</p>';
+}
+};
+
+window.openChapterQuestions = async function(chapterId, chapterName) {
+currentAdminChapter = chapterId;
+document.getElementById('currentChapterName').textContent = chapterName;
+document.getElementById('adminChapterBox').style.display = 'none';
+document.getElementById('adminQuestionsBox').style.display = 'block';
+loadAdminQuestions();
+};
+
+window.backToChapters = function() {
+currentAdminChapter = null;
+document.getElementById('adminChapterBox').style.display = 'block';
+document.getElementById('adminQuestionsBox').style.display = 'none';
+document.getElementById('newQuestionText').value = '';
+document.getElementById('newQuestionAnswer').value = '';
+loadAdminChapters();
+};
+
+window.editChapterName = async function(chapterId, currentName) {
+const newName = prompt('أدخل الاسم الجديد:', currentName);
+if (!newName || newName.trim() === '' || newName === currentName) return;
+
+try {
+await updateDoc(doc(db, 'examChapters', chapterId), {
+ name: newName.trim()
+});
+showToast('✅ تم تعديل الاسم');
+loadAdminChapters();
+} catch (error) {
+showToast('❌ حدث خطأ');
+}
+};
+
+window.deleteChapter = async function(chapterId) {
+if (!confirm('هل أنت متأكد من حذف هذا الباب؟ سيتم حذف جميع أسئلته أيضاً!')) return;
+
+showToast('⏳ جاري الحذف...');
+
+try {
+// حذف جميع الأسئلة التابعة للباب
+const q = query(collection(db, 'examQuestions'), where('chapterId', '==', chapterId));
+const snap = await getDocs(q);
+const batch = [];
+snap.forEach(docu => {
+ batch.push(deleteDoc(doc(db, 'examQuestions', docu.id)));
+});
+await Promise.all(batch);
+
+// حذف الباب
+await deleteDoc(doc(db, 'examChapters', chapterId));
+showToast('🗑️ تم حذف الباب وأسئلته');
+loadAdminChapters();
+} catch (error) {
+console.error('خطأ:', error);
+showToast('❌ حدث خطأ أثناء الحذف');
+}
+};
+
+// ==================== إدارة الأسئلة ====================
+window.addQuestion = async function() {
 const questionText = document.getElementById('newQuestionText').value.trim();
 const answerText = document.getElementById('newQuestionAnswer').value.trim();
 
-if (!subject) { showToast('❌ اختر المادة أولاً'); return; }
+if (!currentAdminChapter) { showToast('❌ اختر الباب أولاً'); return; }
 if (!questionText) { showToast('❌ أدخل السؤال'); return; }
 if (!answerText) { showToast('❌ أدخل الإجابة'); return; }
 
@@ -1105,13 +1330,19 @@ showToast('⏳ جاري حفظ السؤال...');
 
 try {
 await addDoc(collection(db, 'examQuestions'), {
- subject: subject,
+ chapterId: currentAdminChapter,
+ subject: currentAdminSubject,
  question: questionText,
  answer: answerText,
  createdAt: serverTimestamp()
 });
 
-// تفريغ الحقول
+// تحديث عدد الأسئلة
+const chapterRef = doc(db, 'examChapters', currentAdminChapter);
+const chapterSnap = await getDoc(chapterRef);
+const currentCount = chapterSnap.data()?.questionCount || 0;
+await updateDoc(chapterRef, { questionCount: currentCount + 1 });
+
 document.getElementById('newQuestionText').value = '';
 document.getElementById('newQuestionAnswer').value = '';
 
@@ -1124,22 +1355,21 @@ showToast('❌ حدث خطأ أثناء الحفظ: ' + error.message);
 };
 
 window.loadAdminQuestions = async function() {
-const subject = document.getElementById('adminSubjectSelect').value;
 const container = document.getElementById('adminQuestionsContainer');
 
-if (!subject) {
-container.innerHTML = '<p style="color:#aaa;text-align:center">اختر المادة لعرض الأسئلة</p>';
+if (!currentAdminChapter) {
+container.innerHTML = '<p style="color:#aaa;text-align:center">اختر الباب لعرض الأسئلة</p>';
 return;
 }
 
 showToast('⏳ جاري تحميل الأسئلة...');
 
 try {
-const q = query(collection(db, 'examQuestions'), where('subject', '==', subject));
+const q = query(collection(db, 'examQuestions'), where('chapterId', '==', currentAdminChapter));
 const snap = await getDocs(q);
 
 if (snap.empty) {
-container.innerHTML = '<p style="color:#aaa;text-align:center">لا توجد أسئلة مضافة لهذه المادة</p>';
+container.innerHTML = '<p style="color:#aaa;text-align:center">لا توجد أسئلة مضافة لهذا الباب</p>';
 return;
 }
 
@@ -1168,8 +1398,6 @@ container.innerHTML = '<p style="color:#c0392b;text-align:center">حدث خطأ 
 };
 
 window.editQuestion = async function(questionId) {
-const subject = document.getElementById('adminSubjectSelect').value;
-
 try {
 const docRef = doc(db, 'examQuestions', questionId);
 const docSnap = await getDoc(docRef);
@@ -1181,7 +1409,6 @@ return;
 
 const data = docSnap.data();
 
-// تحويل العنصر إلى نموذج تعديل
 const item = document.getElementById(`q-item-${questionId}`);
 item.innerHTML = `
 <div style="margin-bottom:10px">
@@ -1234,6 +1461,15 @@ showToast('⏳ جاري الحذف...');
 
 try {
 await deleteDoc(doc(db, 'examQuestions', questionId));
+
+// تحديث عدد الأسئلة
+const chapterRef = doc(db, 'examChapters', currentAdminChapter);
+const chapterSnap = await getDoc(chapterRef);
+const currentCount = chapterSnap.data()?.questionCount || 0;
+if (currentCount > 0) {
+ await updateDoc(chapterRef, { questionCount: currentCount - 1 });
+}
+
 showToast('🗑️ تم حذف السؤال');
 loadAdminQuestions();
 } catch (error) {
@@ -1242,12 +1478,13 @@ showToast('❌ حدث خطأ أثناء الحذف');
 }
 };
 
-// ==================== نظام الاختبار - مبسط ====================
+// ==================== نظام الاختبار ====================
 let examQuestions = [];
 let currentExam = {};
 let examTimerInterval;
 let currentQuestionIndex = 0;
 let userAnswers = {};
+let selectedChapterId = '';
 
 async function loadSubjectsForExam() {
 const select = document.getElementById('examSubjectSelect');
@@ -1257,8 +1494,61 @@ select.innerHTML += `<option value="${key}">${name}</option>`;
 }
 if (id && names[id]) {
 select.value = id;
+onExamSubjectChange();
 }
 }
+
+window.onExamSubjectChange = async function() {
+const subject = document.getElementById('examSubjectSelect').value;
+const box = document.getElementById('examChapterSelectBox');
+const list = document.getElementById('examChapterList');
+
+if (!subject) {
+box.style.display = 'none';
+selectedChapterId = '';
+return;
+}
+
+showToast('⏳ جاري تحميل الأبواب...');
+
+try {
+const q = query(collection(db, 'examChapters'), where('subject', '==', subject));
+const snap = await getDocs(q);
+
+if (snap.empty) {
+list.innerHTML = '<p style="color:#aaa;text-align:center">لا توجد أبواب مضافة لهذه المادة</p>';
+box.style.display = 'block';
+return;
+}
+
+list.innerHTML = '';
+snap.forEach(docu => {
+const data = docu.data();
+const qCount = data.questionCount || 0;
+list.innerHTML += `
+<div class="chapter-select-item" onclick="selectChapter(this, '${docu.id}')" data-chapter="${docu.id}">
+<div>
+<strong style="color:#f5e6b3">📂 ${data.name}</strong>
+</div>
+<div class="q-count">${qCount} سؤال</div>
+</div>
+`;
+});
+
+box.style.display = 'block';
+} catch (error) {
+console.error('خطأ:', error);
+showToast('❌ حدث خطأ في تحميل الأبواب');
+}
+};
+
+window.selectChapter = function(el, chapterId) {
+document.querySelectorAll('.chapter-select-item').forEach(item => {
+item.classList.remove('selected');
+});
+el.classList.add('selected');
+selectedChapterId = chapterId;
+};
 
 window.startExam = async function() {
 console.log('=== بدء الاختبار ===');
@@ -1269,11 +1559,12 @@ const duration = parseInt(document.getElementById('examDuration').value);
 
 if (!name) { showToast('❌ الرجاء إدخال اسم المشارك'); return; }
 if (!subject) { showToast('❌ الرجاء اختيار المادة'); return; }
+if (!selectedChapterId) { showToast('❌ الرجاء اختيار الباب'); return; }
 
 showToast('⏳ جاري تحميل الأسئلة...');
 
-// جمع جميع أسئلة المادة من Firebase
-const q = query(collection(db, 'examQuestions'), where('subject', '==', subject));
+// جمع أسئلة الباب المختار
+const q = query(collection(db, 'examQuestions'), where('chapterId', '==', selectedChapterId));
 const snap = await getDocs(q);
 
 let allQuestions = [];
@@ -1290,7 +1581,7 @@ allQuestions.push({
 console.log('عدد الأسئلة المحملة من Firebase:', allQuestions.length);
 
 if (allQuestions.length === 0) { 
-showToast('❌ لا توجد أسئلة مضافة لهذه المادة - أضف أسئلة من لوحة الإدارة'); 
+showToast('❌ لا توجد أسئلة مضافة لهذا الباب - أضف أسئلة من لوحة الإدارة'); 
 return; 
 }
 
@@ -1327,10 +1618,8 @@ const container = document.getElementById('examContent');
 const counter = document.getElementById('questionCounter');
 const q = examQuestions[currentQuestionIndex];
 
-// تحديث العداد
 counter.textContent = `السؤال ${currentQuestionIndex + 1} من ${examQuestions.length}`;
 
-// تحديث أزرار التنقل
 document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
 const nextBtn = document.getElementById('nextBtn');
 if (currentQuestionIndex === examQuestions.length - 1) {
@@ -1341,7 +1630,6 @@ nextBtn.textContent = 'التالي ➡';
 nextBtn.onclick = nextQuestion;
 }
 
-// عرض السؤال
 const savedAnswer = userAnswers[currentQuestionIndex] || '';
 container.innerHTML = `
 <div class="question-box">
@@ -1436,7 +1724,7 @@ document.getElementById('examModal').classList.remove('show');
 showResult(result);
 };
 
-// ==================== تصحيح ذكي - مقارنة المعنى ====================
+// ==================== تصحيح ذكي ====================
 function calculateOpenScore(userAnswer, modelAnswer) {
 if (!userAnswer || userAnswer.length < 3) return 0;
 if (!modelAnswer || modelAnswer.length < 3) return 0;
@@ -1444,10 +1732,8 @@ if (!modelAnswer || modelAnswer.length < 3) return 0;
 const cleanUser = cleanTextForComparison(userAnswer);
 const cleanModel = cleanTextForComparison(modelAnswer);
 
-// 1. مقارنة النص كامل
 const fullTextScore = calculateTextSimilarity(cleanUser, cleanModel);
 
-// 2. تقسيم الإجابة النموذجية إلى نقاط رئيسية والتحقق من كل نقطة
 const modelPoints = extractKeyPoints(modelAnswer);
 const userPoints = extractKeyPoints(userAnswer);
 
@@ -1455,7 +1741,7 @@ let matchedPoints = 0;
 let totalPointsWeight = 0;
 
 modelPoints.forEach(modelPoint => {
-const pointWeight = modelPoint.length; // أوزان حسب طول النقطة
+const pointWeight = modelPoint.length;
 const pointScore = findBestMatch(modelPoint, userPoints);
 matchedPoints += pointScore * pointWeight;
 totalPointsWeight += pointWeight;
@@ -1463,10 +1749,8 @@ totalPointsWeight += pointWeight;
 
 const pointsScore = totalPointsWeight > 0 ? Math.round((matchedPoints / totalPointsWeight) * 100) : 0;
 
-// 3. مقارنة الكلمات المفتاحية
 const keywordsScore = compareKeywords(cleanUser, cleanModel);
 
-// 4. الجمع المرجح: 40% نص كامل + 40% نقاط + 20% كلمات مفتاحية
 const finalScore = Math.round(
  (fullTextScore * 0.4) + 
  (pointsScore * 0.4) + 
@@ -1476,18 +1760,15 @@ const finalScore = Math.round(
 return Math.min(100, finalScore);
 }
 
-// استخراج النقاط الرئيسية من النص
 function extractKeyPoints(text) {
-// تقسيم حسب الأسطر والنقاط والفواصل
 const points = text
-.split(/[\n.،,;]+/)
+.split(/[\n.،,;:.!؟"'()\[\]{}]+/)
 .map(s => s.trim())
 .filter(s => s.length > 5);
 
 return points;
 }
 
-// إيجاد أفضل تطابق لنقطة في قائمة نقاط
 function findBestMatch(modelPoint, userPoints) {
 let bestScore = 0;
 const modelWords = cleanTextForComparison(modelPoint).split(/\s+/).filter(w => w.length > 2);
@@ -1510,7 +1791,6 @@ if (score > bestScore) bestScore = score;
 return bestScore;
 }
 
-// مقارنة الكلمات المفتاحية
 function compareKeywords(userText, modelText) {
 const userWords = userText.split(/\s+/).filter(w => w.length > 3);
 const modelWords = modelText.split(/\s+/).filter(w => w.length > 3);
@@ -1558,7 +1838,6 @@ const container = document.getElementById('resultContent');
 let emoji = result.percent >= 90 ? '🏆' : result.percent >= 80 ? '🎉' : result.percent >= 60 ? '👍' : result.percent >= 40 ? '💪' : '📚';
 let message = result.percent >= 90 ? 'ممتاز! بارك الله فيك' : result.percent >= 80 ? 'أحسنت! تقدم رائع' : result.percent >= 60 ? 'جيد! واصل التقدم' : result.percent >= 40 ? 'حاول مراجعة الدروس' : 'حاول مرة أخرى';
 
-// بناء مراجعة الأسئلة
 let reviewHtml = '';
 examQuestions.forEach((q, i) => {
 const score = q.score || 0;
@@ -1614,52 +1893,6 @@ results.push(result);
 localStorage.setItem('examResults', JSON.stringify(results));
 showToast('✅ تم حفظ النتيجة بنجاح!');
 }
-
-window.loadParticipants = function() {
-const container = document.getElementById('participantsList');
-let results = JSON.parse(localStorage.getItem('examResults') || '[]');
-
-if (results.length === 0) {
-container.innerHTML = `
-<div class="empty-state">
-<div style="font-size:48px;margin-bottom:15px">📭</div>
-<p>لا توجد نتائج مسجلة بعد</p>
-<p style="font-size:14px;margin-top:10px">أنشئ اختباراً لترى النتائج هنا</p>
-</div>
-`;
-return;
-}
-
-results = results.reverse();
-
-container.innerHTML = '';
-results.forEach(r => {
-container.innerHTML += `
-<div class="participant-item">
-<div class="participant-info">
-<div class="participant-name">👤 ${r.name}</div>
-<div class="participant-chapters">📚 ${r.subject}</div>
-<div class="participant-chapters">📅 ${r.date}</div>
-</div>
-<div class="participant-score">${r.percent}%</div>
-<div class="participant-actions">
-<button class="share-btn" onclick="shareResult(${r.id})">📤 واتساب</button>
-<button class="delete-btn" onclick="deleteResult(${r.id})">🗑️ حذف</button>
-</div>
-</div>
-`;
-});
-};
-
-window.deleteResult = function(resultId) {
-if (!confirm('هل أنت متأكد من حذف هذه النتيجة؟')) return;
-
-let results = JSON.parse(localStorage.getItem('examResults') || '[]');
-results = results.filter(r => r.id !== resultId);
-localStorage.setItem('examResults', JSON.stringify(results));
-loadParticipants();
-showToast('🗑️ تم حذف النتيجة');
-};
 
 window.shareResult = function(resultId) {
 let results = JSON.parse(localStorage.getItem('examResults') || '[]');
