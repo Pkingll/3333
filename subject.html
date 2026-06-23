@@ -722,13 +722,13 @@ justify-content:flex-end;
 <div class="content" id="content"></div>
 </div>
 
-<!-- قسم الاختبارات -->
+<!-- قسم الاختبارات - مبسط -->
 <div id="section-exam" style="display:none">
 <button class="back-btn" onclick="backToMain()">⬅ العودة للمحتوى</button>
 
 <div class="box">
 <h3 style="color:#f5e6b3">✏️ إنشاء اختبار جديد</h3>
-<p style="color:#aaa;margin-bottom:15px">يمكنك إنشاء اختبار لـ <strong>أي مادة</strong> تختارها من القائمة:</p>
+<p style="color:#aaa;margin-bottom:15px">سيتم عرض جميع أسئلة المادة المختارة</p>
 
 <div style="margin:15px 0">
 <label style="color:#f5e6b3;display:block;margin-bottom:5px">👤 اسم المشارك:</label>
@@ -737,27 +737,8 @@ justify-content:flex-end;
 
 <div style="margin:15px 0">
 <label style="color:#f5e6b3;display:block;margin-bottom:5px">📚 اختر المادة:</label>
-<select id="examSubjectSelect" onchange="loadExamChapters()" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
+<select id="examSubjectSelect" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
 <option value="">-- اختر المادة --</option>
-</select>
-</div>
-
-<div style="margin:15px 0">
-<label style="color:#f5e6b3;display:block;margin-bottom:5px">📂 الفصول المطلوبة (Ctrl+Click للاختيار المتعدد):</label>
-<select id="examChaptersSelect" multiple style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none;min-height:120px">
-<option value="">اختر المادة أولاً</option>
-</select>
-</div>
-
-<div style="margin:15px 0">
-<label style="color:#f5e6b3;display:block;margin-bottom:5px">🔢 عدد الأسئلة:</label>
-<select id="examQuestionCount" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
-<option value="5">5 أسئلة</option>
-<option value="10" selected>10 أسئلة</option>
-<option value="15">15 سؤالاً</option>
-<option value="20">20 سؤالاً</option>
-<option value="30">30 سؤالاً</option>
-<option value="50">50 سؤالاً</option>
 </select>
 </div>
 
@@ -1261,7 +1242,7 @@ showToast('❌ حدث خطأ أثناء الحذف');
 }
 };
 
-// ==================== نظام الاختبار ====================
+// ==================== نظام الاختبار - مبسط ====================
 let examQuestions = [];
 let currentExam = {};
 let examTimerInterval;
@@ -1276,50 +1257,22 @@ select.innerHTML += `<option value="${key}">${name}</option>`;
 }
 if (id && names[id]) {
 select.value = id;
-loadExamChapters();
 }
 }
-
-window.loadExamChapters = async function() {
-const subject = document.getElementById('examSubjectSelect').value;
-const select = document.getElementById('examChaptersSelect');
-select.innerHTML = '';
-if (!subject) {
-select.innerHTML = '<option value="">اختر المادة أولاً</option>';
-return;
-}
-const q = query(collection(db, 'chapters'), where('subject', '==', subject));
-const snap = await getDocs(q);
-let arr = [];
-snap.forEach(docu => arr.push({id: docu.id, ...docu.data()}));
-arr.sort((a, b) => (a.order || 0) - (b.order || 0));
-if (arr.length === 0) {
-select.innerHTML = '<option value="">لا توجد فصول في هذه المادة</option>';
-return;
-}
-arr.forEach(ch => {
-select.innerHTML += `<option value="${ch.id}">📂 ${ch.title}</option>`;
-});
-};
 
 window.startExam = async function() {
 console.log('=== بدء الاختبار ===');
 try {
 const name = document.getElementById('examParticipantName').value.trim();
 const subject = document.getElementById('examSubjectSelect').value;
-const chaptersSelect = document.getElementById('examChaptersSelect');
-const selectedChapters = Array.from(chaptersSelect.selectedOptions).map(o => o.value);
-const selectedChaptersNames = Array.from(chaptersSelect.selectedOptions).map(o => o.text.replace('📂 ', ''));
-const questionCount = parseInt(document.getElementById('examQuestionCount').value);
 const duration = parseInt(document.getElementById('examDuration').value);
 
 if (!name) { showToast('❌ الرجاء إدخال اسم المشارك'); return; }
 if (!subject) { showToast('❌ الرجاء اختيار المادة'); return; }
-if (selectedChapters.length === 0) { showToast('❌ الرجاء اختيار فصل واحد على الأقل'); return; }
 
 showToast('⏳ جاري تحميل الأسئلة...');
 
-// جمع الأسئلة من Firebase
+// جمع جميع أسئلة المادة من Firebase
 const q = query(collection(db, 'examQuestions'), where('subject', '==', subject));
 const snap = await getDocs(q);
 
@@ -1341,9 +1294,9 @@ showToast('❌ لا توجد أسئلة مضافة لهذه المادة - أض�
 return; 
 }
 
-// خلط الأسئلة واختيار العدد المطلوب
+// خلط الأسئلة
 const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
-examQuestions = shuffled.slice(0, Math.min(questionCount, allQuestions.length));
+examQuestions = shuffled;
 
 console.log('عدد الأسئلة في الاختبار:', examQuestions.length);
 
@@ -1351,7 +1304,6 @@ currentExam = {
 name,
 subject: names[subject] || subject,
 subjectKey: subject,
-chapters: selectedChaptersNames,
 totalQuestions: examQuestions.length,
 duration: duration,
 startTime: Date.now()
@@ -1472,7 +1424,6 @@ id: Date.now(),
 name: currentExam.name,
 subject: currentExam.subject,
 subjectKey: currentExam.subjectKey,
-chapters: currentExam.chapters,
 score: Math.round(totalScore / 100 * totalQuestions),
 total: totalQuestions,
 percent: avgScore,
@@ -1485,7 +1436,7 @@ document.getElementById('examModal').classList.remove('show');
 showResult(result);
 };
 
-// تصحيح ذكي للأسئلة المقالية
+// ==================== تصحيح ذكي - مقارنة المعنى ====================
 function calculateOpenScore(userAnswer, modelAnswer) {
 if (!userAnswer || userAnswer.length < 3) return 0;
 if (!modelAnswer || modelAnswer.length < 3) return 0;
@@ -1493,33 +1444,88 @@ if (!modelAnswer || modelAnswer.length < 3) return 0;
 const cleanUser = cleanTextForComparison(userAnswer);
 const cleanModel = cleanTextForComparison(modelAnswer);
 
-// تقسيم الإجابة النموذجية إلى نقاط
-const modelPoints = modelAnswer.split(/[.!؟\n]+/)
+// 1. مقارنة النص كامل
+const fullTextScore = calculateTextSimilarity(cleanUser, cleanModel);
+
+// 2. تقسيم الإجابة النموذجية إلى نقاط رئيسية والتحقق من كل نقطة
+const modelPoints = extractKeyPoints(modelAnswer);
+const userPoints = extractKeyPoints(userAnswer);
+
+let matchedPoints = 0;
+let totalPointsWeight = 0;
+
+modelPoints.forEach(modelPoint => {
+const pointWeight = modelPoint.length; // أوزان حسب طول النقطة
+const pointScore = findBestMatch(modelPoint, userPoints);
+matchedPoints += pointScore * pointWeight;
+totalPointsWeight += pointWeight;
+});
+
+const pointsScore = totalPointsWeight > 0 ? Math.round((matchedPoints / totalPointsWeight) * 100) : 0;
+
+// 3. مقارنة الكلمات المفتاحية
+const keywordsScore = compareKeywords(cleanUser, cleanModel);
+
+// 4. الجمع المرجح: 40% نص كامل + 40% نقاط + 20% كلمات مفتاحية
+const finalScore = Math.round(
+ (fullTextScore * 0.4) + 
+ (pointsScore * 0.4) + 
+ (keywordsScore * 0.2)
+);
+
+return Math.min(100, finalScore);
+}
+
+// استخراج النقاط الرئيسية من النص
+function extractKeyPoints(text) {
+// تقسيم حسب الأسطر والنقاط والفواصل
+const points = text
+.split(/[\n.،,;]+/)
 .map(s => s.trim())
 .filter(s => s.length > 5);
 
-const totalPoints = modelPoints.length || 1;
-let matchedPoints = 0;
+return points;
+}
 
-const userWords = cleanUser.split(/\s+/).filter(w => w.length > 2);
+// إيجاد أفضل تطابق لنقطة في قائمة نقاط
+function findBestMatch(modelPoint, userPoints) {
+let bestScore = 0;
+const modelWords = cleanTextForComparison(modelPoint).split(/\s+/).filter(w => w.length > 2);
 
-modelPoints.forEach(sentence => {
-const sentenceWords = cleanTextForComparison(sentence).split(/\s+/).filter(w => w.length > 2);
-if (sentenceWords.length === 0) return;
+if (modelWords.length === 0) return 0;
+
+userPoints.forEach(userPoint => {
+const userWords = cleanTextForComparison(userPoint).split(/\s+/).filter(w => w.length > 2);
+if (userWords.length === 0) return;
 
 let commonWords = 0;
-sentenceWords.forEach(word => {
+modelWords.forEach(word => {
 if (userWords.includes(word)) commonWords++;
 });
 
-const matchRatio = commonWords / sentenceWords.length;
-if (matchRatio >= 0.3) matchedPoints++;
+const score = commonWords / modelWords.length;
+if (score > bestScore) bestScore = score;
 });
 
-const sentenceScore = Math.round((matchedPoints / totalPoints) * 100);
-const fullTextScore = calculateTextSimilarity(cleanUser, cleanModel);
+return bestScore;
+}
 
-return Math.max(sentenceScore, fullTextScore);
+// مقارنة الكلمات المفتاحية
+function compareKeywords(userText, modelText) {
+const userWords = userText.split(/\s+/).filter(w => w.length > 3);
+const modelWords = modelText.split(/\s+/).filter(w => w.length > 3);
+
+if (modelWords.length === 0) return 0;
+
+const userSet = new Set(userWords);
+const modelSet = new Set(modelWords);
+
+let matchedKeywords = 0;
+modelSet.forEach(word => {
+if (userSet.has(word)) matchedKeywords++;
+});
+
+return Math.round((matchedKeywords / modelSet.size) * 100);
 }
 
 function calculateTextSimilarity(text1, text2) {
@@ -1577,7 +1583,6 @@ container.innerHTML = `
 <div class="result-score">${result.percent}%</div>
 <div class="result-percent">${result.answeredCount}/${result.total} أسئلة تمت الإجابة عليها</div>
 <p style="color:#aaa;margin:15px 0">المادة: ${result.subject}</p>
-<p style="color:#aaa;margin:5px 0">الفصول: ${result.chapters.join(' • ')}</p>
 <p style="color:#aaa;margin:5px 0">التاريخ: ${result.date}</p>
 
 <div style="margin-top:25px;text-align:right">
@@ -1633,7 +1638,7 @@ container.innerHTML += `
 <div class="participant-item">
 <div class="participant-info">
 <div class="participant-name">👤 ${r.name}</div>
-<div class="participant-chapters">📚 ${r.subject} | 📂 ${r.chapters.join(' • ')}</div>
+<div class="participant-chapters">📚 ${r.subject}</div>
 <div class="participant-chapters">📅 ${r.date}</div>
 </div>
 <div class="participant-score">${r.percent}%</div>
@@ -1664,7 +1669,6 @@ if (!result) return;
 const text = `🎓 نتيجة الاختبار
 👤 الاسم: ${result.name}
 📚 المادة: ${result.subject}
-📂 الفصول: ${result.chapters.join(' • ')}
 ✅ النتيجة: ${result.percent}%
 📅 التاريخ: ${result.date}
 
