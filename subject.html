@@ -756,7 +756,11 @@ chaptersList.innerHTML = "";
 
 let arr=[];
 snap.forEach(docu=>{
-arr.push({id:docu.id,...docu.data()});
+const data = docu.data();
+// استبعاد فصول الأسئلة (التي اسمها يبدأ بـ "أسئلة" أو "اسئلة")
+if (data.title && !data.title.startsWith('أسئلة') && !data.title.startsWith('اسئلة')) {
+arr.push({id:docu.id,...data});
+}
 });
 
 arr.sort((a,b)=>(a.order||0)-(b.order||0));
@@ -898,16 +902,22 @@ return;
 const q = query(collection(db, 'chapters'), where('subject', '==', subject));
 const snap = await getDocs(q);
 let arr = [];
-snap.forEach(docu => arr.push({id: docu.id, ...docu.data()}));
+snap.forEach(docu => {
+const data = docu.data();
+// فقط فصول الأسئلة (التي اسمها يبدأ بـ "أسئلة" أو "اسئلة")
+if (data.title && (data.title.startsWith('أسئلة') || data.title.startsWith('اسئلة'))) {
+arr.push({id: docu.id, ...data});
+}
+});
 arr.sort((a, b) => (a.order || 0) - (b.order || 0));
 
 if (arr.length === 0) {
-select.innerHTML = '<option value="">لا توجد فصول في هذه المادة</option>';
+select.innerHTML = '<option value="">لا توجد فصول أسئلة في هذه المادة</option>';
 return;
 }
 
 arr.forEach(ch => {
-select.innerHTML += `<option value="${ch.id}">📂 ${ch.title}</option>`;
+select.innerHTML += `<option value="${ch.id}">❓ ${ch.title}</option>`;
 });
 };
 
