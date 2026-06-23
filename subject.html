@@ -929,7 +929,7 @@ const name = document.getElementById('examParticipantName').value.trim();
 const subject = document.getElementById('examSubjectSelect').value;
 const chaptersSelect = document.getElementById('examChaptersSelect');
 const selectedChapters = Array.from(chaptersSelect.selectedOptions).map(o => o.value);
-const selectedChaptersNames = Array.from(chaptersSelect.selectedOptions).map(o => o.text.replace('📂 ', ''));
+const selectedChaptersNames = Array.from(chaptersSelect.selectedOptions).map(o => o.text.replace('❓ ', '').replace('📂 ', ''));
 const questionCount = parseInt(document.getElementById('examQuestionCount').value);
 const duration = parseInt(document.getElementById('examDuration').value);
 
@@ -946,13 +946,25 @@ const q = query(collection(db, 'lessons'), where('chapterId', '==', chId));
 const snap = await getDocs(q);
 snap.forEach(docu => {
 const data = docu.data();
+// معالجة حقل questions بجميع أشكاله
+let questionsData = data.questions || null;
+// إذا كان questions كائن Firestore (ليس مصفوفة عادية)
+if (questionsData && typeof questionsData === 'object' && !Array.isArray(questionsData)) {
+// محاولة تحويله لمصفوفة
+questionsData = Object.values(questionsData);
+}
+// التأكد من أن questions مصفوفة
+if (!Array.isArray(questionsData)) {
+questionsData = null;
+}
 lessons.push({
 id: docu.id,
 title: data.title || '',
 text: data.text || '',
-questions: data.questions || null,
+questions: questionsData,
 ...data
 });
+console.log('درس:', data.title, '| questions:', questionsData ? questionsData.length : 'لا يوجد');
 });
 }
 
@@ -970,7 +982,7 @@ examQuestions = generateQuestions(lessons, Math.min(questionCount, lessons.lengt
 console.log('عدد الأسئلة المُنشأة:', examQuestions.length);
 
 if (examQuestions.length === 0) { 
-showToast('❌ لا يمكن إنشاء أسئلة من هذه الدروس'); 
+showToast('❌ لا يمكن إنشاء أسئلة من هذه الدروس - تأكد من وجود أسئلة في الدروس'); 
 return; 
 }
 
@@ -1035,16 +1047,31 @@ return questions.slice(0, count);
 
 function getValidCustomQuestions(questionsArray) {
 const valid = [];
+console.log('التحقق من الأسئلة:', questionsArray);
 for (const q of questionsArray) {
-if (!q.question || !q.choices || !q.correct) continue;
-if (!Array.isArray(q.choices) || q.choices.length < 2) continue;
-if (!q.choices.includes(q.correct)) continue;
+// التأكد من أن q كائن وليس null
+if (!q || typeof q !== 'object') continue;
+// التعامل مع كائنات Firestore
+const questionObj = q.toJSON ? q.toJSON() : q;
+console.log('سؤال:', questionObj);
+if (!questionObj.question || !questionObj.choices || !questionObj.correct) continue;
+// التأكد من أن choices مصفوفة
+let choices = questionObj.choices;
+if (choices && typeof choices === 'object' && !Array.isArray(choices)) {
+choices = Object.values(choices);
+}
+if (!Array.isArray(choices) || choices.length < 2) continue;
+// التأكد من أن correct موجود في choices
+const correctStr = String(questionObj.correct).trim();
+const choicesStr = choices.map(c => String(c).trim());
+if (!choicesStr.includes(correctStr)) continue;
 valid.push({
-question: q.question,
-choices: q.choices,
-correct: q.correct
+question: String(questionObj.question).trim(),
+choices: choicesStr,
+correct: correctStr
 });
 }
+console.log('أسئلة صالحة:', valid.length);
 return valid;
 }
 
