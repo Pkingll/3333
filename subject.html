@@ -1017,7 +1017,7 @@ const shuffled = [...lessons].sort(() => Math.random() - 0.5);
 for (const lesson of shuffled) {
 if (questions.length >= count) break;
 
-// المحاولة 1: الأسئلة المخصصة من Firebase
+// المحاولة 1: الأسئلة المخصصة من Firebase (حقل questions)
 if (lesson.questions && Array.isArray(lesson.questions) && lesson.questions.length > 0) {
 const customQuestions = getValidCustomQuestions(lesson.questions);
 for (const cq of customQuestions) {
@@ -1031,7 +1031,15 @@ source: lesson.title
 }
 }
 
-// المحاولة 2: التوليد التلقائي من النص
+// المحاولة 2: استخراج السؤال من title والإجابة من text (لفصول الأسئلة)
+if (questions.length < count && lesson.title && lesson.text) {
+const extractedQ = extractQuestionFromLesson(lesson);
+if (extractedQ) {
+questions.push(extractedQ);
+}
+}
+
+// المحاولة 3: التوليد التلقائي من النص الطويل (للدروس العادية)
 if (questions.length < count && lesson.text && lesson.text.length > 100) {
 const autoQ = createSmartQuestion(lesson);
 if (autoQ) {
@@ -1041,6 +1049,59 @@ questions.push(autoQ);
 }
 
 return questions.slice(0, count);
+}
+
+
+/* ================= استخراج سؤال من درس فصول الأسئلة ================= */
+
+function extractQuestionFromLesson(lesson) {
+const title = (lesson.title || '').trim();
+const text = (lesson.text || '').trim();
+
+if (!title || !text) return null;
+
+// السؤال من العنوان
+const question = title;
+
+// استخراج الإجابة الصحيحة (السطر الأول من النص)
+const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+if (lines.length === 0) return null;
+
+const correctAnswer = lines[0];
+
+// توليد خيارات خاطئة من باقي النص أو من الدروس الأخرى
+const wrongAnswers = [];
+for (let i = 1; i < lines.length && wrongAnswers.length < 3; i++) {
+if (lines[i] !== correctAnswer && lines[i].length > 2) {
+wrongAnswers.push(lines[i]);
+}
+}
+
+// إذا لم تكفِ الخيارات، نستخدم أجزاء من النص
+if (wrongAnswers.length < 3) {
+const words = text.split(/\s+/).filter(w => w.length > 3);
+for (let i = 0; i < words.length && wrongAnswers.length < 3; i++) {
+const fake = words[i] + ' ' + (words[i + 1] || '');
+if (fake !== correctAnswer && fake.length > 5) {
+wrongAnswers.push(fake);
+}
+}
+}
+
+// إذا لم تكفِ بعد، نستخدم خيارات افتراضية
+while (wrongAnswers.length < 3) {
+wrongAnswers.push('خيار ' + (wrongAnswers.length + 1));
+}
+
+const choices = [correctAnswer, ...wrongAnswers.slice(0, 3)];
+const shuffled = choices.sort(() => Math.random() - 0.5);
+
+return {
+question: question,
+choices: shuffled,
+correct: correctAnswer,
+source: lesson.title
+};
 }
 
 /* ================= التحقق من الأسئلة المخصصة ================= */
