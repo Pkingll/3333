@@ -149,6 +149,351 @@ background:#112233;
 border-radius:10px;
 cursor:pointer;
 }
+
+/* ================== إضافات البحث والاختبارات ================== */
+.search-box{
+width:92%;
+max-width:900px;
+margin:15px auto;
+}
+
+.search-box input{
+width:100%;
+padding:14px;
+border:1px solid rgba(255,255,255,.2);
+border-radius:12px;
+background:#0d2033;
+color:#fff;
+font-size:16px;
+outline:none;
+}
+
+.search-box input::placeholder{
+color:#aaa;
+}
+
+.nav-btns{
+width:92%;
+max-width:900px;
+margin:15px auto;
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.nav-btn{
+padding:12px 20px;
+border:none;
+border-radius:12px;
+background:#0d2033;
+color:#f5e6b3;
+font-weight:700;
+cursor:pointer;
+border:1px solid rgba(255,255,255,.1);
+}
+
+.nav-btn:hover{
+background:#1a3a5c;
+}
+
+.nav-btn.active{
+background:#d4af37;
+color:#06131f;
+}
+
+.modal-overlay{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.8);
+z-index:1000;
+display:none;
+justify-content:center;
+align-items:center;
+padding:20px;
+}
+
+.modal-overlay.show{
+display:flex;
+}
+
+.modal{
+background:#0d2033;
+border:1px solid rgba(255,255,255,.15);
+border-radius:20px;
+width:100%;
+max-width:600px;
+max-height:90vh;
+overflow-y:auto;
+padding:25px;
+position:relative;
+}
+
+.modal h2{
+color:#f5e6b3;
+margin-bottom:20px;
+text-align:center;
+}
+
+.modal input, .modal select{
+width:100%;
+padding:12px;
+margin:8px 0;
+border:1px solid rgba(255,255,255,.2);
+border-radius:10px;
+background:#06131f;
+color:#fff;
+font-size:16px;
+outline:none;
+}
+
+.modal label{
+display:block;
+color:#f5e6b3;
+margin:10px 0 5px;
+}
+
+.close-modal{
+position:absolute;
+top:15px;
+left:15px;
+background:#c0392b;
+color:#fff;
+border:none;
+padding:8px 14px;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.question-box{
+background:#06131f;
+border:1px solid rgba(255,255,255,.1);
+border-radius:14px;
+padding:20px;
+margin:15px 0;
+}
+
+.question-box h4{
+color:#f5e6b3;
+margin-bottom:15px;
+}
+
+.choices{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.choice{
+padding:12px;
+background:#0d2033;
+border:1px solid rgba(255,255,255,.1);
+border-radius:10px;
+cursor:pointer;
+transition:.3s;
+}
+
+.choice:hover{
+background:#1a3a5c;
+}
+
+.choice.selected{
+background:#d4af37;
+color:#06131f;
+border-color:#d4af37;
+}
+
+.choice.wrong{
+background:#c0392b;
+border-color:#c0392b;
+}
+
+.choice.correct{
+background:#27ae60;
+border-color:#27ae60;
+}
+
+.result-box{
+text-align:center;
+padding:30px;
+}
+
+.result-score{
+font-size:48px;
+color:#f5e6b3;
+font-weight:700;
+}
+
+.result-percent{
+font-size:24px;
+color:#27ae60;
+margin:10px 0;
+}
+
+.participants-box{
+width:92%;
+max-width:900px;
+margin:20px auto;
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:15px;
+padding:20px;
+}
+
+.participants-box h3{
+color:#f5e6b3;
+margin-bottom:15px;
+}
+
+.participant-item{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:12px;
+margin:8px 0;
+background:#0d2033;
+border-radius:10px;
+flex-wrap:wrap;
+gap:10px;
+}
+
+.participant-info{
+flex:1;
+}
+
+.participant-name{
+color:#f5e6b3;
+font-weight:700;
+}
+
+.participant-chapters{
+color:#aaa;
+font-size:14px;
+}
+
+.participant-score{
+font-size:20px;
+font-weight:700;
+color:#27ae60;
+}
+
+.participant-actions{
+display:flex;
+gap:8px;
+}
+
+.participant-actions button{
+padding:6px 12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:14px;
+}
+
+.share-btn{
+background:#25d366;
+color:#fff;
+}
+
+.delete-btn{
+background:#c0392b;
+color:#fff;
+}
+
+.toast{
+position:fixed;
+top:20px;
+right:20px;
+background:#27ae60;
+color:#fff;
+padding:15px 25px;
+border-radius:12px;
+z-index:2000;
+transform:translateX(150%);
+transition:.5s;
+font-weight:700;
+}
+
+.toast.show{
+transform:translateX(0);
+}
+
+.empty-state{
+text-align:center;
+padding:40px;
+color:#aaa;
+}
+
+.btn-primary{
+background:#d4af37;
+color:#06131f;
+border:none;
+padding:12px 24px;
+border-radius:12px;
+font-weight:700;
+cursor:pointer;
+font-size:16px;
+}
+
+.btn-secondary{
+background:#0d2033;
+color:#f5e6b3;
+border:1px solid rgba(255,255,255,.1);
+padding:10px 20px;
+border-radius:10px;
+cursor:pointer;
+}
+
+.timer{
+text-align:center;
+font-size:20px;
+color:#e74c3c;
+font-weight:700;
+margin:10px 0;
+}
+
+.back-btn{
+display:block;
+margin:15px auto;
+padding:12px 24px;
+background:#0d2033;
+color:#f5e6b3;
+border:1px solid rgba(255,255,255,.1);
+border-radius:12px;
+cursor:pointer;
+font-weight:700;
+text-align:center;
+width:92%;
+max-width:900px;
+}
+
+.back-btn:hover{
+background:#1a3a5c;
+}
+
+::-webkit-scrollbar{
+width:8px;
+}
+
+::-webkit-scrollbar-track{
+background:#06131f;
+}
+
+::-webkit-scrollbar-thumb{
+background:#d4af37;
+border-radius:4px;
+}
+
+@media(max-width:600px){
+.participant-item{
+flex-direction:column;
+align-items:flex-start;
+}
+.participant-actions{
+width:100%;
+justify-content:flex-end;
+}
+}
 </style>
 
 </head>
@@ -166,7 +511,20 @@ cursor:pointer;
 <h1 id="title">المادة</h1>
 </div>
 
-<!-- 📂 الفصول (إضافة فقط) -->
+<!-- أزرار التنقل -->
+<div class="nav-btns">
+<button class="nav-btn" onclick="openExamSection()">✏️ الاختبارات</button>
+<button class="nav-btn" onclick="openParticipantsSection()">🏆 مشاركات في الاختبارات</button>
+</div>
+
+<!-- البحث -->
+<div class="search-box">
+<input type="text" id="searchInput" placeholder="🔍 ابحث عن فصل أو درس..." oninput="performSearch()">
+</div>
+
+<!-- القسم الرئيسي: الفصول + الدروس + المحتوى -->
+<div id="section-main">
+<!-- 📂 الفصول -->
 <div class="box">
 <h3 style="color:#f5e6b3">📂 الفصول</h3>
 <div id="chaptersList"></div>
@@ -180,10 +538,95 @@ cursor:pointer;
 
 <!-- المحتوى القديم بدون تغيير -->
 <div class="content" id="content"></div>
+</div>
+
+<!-- قسم الاختبارات -->
+<div id="section-exam" style="display:none">
+<button class="back-btn" onclick="backToMain()">⬅ العودة للمحتوى</button>
+
+<div class="box">
+<h3 style="color:#f5e6b3">✏️ إنشاء اختبار جديد</h3>
+<p style="color:#aaa;margin-bottom:15px">يمكنك إنشاء اختبار لـ <strong>أي مادة</strong> تختارها من القائمة:</p>
+
+<div style="margin:15px 0">
+<label style="color:#f5e6b3;display:block;margin-bottom:5px">👤 اسم المشارك:</label>
+<input type="text" id="examParticipantName" placeholder="أدخل اسمك" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
+</div>
+
+<div style="margin:15px 0">
+<label style="color:#f5e6b3;display:block;margin-bottom:5px">📚 اختر المادة:</label>
+<select id="examSubjectSelect" onchange="loadExamChapters()" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
+<option value="">-- اختر المادة --</option>
+</select>
+</div>
+
+<div style="margin:15px 0">
+<label style="color:#f5e6b3;display:block;margin-bottom:5px">📂 الفصول المطلوبة (Ctrl+Click للاختيار المتعدد):</label>
+<select id="examChaptersSelect" multiple style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none;min-height:120px">
+<option value="">اختر المادة أولاً</option>
+</select>
+</div>
+
+<div style="margin:15px 0">
+<label style="color:#f5e6b3;display:block;margin-bottom:5px">🔢 عدد الأسئلة:</label>
+<select id="examQuestionCount" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
+<option value="5">5 أسئلة</option>
+<option value="10" selected>10 أسئلة</option>
+<option value="15">15 سؤالاً</option>
+<option value="20">20 سؤالاً</option>
+</select>
+</div>
+
+<div style="margin:15px 0">
+<label style="color:#f5e6b3;display:block;margin-bottom:5px">⏱️ مدة الاختبار (دقيقة):</label>
+<select id="examDuration" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
+<option value="5">5 دقائق</option>
+<option value="10">10 دقائق</option>
+<option value="15" selected>15 دقيقة</option>
+<option value="30">30 دقيقة</option>
+<option value="60">60 دقيقة</option>
+</select>
+</div>
+
+<button class="btn-primary" onclick="startExam()" style="width:100%;margin-top:15px">
+🚀 بدء الاختبار
+</button>
+</div>
+</div>
+
+<!-- قسم المشاركين -->
+<div id="section-participants" style="display:none">
+<button class="back-btn" onclick="backToMain()">⬅ العودة للمحتوى</button>
+
+<div class="participants-box">
+<h3>🏆 قائمة المشاركين في الاختبارات</h3>
+<div id="participantsList"></div>
+</div>
+</div>
+
+<!-- نافذة الاختبار -->
+<div class="modal-overlay" id="examModal">
+<div class="modal">
+<button class="close-modal" onclick="closeExamModal()">✕</button>
+<h2>📝 الاختبار</h2>
+<div class="timer" id="examTimer">⏱️ 15:00</div>
+<div id="examContent"></div>
+</div>
+</div>
+
+<!-- نافذة النتيجة -->
+<div class="modal-overlay" id="resultModal">
+<div class="modal">
+<div id="resultContent"></div>
+</div>
+</div>
 
 <button class="back" onclick="location.href='index.html'">
 ⬅ الرجوع
 </button>
+
+<!-- إشعار -->
+<div class="toast" id="toast"></div>
 
 <script type="module">
 
@@ -365,6 +808,406 @@ ${d.audio ? `
 
 ${d.link ? `<a href="${d.link}" target="_blank">🔗 ${d.link}</a>` : ""}
 `;
+};
+
+/* ================= البحث ================= */
+window.performSearch = function() {
+const query = document.getElementById('searchInput').value.trim().toLowerCase();
+if (!query) {
+document.querySelectorAll('.itemBtn, .lessonBtn').forEach(el => {
+el.style.display = 'block';
+});
+return;
+}
+
+document.querySelectorAll('.itemBtn').forEach(el => {
+const text = el.textContent.toLowerCase();
+el.style.display = text.includes(query) ? 'block' : 'none';
+});
+
+document.querySelectorAll('.lessonBtn').forEach(el => {
+const text = el.textContent.toLowerCase();
+el.style.display = text.includes(query) ? 'block' : 'none';
+});
+
+document.getElementById('lessonsBox').style.display = 'block';
+};
+
+/* ================= التنقل بين الأقسام ================= */
+window.openExamSection = function() {
+document.getElementById('section-main').style.display = 'none';
+document.getElementById('section-participants').style.display = 'none';
+document.getElementById('section-exam').style.display = 'block';
+document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+event.target.classList.add('active');
+loadSubjectsForExam();
+};
+
+window.openParticipantsSection = function() {
+document.getElementById('section-main').style.display = 'none';
+document.getElementById('section-exam').style.display = 'none';
+document.getElementById('section-participants').style.display = 'block';
+document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+event.target.classList.add('active');
+loadParticipants();
+};
+
+window.backToMain = function() {
+document.getElementById('section-main').style.display = 'block';
+document.getElementById('section-exam').style.display = 'none';
+document.getElementById('section-participants').style.display = 'none';
+document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+};
+
+/* ================= إنشاء الاختبار (لكل الم materials) ================= */
+let examQuestions = [];
+let currentExam = {};
+let examTimerInterval;
+
+async function loadSubjectsForExam() {
+const select = document.getElementById('examSubjectSelect');
+select.innerHTML = '<option value="">-- اختر المادة --</option>';
+for (const [key, name] of Object.entries(names)) {
+select.innerHTML += `<option value="${key}">${name}</option>`;
+}
+if (id && names[id]) {
+select.value = id;
+loadExamChapters();
+}
+}
+
+window.loadExamChapters = async function() {
+const subject = document.getElementById('examSubjectSelect').value;
+const select = document.getElementById('examChaptersSelect');
+select.innerHTML = '';
+
+if (!subject) {
+select.innerHTML = '<option value="">اختر المادة أولاً</option>';
+return;
+}
+
+const q = query(collection(db, 'chapters'), where('subject', '==', subject));
+const snap = await getDocs(q);
+let arr = [];
+snap.forEach(docu => arr.push({id: docu.id, ...docu.data()}));
+arr.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+if (arr.length === 0) {
+select.innerHTML = '<option value="">لا توجد فصول في هذه المادة</option>';
+return;
+}
+
+arr.forEach(ch => {
+select.innerHTML += `<option value="${ch.id}">📂 ${ch.title}</option>`;
+});
+};
+
+window.startExam = async function() {
+const name = document.getElementById('examParticipantName').value.trim();
+const subject = document.getElementById('examSubjectSelect').value;
+const chaptersSelect = document.getElementById('examChaptersSelect');
+const selectedChapters = Array.from(chaptersSelect.selectedOptions).map(o => o.value);
+const selectedChaptersNames = Array.from(chaptersSelect.selectedOptions).map(o => o.text.replace('📂 ', ''));
+const questionCount = parseInt(document.getElementById('examQuestionCount').value);
+const duration = parseInt(document.getElementById('examDuration').value);
+
+if (!name) { showToast('❌ الرجاء إدخال اسم المشارك'); return; }
+if (!subject) { showToast('❌ الرجاء اختيار المادة'); return; }
+if (selectedChapters.length === 0) { showToast('❌ الرجاء اختيار فصل واحد على الأقل'); return; }
+
+let lessons = [];
+for (const chId of selectedChapters) {
+const q = query(collection(db, 'lessons'), where('chapterId', '==', chId));
+const snap = await getDocs(q);
+snap.forEach(docu => lessons.push({id: docu.id, ...docu.data()}));
+}
+
+if (lessons.length === 0) { showToast('❌ لا توجد دروس في الفصول المختارة'); return; }
+
+examQuestions = generateQuestions(lessons, Math.min(questionCount, lessons.length * 3));
+if (examQuestions.length === 0) { showToast('❌ لا يمكن إنشاء أسئلة كافية'); return; }
+
+currentExam = {
+name,
+subject: names[subject] || subject,
+subjectKey: subject,
+chapters: selectedChaptersNames,
+totalQuestions: examQuestions.length,
+duration: duration,
+startTime: Date.now()
+};
+
+renderExam();
+document.getElementById('examModal').classList.add('show');
+startTimer(duration * 60);
+};
+
+function generateQuestions(lessons, count) {
+let questions = [];
+const shuffled = [...lessons].sort(() => Math.random() - 0.5);
+
+for (let i = 0; i < Math.min(count, shuffled.length); i++) {
+const lesson = shuffled[i];
+const q = createQuestionFromLesson(lesson);
+if (q) questions.push(q);
+}
+
+while (questions.length < count && shuffled.length > 0) {
+const lesson = shuffled[questions.length % shuffled.length];
+const q = createQuestionFromLesson(lesson);
+if (q && !questions.some(existing => existing.question === q.question)) questions.push(q);
+}
+
+return questions.slice(0, count);
+}
+
+function createQuestionFromLesson(lesson) {
+const text = lesson.text || '';
+const title = lesson.title || '';
+
+if (!text && !title) return null;
+
+const sentences = text.split(/[.!؟\n]+/).filter(s => s.trim().length > 10);
+if (sentences.length === 0) return null;
+
+const sentence = sentences[Math.floor(Math.random() * sentences.length)].trim();
+const words = sentence.split(/\s+/).filter(w => w.length > 3);
+
+if (words.length < 3) return null;
+
+const missingWordIndex = Math.floor(Math.random() * words.length);
+const missingWord = words[missingWordIndex];
+const maskedSentence = sentence.replace(missingWord, '_____');
+
+let choices = [missingWord];
+const otherWords = words.filter(w => w !== missingWord);
+while (choices.length < 4 && otherWords.length > 0) {
+const w = otherWords[Math.floor(Math.random() * otherWords.length)];
+if (!choices.includes(w)) choices.push(w);
+}
+
+const fillers = ['العلم', 'الدين', 'القرآن', 'السنة', 'الإيمان', 'العمل', 'الصدق', 'البر', 'التقوى', 'الصلاة', 'الجهاد', 'الصبر', 'التوحيد', 'الشريعة', 'المسلمين'];
+while (choices.length < 4) {
+const f = fillers[Math.floor(Math.random() * fillers.length)];
+if (!choices.includes(f)) choices.push(f);
+}
+
+choices = choices.sort(() => Math.random() - 0.5);
+
+return {
+question: `أكمل الجملة التالية:\n"${maskedSentence}"`,
+choices: choices,
+correct: missingWord,
+lessonTitle: title
+};
+}
+
+function renderExam() {
+const container = document.getElementById('examContent');
+container.innerHTML = '';
+
+examQuestions.forEach((q, index) => {
+let choicesHtml = '';
+q.choices.forEach((choice) => {
+choicesHtml += `<div class="choice" onclick="selectAnswer(${index}, '${choice.replace(/'/g, "\\'")}', this)">${choice}</div>`;
+});
+
+container.innerHTML += `
+<div class="question-box" id="q-${index}">
+<h4>السؤال ${index + 1} من ${examQuestions.length} ${q.lessonTitle ? `<small style="color:#aaa">(${q.lessonTitle})</small>` : ''}</h4>
+<p style="margin-bottom:15px;color:#fff;line-height:1.8">${q.question}</p>
+<div class="choices" id="choices-${index}">
+${choicesHtml}
+</div>
+</div>
+`;
+});
+
+container.innerHTML += `
+<button class="btn-primary" onclick="submitExam()" style="width:100%;margin-top:20px">
+✅ إنهاء الاختبار وتصحيح
+</button>
+`;
+}
+
+window.selectAnswer = function(qIndex, choice, element) {
+const box = document.getElementById(`choices-${qIndex}`);
+box.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
+element.classList.add('selected');
+examQuestions[qIndex].userAnswer = choice;
+};
+
+function startTimer(seconds) {
+const timerEl = document.getElementById('examTimer');
+let remaining = seconds;
+
+examTimerInterval = setInterval(() => {
+remaining--;
+const mins = Math.floor(remaining / 60);
+const secs = remaining % 60;
+timerEl.textContent = `⏱️ ${mins}:${secs.toString().padStart(2, '0')}`;
+
+if (remaining <= 0) {
+clearInterval(examTimerInterval);
+submitExam();
+showToast('⏰ انتهى وقت الاختبار!');
+}
+}, 1000);
+}
+
+window.closeExamModal = function() {
+clearInterval(examTimerInterval);
+document.getElementById('examModal').classList.remove('show');
+};
+
+window.submitExam = function() {
+clearInterval(examTimerInterval);
+
+let correct = 0;
+examQuestions.forEach((q, i) => {
+const box = document.getElementById(`choices-${i}`);
+if (!box) return;
+
+box.querySelectorAll('.choice').forEach(c => {
+if (c.textContent === q.correct) c.classList.add('correct');
+if (c.textContent === q.userAnswer && q.userAnswer !== q.correct) c.classList.add('wrong');
+});
+
+if (q.userAnswer === q.correct) correct++;
+});
+
+const score = correct;
+const total = examQuestions.length;
+const percent = Math.round((score / total) * 100);
+
+const result = {
+id: Date.now(),
+name: currentExam.name,
+subject: currentExam.subject,
+subjectKey: currentExam.subjectKey,
+chapters: currentExam.chapters,
+score: score,
+total: total,
+percent: percent,
+date: new Date().toLocaleString('ar-SA')
+};
+
+saveResult(result);
+document.getElementById('examModal').classList.remove('show');
+showResult(result);
+};
+
+function showResult(result) {
+const container = document.getElementById('resultContent');
+let emoji = result.percent >= 90 ? '🏆' : result.percent >= 80 ? '🎉' : result.percent >= 60 ? '👍' : result.percent >= 40 ? '💪' : '📚';
+let message = result.percent >= 90 ? 'ممتاز! بارك الله فيك' : result.percent >= 80 ? 'أحسنت! تقدم رائع' : result.percent >= 60 ? 'جيد! واصل التقدم' : result.percent >= 40 ? 'حاول مراجعة الدروس' : 'حاول مرة أخرى';
+
+container.innerHTML = `
+<div class="result-box">
+<div style="font-size:64px;margin-bottom:10px">${emoji}</div>
+<h2 style="color:#f5e6b3;margin-bottom:20px">${message}</h2>
+<div class="result-score">${result.score}/${result.total}</div>
+<div class="result-percent">${result.percent}%</div>
+<p style="color:#aaa;margin:15px 0">المادة: ${result.subject}</p>
+<p style="color:#aaa;margin:5px 0">الفصول: ${result.chapters.join(' • ')}</p>
+<p style="color:#aaa;margin:5px 0">التاريخ: ${result.date}</p>
+<div style="margin-top:25px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+<button class="btn-primary" onclick="shareResult(${result.id})">
+📤 مشاركة عبر واتساب
+</button>
+<button class="btn-secondary" onclick="closeResult()">
+❌ إغلاق
+</button>
+</div>
+</div>
+`;
+
+document.getElementById('resultModal').classList.add('show');
+}
+
+window.closeResult = function() {
+document.getElementById('resultModal').classList.remove('show');
+};
+
+/* ================= حفظ وعرض النتائج ================= */
+function saveResult(result) {
+let results = JSON.parse(localStorage.getItem('examResults') || '[]');
+results.push(result);
+localStorage.setItem('examResults', JSON.stringify(results));
+showToast('✅ تم حفظ النتيجة بنجاح!');
+}
+
+window.loadParticipants = function() {
+const container = document.getElementById('participantsList');
+let results = JSON.parse(localStorage.getItem('examResults') || '[]');
+
+if (results.length === 0) {
+container.innerHTML = `
+<div class="empty-state">
+<div style="font-size:48px;margin-bottom:15px">📭</div>
+<p>لا توجد نتائج مسجلة بعد</p>
+<p style="font-size:14px;margin-top:10px">أنشئ اختباراً لترى النتائج هنا</p>
+</div>
+`;
+return;
+}
+
+results = results.reverse();
+
+container.innerHTML = '';
+results.forEach(r => {
+container.innerHTML += `
+<div class="participant-item">
+<div class="participant-info">
+<div class="participant-name">👤 ${r.name}</div>
+<div class="participant-chapters">📚 ${r.subject} | 📂 ${r.chapters.join(' • ')}</div>
+<div class="participant-chapters">📅 ${r.date}</div>
+</div>
+<div class="participant-score">${r.score}/${r.total} (${r.percent}%)</div>
+<div class="participant-actions">
+<button class="share-btn" onclick="shareResult(${r.id})">📤 واتساب</button>
+<button class="delete-btn" onclick="deleteResult(${r.id})">🗑️ حذف</button>
+</div>
+</div>
+`;
+});
+};
+
+window.deleteResult = function(resultId) {
+if (!confirm('هل أنت متأكد من حذف هذه النتيجة؟')) return;
+
+let results = JSON.parse(localStorage.getItem('examResults') || '[]');
+results = results.filter(r => r.id !== resultId);
+localStorage.setItem('examResults', JSON.stringify(results));
+loadParticipants();
+showToast('🗑️ تم حذف النتيجة');
+};
+
+window.shareResult = function(resultId) {
+let results = JSON.parse(localStorage.getItem('examResults') || '[]');
+const result = results.find(r => r.id === resultId);
+if (!result) return;
+
+const text = `🎓 نتيجة الاختبار
+👤 الاسم: ${result.name}
+📚 المادة: ${result.subject}
+📂 الفصول: ${result.chapters.join(' • ')}
+✅ النتيجة: ${result.score}/${result.total}
+📊 النسبة: ${result.percent}%
+📅 التاريخ: ${result.date}
+
+🌟 تم الاختبار عبر تطبيق التعليم`;
+
+const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+window.open(url, '_blank');
+};
+
+/* ================= إشعارات ================= */
+window.showToast = function(message) {
+const toast = document.getElementById('toast');
+toast.textContent = message;
+toast.classList.add('show');
+setTimeout(() => toast.classList.remove('show'), 3000);
 };
 
 /* تشغيل */
