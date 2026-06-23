@@ -882,6 +882,7 @@ lessons.push({
 id: docu.id,
 title: data.title || '',
 text: data.text || '',
+questions: data.questions || null,
 ...data
 });
 });
@@ -896,11 +897,11 @@ return;
 
 showToast('⏳ جاري إنشاء الأسئلة...');
 
-examQuestions = generateQuestionsFromLessons(lessons, questionCount);
+examQuestions = generateQuestions(lessons, questionCount);
 console.log('عدد الأسئلة المُنشأة:', examQuestions.length);
 
 if (examQuestions.length === 0) { 
-showToast('❌ لا يمكن إنشاء أسئلة من هذه الدروس'); 
+showToast('❌ لا يمكن إنشاء أسئلة من هذه الدروس - تأكد من وجود أسئلة في الدروس'); 
 return; 
 }
 
@@ -924,375 +925,89 @@ showToast('❌ حدث خطأ: ' + error.message);
 }
 };
 
-function generateQuestionsFromLessons(lessons, count) {
+function generateQuestions(lessons, count) {
 console.log('توليد', count, 'سؤال من', lessons.length, 'درس');
 let questions = [];
-let attemptsPerLesson = Math.max(5, Math.ceil(count / Math.max(1, lessons.length)));
+const shuffled = [...lessons].sort(() => Math.random() - 0.5);
 
-const shuffledLessons = [...lessons].sort(() => Math.random() - 0.5);
-
-for (const lesson of shuffledLessons) {
+for (const lesson of shuffled) {
 if (questions.length >= count) break;
 
-const text = (lesson.text || '').trim();
-if (text.length < 30) continue;
-
-const sentences = extractSentences(text);
-if (sentences.length === 0) continue;
-
-let lessonQuestions = 0;
-
-for (const sentence of sentences) {
+// المحاولة 1: الأسئلة المخزنة في حقل questions (مصفوفة)
+if (lesson.questions && Array.isArray(lesson.questions) && lesson.questions.length > 0) {
+const validQuestions = getValidQuestions(lesson.questions);
+for (const cq of validQuestions) {
 if (questions.length >= count) break;
-if (lessonQuestions >= attemptsPerLesson) break;
-
-const question = createQuestionFromSentence(sentence, text, lesson.title);
-if (question) {
-questions.push(question);
-lessonQuestions++;
+questions.push({
+question: cq.question,
+choices: [...cq.choices].sort(() => Math.random() - 0.5),
+correct: cq.correct,
+source: lesson.title
+});
 }
 }
 
-if (lessonQuestions < 2 && questions.length < count) {
-const conceptQuestions = createConceptQuestions(text, lesson.title);
-for (const q of conceptQuestions) {
+// المحاولة 2: استخراج من النص إذا كان يحتوي على | (صيغة سؤال/إجابة)
+if (questions.length < count && lesson.text && lesson.text.includes('|')) {
+const extracted = extractQuestionsFromText(lesson.text, lesson.title);
+for (const q of extracted) {
 if (questions.length >= count) break;
 questions.push(q);
 }
 }
 }
 
-let loopCount = 0;
-while (questions.length < count && questions.length > 0 && loopCount < 50) {
-const original = questions[loopCount % questions.length];
-const variation = createVariation(original, text);
-if (variation) questions.push(variation);
-loopCount++;
-}
-
 return questions.slice(0, count);
 }
 
-function extractSentences(text) {
-const raw = text.split(/[.!؟\n]+/)
-.map(s => s.trim())
-.filter(s => s.length >= 20 && s.length <= 300);
-
-const sentences = [];
-for (const s of raw) {
-const words = s.split(/\s+/).filter(w => w.length > 2);
-if (words.length < 4) continue;
-if (s.includes('http') || s.includes('www') || s.includes('function')) continue;
-if (isVagueSentence(s)) continue;
-sentences.push(s);
+function getValidQuestions(questionsArray) {
+const valid = [];
+for (const q of questionsArray) {
+if (!q || typeof q !== 'object') continue;
+const questionObj = q.toJSON ? q.toJSON() : q;
+if (!questionObj.question || !questionObj.choices || !questionObj.correct) continue;
+let choices = questionObj.choices;
+if (choices && typeof choices === 'object' && !Array.isArray(choices)) {
+choices = Object.values(choices);
+}
+if (!Array.isArray(choices) || choices.length < 2) continue;
+const correctStr = String(questionObj.correct).trim();
+const choicesStr = choices.map(c => String(c).trim());
+if (!choicesStr.includes(correctStr)) continue;
+valid.push({
+question: String(questionObj.question).trim(),
+choices: choicesStr,
+correct: correctStr
+});
+}
+return valid;
 }
 
-return sentences;
-}
-
-function isVagueSentence(sentence) {
-const vagueWords = ['شيء', 'أمر', 'كذا', 'إلخ', 'وهكذا', '...', 'إلخ'];
-const words = sentence.split(/\s+/);
-const meaningfulWords = words.filter(w => w.length > 3 && !vagueWords.includes(w));
-return meaningfulWords.length < 3;
-}
-
-function createQuestionFromSentence(sentence, fullText, lessonTitle) {
-const defPatterns = [
-/(.{3,40}?)(?:\s+هو|\s+هي|\s+يعني|\s+تعني|\s+يُعرّف|\s+تُعرّف|\s+يقصد|\s+تقصد)\s+(.{10,120})/,
-/(.{3,40}?)\s+(?:هو|هي)\s+(.{10,120})/,
-/(.{3,40}?)\s+(?:يعني|تعني)\s+(.{10,120})/
-];
-
-for (const pattern of defPatterns) {
-const match = sentence.match(pattern);
-if (match) {
-const term = cleanText(match[1]);
-const definition = cleanText(match[2]);
-if (term.length >= 3 && definition.length >= 10 && !isVague(definition)) {
-const wrong = generateWrongAnswers(fullText, sentence, definition, 2);
-if (wrong.length >= 1) {
-return buildQuestion(`ما هو تعريف "${term}"؟`, definition, wrong, lessonTitle);
-}
-}
-}
-}
-
-const reasonMatch = sentence.match(/(.{5,50}?)\s+(?:لأن|لِ|بسبب|نظراً ل)\s+(.{10,120})/);
-if (reasonMatch) {
-const action = cleanText(reasonMatch[1]);
-const reason = cleanText(reasonMatch[2]);
-if (action.length >= 5 && reason.length >= 10 && !isVague(reason)) {
-const wrong = generateWrongAnswers(fullText, sentence, reason, 2);
-if (wrong.length >= 1) {
-return buildQuestion(`لماذا ${action}؟`, reason, wrong, lessonTitle);
-}
-}
-}
-
-const conditionMatch = sentence.match(/(?:إذا|من|كل من|حين|عندما)\s+(.{5,50}?)\s+(?:فـ|فإن|فعليه|يجب عليه|فيجب|فيتوجب|فيتعين)\s+(.{10,120})/);
-if (conditionMatch) {
-const condition = cleanText(conditionMatch[1]);
-const result = cleanText(conditionMatch[2]);
-if (condition.length >= 5 && result.length >= 10 && !isVague(result)) {
-const wrong = generateWrongAnswers(fullText, sentence, result, 2);
-if (wrong.length >= 1) {
-return buildQuestion(`ما هو الشيء الواجب عند ${condition}؟`, result, wrong, lessonTitle);
-}
-}
-}
-
-const partsMatch = sentence.match(/(.{3,40}?)\s+(?:يتكون من|تتكون من|يشمل|تشمل|يحتوي على|تحتوي على|فيه|فيهما|يتضمن|تتضمن)\s+(.{10,120})/);
-if (partsMatch) {
-const term = cleanText(partsMatch[1]);
-const parts = cleanText(partsMatch[2]);
-if (term.length >= 3 && parts.length >= 10 && !isVague(parts)) {
-const wrong = generateWrongAnswers(fullText, sentence, parts, 2);
-if (wrong.length >= 1) {
-return buildQuestion(`ما هي أجزاء/محتوى "${term}"؟`, parts, wrong, lessonTitle);
-}
-}
-}
-
-const timeMatch = sentence.match(/(.{3,40}?)\s+(?:يكون|تكون|يقع|تقع|يحدث|تحدث|يوجد|توجد)\s+(?:في|عند|بعد|قبل|عندما|إذا|خلال|أثناء)\s+(.{10,120})/);
-if (timeMatch) {
-const term = cleanText(timeMatch[1]);
-const time = cleanText(timeMatch[2]);
-if (term.length >= 3 && time.length >= 10 && !isVague(time)) {
-const wrong = generateWrongAnswers(fullText, sentence, time, 2);
-if (wrong.length >= 1) {
-return buildQuestion(`متى/أين يكون ${term}؟`, time, wrong, lessonTitle);
-}
-}
-}
-
-const actionMatch = sentence.match(/(.{3,40}?)\s+(?:يؤدي|تؤدي|يسبب|تسبب|ينتج|تنتج|يؤثر|تؤثر|يترتب|تترتب)\s+(?:على|في|من|إلى)\s+(.{10,120})/);
-if (actionMatch) {
-const actor = cleanText(actionMatch[1]);
-const result = cleanText(actionMatch[2]);
-if (actor.length >= 3 && result.length >= 10 && !isVague(result)) {
-const wrong = generateWrongAnswers(fullText, sentence, result, 2);
-if (wrong.length >= 1) {
-return buildQuestion(`ما هو نتيجة/أثر ${actor}؟`, result, wrong, lessonTitle);
-}
-}
-}
-
-const purposeMatch = sentence.match(/(.{3,40}?)\s+(?:لِ|من أجل|بهدف|لأجل|لغرض)\s+(.{10,120})/);
-if (purposeMatch) {
-const thing = cleanText(purposeMatch[1]);
-const purpose = cleanText(purposeMatch[2]);
-if (thing.length >= 3 && purpose.length >= 10 && !isVague(purpose)) {
-const wrong = generateWrongAnswers(fullText, sentence, purpose, 2);
-if (wrong.length >= 1) {
-return buildQuestion(`ما هو الغرض/الهدف من ${thing}؟`, purpose, wrong, lessonTitle);
-}
-}
-}
-
-const featureMatch = sentence.match(/(.{3,40}?)\s+(?:يتميز|تتميز|يتصف|تتصف|يُعتبر|تُعتبر|يُعرف|تُعرف)\s+(?:بـ|بأنه|بأنها|ب)\s+(.{10,120})/);
-if (featureMatch) {
-const term = cleanText(featureMatch[1]);
-const feature = cleanText(featureMatch[2]);
-if (term.length >= 3 && feature.length >= 10 && !isVague(feature)) {
-const wrong = generateWrongAnswers(fullText, sentence, feature, 2);
-if (wrong.length >= 1) {
-return buildQuestion(`ما هي صفة/خاصية "${term}"؟`, feature, wrong, lessonTitle);
-}
-}
-}
-
-return null;
-}
-
-function createConceptQuestions(text, lessonTitle) {
+function extractQuestionsFromText(text, lessonTitle) {
 const questions = [];
-const sentences = extractSentences(text);
-if (sentences.length === 0) return questions;
+const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-const allWords = text.split(/\s+/)
-.map(w => w.replace(/[،,؛;:.!؟"'()\[\]{}]/g, ''))
-.filter(w => w.length >= 4 && w.length <= 20);
-
-const wordFreq = {};
-for (const word of allWords) {
-const lower = word.toLowerCase();
-if (!wordFreq[lower]) wordFreq[lower] = 0;
-wordFreq[lower]++;
-}
-
-const keywords = Object.entries(wordFreq)
-.filter(([w, c]) => c >= 2)
-.map(([w]) => w)
-.slice(0, 5);
-
-for (const keyword of keywords) {
-if (questions.length >= 2) break;
-
-const relevantSentence = sentences.find(s => s.includes(keyword));
-if (!relevantSentence) continue;
-
-const context = extractContext(relevantSentence, keyword);
-if (context && context.length >= 15) {
-const wrong = generateWrongAnswers(text, relevantSentence, context, 2);
-if (wrong.length >= 1) {
-questions.push(buildQuestion(`ما المقصود بـ "${keyword}" في الدرس؟`, context, wrong, lessonTitle));
+for (let i = 0; i < lines.length; i++) {
+const line = lines[i];
+if (line.includes('|')) {
+const parts = line.split('|').map(p => p.trim()).filter(p => p.length > 0);
+if (parts.length >= 3) {
+const questionText = parts[0];
+const correctAnswer = parts[1];
+const otherChoices = parts.slice(2);
+const allChoices = [correctAnswer, ...otherChoices];
+const shuffled = allChoices.sort(() => Math.random() - 0.5);
+questions.push({
+question: questionText,
+choices: shuffled,
+correct: correctAnswer,
+source: lessonTitle
+});
 }
 }
 }
 
 return questions;
-}
-
-function extractContext(sentence, keyword) {
-const idx = sentence.indexOf(keyword);
-if (idx === -1) return null;
-
-const start = Math.max(0, idx - 30);
-const end = Math.min(sentence.length, idx + keyword.length + 50);
-let context = sentence.substring(start, end).trim();
-
-context = context.replace(new RegExp(keyword, 'g'), '...').trim();
-if (context.startsWith('...')) context = context.substring(3).trim();
-if (context.endsWith('...')) context = context.substring(0, context.length - 3).trim();
-
-return context.length >= 10 ? context : null;
-}
-
-function createVariation(original, fullText) {
-if (!original || !original.question) return null;
-
-let newQuestion = original.question;
-if (newQuestion.startsWith('ما هو')) {
-newQuestion = newQuestion.replace('ما هو', 'ما هي');
-} else if (newQuestion.startsWith('ما هي')) {
-newQuestion = newQuestion.replace('ما هي', 'ما هو');
-} else if (newQuestion.startsWith('لماذا')) {
-newQuestion = newQuestion.replace('لماذا', 'ما السبب في');
-} else if (newQuestion.startsWith('ما السبب')) {
-newQuestion = newQuestion.replace('ما السبب في', 'لماذا');
-}
-
-if (newQuestion === original.question) {
-const sentences = extractSentences(fullText);
-if (sentences.length > 0) {
-const randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
-return createQuestionFromSentence(randomSentence, fullText, original.source);
-}
-}
-
-return {
-question: newQuestion,
-choices: [...original.choices].sort(() => Math.random() - 0.5),
-correct: original.correct,
-source: original.source
-};
-}
-
-function buildQuestion(questionText, correctAnswer, wrongAnswers, source) {
-if (!correctAnswer || correctAnswer.length < 5) return null;
-if (!wrongAnswers || wrongAnswers.length < 1) return null;
-
-const allChoices = [correctAnswer, ...wrongAnswers.slice(0, 3)];
-const uniqueChoices = [...new Set(allChoices.map(c => c.trim()))];
-if (uniqueChoices.length < 2) return null;
-
-const shuffled = uniqueChoices.sort(() => Math.random() - 0.5);
-
-return {
-question: questionText,
-choices: shuffled,
-correct: correctAnswer,
-source: source || 'سؤال'
-};
-}
-
-function generateWrongAnswers(fullText, correctSentence, correctAnswer, minCount = 2) {
-const wrongAnswers = [];
-const allSentences = fullText.split(/[.!؟\n]+/)
-.map(s => s.trim())
-.filter(s => s.length >= 20 && s !== correctSentence);
-
-for (const sentence of allSentences) {
-if (wrongAnswers.length >= 5) break;
-
-const info = extractAnyInfo(sentence);
-if (info && info !== correctAnswer && info.length >= 10 && info.length <= 100) {
-if (similarity(info, correctAnswer) < 0.6) {
-wrongAnswers.push(info);
-}
-}
-}
-
-if (wrongAnswers.length < minCount) {
-for (const sentence of allSentences) {
-if (wrongAnswers.length >= 5) break;
-const clean = sentence.replace(/[،,؛;:.!؟"']/g, '').trim();
-if (clean.length >= 15 && clean.length <= 80 && clean !== correctAnswer) {
-if (similarity(clean, correctAnswer) < 0.6) {
-wrongAnswers.push(clean);
-}
-}
-}
-}
-
-return wrongAnswers.slice(0, 3);
-}
-
-function extractAnyInfo(sentence) {
-const patterns = [
-/(.{3,40}?)(?:\s+هو|\s+هي|\s+يعني|\s+تعني)\s+(.{10,100})/,
-/(.{5,50}?)\s+(?:لأن|لِ|بسبب)\s+(.{10,100})/,
-/(?:إذا|من|كل من)\s+(.{5,50}?)\s+(?:فـ|فإن|فعليه|يجب عليه)\s+(.{10,100})/,
-/(.{3,40}?)\s+(?:يتكون من|تتكون من|يشمل|تشمل)\s+(.{10,100})/,
-/(.{3,40}?)\s+(?:يكون|تكون|يقع|تقع)\s+(?:في|عند|بعد|قبل)\s+(.{10,100})/,
-/(.{3,40}?)\s+(?:يؤدي|تؤدي|يسبب|تسبب)\s+(?:على|في|إلى)\s+(.{10,100})/
-];
-
-for (const pattern of patterns) {
-const match = sentence.match(pattern);
-if (match) return cleanText(match[2]);
-}
-
-const words = sentence.split(/\s+/).filter(w => w.length > 3);
-if (words.length >= 5) {
-return words.slice(0, 8).join(' ');
-}
-
-return null;
-}
-
-function similarity(text1, text2) {
-if (!text1 || !text2) return 1;
-const words1 = text1.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-const words2 = text2.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-if (words1.length === 0 || words2.length === 0) return 1;
-
-const set1 = new Set(words1);
-const set2 = new Set(words2);
-const intersection = [...set1].filter(w => set2.has(w));
-const union = new Set([...set1, ...set2]);
-
-return intersection.length / union.size;
-}
-
-function cleanText(text) {
-if (!text) return '';
-return text
-.replace(/[،,؛;:.!؟"'()\[\]{}]/g, ' ')
-.replace(/\s+/g, ' ')
-.trim()
-.substring(0, 120);
-}
-
-function isVague(text) {
-if (!text || text.length < 10) return true;
-const vagueWords = ['شيء', 'أمر', 'كذا', 'إلخ', 'وهكذا', '...', 'إلخ', 'إلى آخره'];
-for (const word of vagueWords) {
-if (text.includes(word)) return true;
-}
-const words = text.split(/\s+/).filter(w => w.length > 3);
-return words.length < 3;
 }
 
 function renderExam() {
