@@ -344,76 +344,6 @@ color:#27ae60;
 margin:10px 0;
 }
 
-.participants-box{
-width:92%;
-max-width:900px;
-margin:20px auto;
-background:rgba(5,15,30,.65);
-border:1px solid rgba(255,255,255,.1);
-border-radius:15px;
-padding:20px;
-}
-
-.participants-box h3{
-color:#f5e6b3;
-margin-bottom:15px;
-}
-
-.participant-item{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:12px;
-margin:8px 0;
-background:#0d2033;
-border-radius:10px;
-flex-wrap:wrap;
-gap:10px;
-}
-
-.participant-info{
-flex:1;
-}
-
-.participant-name{
-color:#f5e6b3;
-font-weight:700;
-}
-
-.participant-chapters{
-color:#aaa;
-font-size:14px;
-}
-
-.participant-score{
-font-size:20px;
-font-weight:700;
-color:#27ae60;
-}
-
-.participant-actions{
-display:flex;
-gap:8px;
-}
-
-.participant-actions button{
-padding:6px 12px;
-border:none;
-border-radius:8px;
-cursor:pointer;
-font-size:14px;
-}
-
-.share-btn{
-background:#25d366;
-color:#fff;
-}
-
-.delete-btn{
-background:#c0392b;
-color:#fff;
-}
-
 .toast{
 position:fixed;
 top:20px;
@@ -495,7 +425,6 @@ max-width:900px;
 background:#1a3a5c;
 }
 
-/* ======== أسئلة مقالية ======== */
 .open-answer{
 width:100%;
 padding:14px;
@@ -516,43 +445,12 @@ margin-top:10px;
 color:#888;
 }
 
-.open-answer.correct-answer{
-border-color:#27ae60;
-background:rgba(39,174,96,0.1);
-}
-
-.open-answer.partial-answer{
-border-color:#d4af37;
-background:rgba(212,175,55,0.1);
-}
-
-.open-answer.wrong-answer{
-border-color:#c0392b;
-background:rgba(192,57,43,0.1);
-}
-
 .answer-label{
 color:#f5e6b3;
 font-weight:700;
 margin-top:15px;
 margin-bottom:5px;
 font-size:15px;
-}
-
-.model-answer-box{
-background:rgba(255,255,255,.05);
-border:1px solid rgba(255,255,255,.1);
-border-radius:12px;
-padding:15px;
-margin-top:15px;
-line-height:1.8;
-}
-
-.model-answer-title{
-color:#d4af37;
-font-weight:700;
-margin-bottom:10px;
-font-size:14px;
 }
 
 .question-counter{
@@ -593,12 +491,6 @@ color:#06131f;
 }
 
 /* ======== لوحة الإدارة ======== */
-.admin-panel{
-width:92%;
-max-width:900px;
-margin:15px auto;
-}
-
 .admin-question-item{
 background:rgba(5,15,30,.65);
 border:1px solid rgba(255,255,255,.1);
@@ -658,7 +550,7 @@ font-size:24px;
 letter-spacing:10px;
 }
 
-/* ======== أقسام الأبواب ======== */
+/* ======== أقسام الأبواب للاختبارات فقط ======== */
 .chapter-section{
 background:rgba(5,15,30,.65);
 border:1px solid rgba(255,255,255,.1);
@@ -681,15 +573,6 @@ margin-bottom:10px;
 .chapter-header h4{
 color:#f5e6b3;
 font-weight:700;
-}
-
-.chapter-header .toggle-icon{
-color:#d4af37;
-font-size:18px;
-}
-
-.chapter-questions{
-padding:10px 0;
 }
 
 .chapter-actions{
@@ -747,6 +630,230 @@ font-size:14px;
 color:#06131f;
 }
 
+/* ======== شريط التقدم ======== */
+.progress-bar-container{
+width:100%;
+height:8px;
+background:rgba(255,255,255,.1);
+border-radius:4px;
+margin:15px 0;
+overflow:hidden;
+}
+
+.progress-bar{
+height:100%;
+background:#d4af37;
+border-radius:4px;
+transition:width .3s;
+}
+
+/* ======== تصنيف الإجابة ======== */
+.answer-classification{
+display:flex;
+align-items:center;
+gap:8px;
+margin:10px 0;
+flex-wrap:wrap;
+}
+
+.classification-badge{
+display:inline-flex;
+align-items:center;
+gap:6px;
+padding:6px 14px;
+border-radius:20px;
+font-size:13px;
+font-weight:700;
+border:2px solid;
+}
+
+.classification-badge.excellent{
+background:rgba(39,174,96,.15);
+color:#27ae60;
+border-color:#27ae60;
+}
+
+.classification-badge.very-good{
+background:rgba(46,204,113,.15);
+color:#2ecc71;
+border-color:#2ecc71;
+}
+
+.classification-badge.good{
+background:rgba(212,175,55,.15);
+color:#d4af37;
+border-color:#d4af37;
+}
+
+.classification-badge.acceptable{
+background:rgba(230,126,34,.15);
+color:#e67e22;
+border-color:#e67e22;
+}
+
+.classification-badge.weak{
+background:rgba(231,76,60,.15);
+color:#e74c3c;
+border-color:#e74c3c;
+}
+
+.classification-badge.no-answer{
+background:rgba(149,165,166,.15);
+color:#95a5a6;
+border-color:#95a5a6;
+}
+
+.score-badge{
+display:inline-flex;
+align-items:center;
+padding:4px 12px;
+border-radius:20px;
+font-size:14px;
+font-weight:700;
+}
+
+.score-badge.excellent{background:#27ae60;color:#fff;}
+.score-badge.very-good{background:#2ecc71;color:#fff;}
+.score-badge.good{background:#d4af37;color:#06131f;}
+.score-badge.acceptable{background:#e67e22;color:#fff;}
+.score-badge.weak{background:#e74c3c;color:#fff;}
+.score-badge.no-answer{background:#95a5a6;color:#fff;}
+
+/* ======== ملخص التصنيفات ======== */
+.summary-box{
+background:rgba(5,15,30,.8);
+border:1px solid rgba(255,255,255,.1);
+border-radius:14px;
+padding:20px;
+margin:20px 0;
+}
+
+.summary-title{
+color:#f5e6b3;
+font-size:18px;
+font-weight:700;
+margin-bottom:15px;
+text-align:center;
+}
+
+.summary-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));
+gap:10px;
+}
+
+.summary-item{
+text-align:center;
+padding:12px;
+border-radius:10px;
+background:rgba(255,255,255,.03);
+}
+
+.summary-item .count{
+font-size:28px;
+font-weight:700;
+margin-bottom:5px;
+}
+
+.summary-item .label{
+font-size:13px;
+color:#aaa;
+}
+
+/* ======== بطاقة سؤال في النتيجة ======== */
+.result-question-card{
+margin:15px 0;
+padding:20px;
+background:#06131f;
+border-radius:14px;
+border:1px solid rgba(255,255,255,.08);
+text-align:right;
+position:relative;
+overflow:hidden;
+}
+
+.result-question-card::before{
+content:"";
+position:absolute;
+top:0;
+right:0;
+width:4px;
+height:100%;
+}
+
+.result-question-card.excellent::before{background:#27ae60;}
+.result-question-card.very-good::before{background:#2ecc71;}
+.result-question-card.good::before{background:#d4af37;}
+.result-question-card.acceptable::before{background:#e67e22;}
+.result-question-card.weak::before{background:#e74c3c;}
+.result-question-card.no-answer::before{background:#95a5a6;}
+
+.question-number-badge{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:32px;
+height:32px;
+border-radius:50%;
+font-weight:700;
+font-size:14px;
+margin-left:10px;
+}
+
+.question-header-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:12px;
+flex-wrap:wrap;
+gap:8px;
+}
+
+.question-meta{
+display:flex;
+align-items:center;
+gap:8px;
+flex-wrap:wrap;
+}
+
+.user-answer-box{
+background:rgba(255,255,255,.03);
+border:1px solid rgba(255,255,255,.08);
+border-radius:10px;
+padding:12px;
+margin:10px 0;
+line-height:1.8;
+}
+
+.user-answer-label{
+color:#aaa;
+font-size:12px;
+margin-bottom:5px;
+display:block;
+}
+
+.model-answer-box{
+background:rgba(212,175,55,.05);
+border:1px solid rgba(212,175,55,.15);
+border-radius:10px;
+padding:12px;
+margin-top:10px;
+line-height:1.8;
+}
+
+.model-answer-label{
+color:#d4af37;
+font-size:12px;
+margin-bottom:5px;
+display:block;
+font-weight:700;
+}
+
+.no-answer-text{
+color:#95a5a6;
+font-style:italic;
+}
+
 ::-webkit-scrollbar{
 width:8px;
 }
@@ -761,13 +868,12 @@ border-radius:4px;
 }
 
 @media(max-width:600px){
-.participant-item{
+.summary-grid{
+grid-template-columns:repeat(2, 1fr);
+}
+.question-header-row{
 flex-direction:column;
 align-items:flex-start;
-}
-.participant-actions{
-width:100%;
-justify-content:flex-end;
 }
 }
 </style>
@@ -992,11 +1098,9 @@ english:"الإنجليزي",
 tafsir:"التفسير"
 };
 
-document.getElementById("title").textContent =
-names[id] || "المادة";
+document.getElementById("title").textContent = names[id] || "المادة";
 
 const snap = await getDoc(doc(db,"subjects",id));
-
 const content = document.getElementById("content");
 
 if(snap.exists()){
@@ -1042,10 +1146,7 @@ let chaptersList = document.getElementById("chaptersList");
 let lessonsList = document.getElementById("lessonsList");
 
 async function loadChapters(){
-const q = query(
-collection(db,"chapters"),
-where("subject","==",id)
-);
+const q = query(collection(db,"chapters"),where("subject","==",id));
 const snap = await getDocs(q);
 chaptersList.innerHTML = "";
 let arr=[];
@@ -1064,10 +1165,7 @@ chaptersList.innerHTML += `
 
 window.openChapter = async (chapterId)=>{
 document.getElementById("lessonsBox").style.display="block";
-const q = query(
-collection(db,"lessons"),
-where("chapterId","==",chapterId)
-);
+const q = query(collection(db,"lessons"),where("chapterId","==",chapterId));
 const snap = await getDocs(q);
 lessonsList.innerHTML = "";
 let arr=[];
@@ -1175,7 +1273,7 @@ onAdminSubjectChange();
 }
 };
 
-// ==================== إدارة الأبواب ====================
+// ==================== إدارة الأبواب (للاختبارات فقط) ====================
 let currentAdminSubject = '';
 let currentAdminChapter = null;
 
@@ -1235,8 +1333,6 @@ container.innerHTML = '';
 snap.forEach(docu => {
 const data = docu.data();
 const chapterId = docu.id;
-
-// عدد الأسئلة
 const qCount = data.questionCount || 0;
 
 container.innerHTML += `
@@ -1298,7 +1394,6 @@ if (!confirm('هل أنت متأكد من حذف هذا الباب؟ سيتم ح
 showToast('⏳ جاري الحذف...');
 
 try {
-// حذف جميع الأسئلة التابعة للباب
 const q = query(collection(db, 'examQuestions'), where('chapterId', '==', chapterId));
 const snap = await getDocs(q);
 const batch = [];
@@ -1307,7 +1402,6 @@ snap.forEach(docu => {
 });
 await Promise.all(batch);
 
-// حذف الباب
 await deleteDoc(doc(db, 'examChapters', chapterId));
 showToast('🗑️ تم حذف الباب وأسئلته');
 loadAdminChapters();
@@ -1337,7 +1431,6 @@ await addDoc(collection(db, 'examQuestions'), {
  createdAt: serverTimestamp()
 });
 
-// تحديث عدد الأسئلة
 const chapterRef = doc(db, 'examChapters', currentAdminChapter);
 const chapterSnap = await getDoc(chapterRef);
 const currentCount = chapterSnap.data()?.questionCount || 0;
@@ -1462,7 +1555,6 @@ showToast('⏳ جاري الحذف...');
 try {
 await deleteDoc(doc(db, 'examQuestions', questionId));
 
-// تحديث عدد الأسئلة
 const chapterRef = doc(db, 'examChapters', currentAdminChapter);
 const chapterSnap = await getDoc(chapterRef);
 const currentCount = chapterSnap.data()?.questionCount || 0;
@@ -1485,6 +1577,7 @@ let examTimerInterval;
 let currentQuestionIndex = 0;
 let userAnswers = {};
 let selectedChapterId = '';
+let selectedChapterName = '';
 
 async function loadSubjectsForExam() {
 const select = document.getElementById('examSubjectSelect');
@@ -1503,9 +1596,11 @@ const subject = document.getElementById('examSubjectSelect').value;
 const box = document.getElementById('examChapterSelectBox');
 const list = document.getElementById('examChapterList');
 
+selectedChapterId = '';
+selectedChapterName = '';
+
 if (!subject) {
 box.style.display = 'none';
-selectedChapterId = '';
 return;
 }
 
@@ -1526,7 +1621,7 @@ snap.forEach(docu => {
 const data = docu.data();
 const qCount = data.questionCount || 0;
 list.innerHTML += `
-<div class="chapter-select-item" onclick="selectChapter(this, '${docu.id}')" data-chapter="${docu.id}">
+<div class="chapter-select-item" onclick="selectChapter(this, '${docu.id}', '${data.name}')" data-chapter="${docu.id}">
 <div>
 <strong style="color:#f5e6b3">📂 ${data.name}</strong>
 </div>
@@ -1542,16 +1637,16 @@ showToast('❌ حدث خطأ في تحميل الأبواب');
 }
 };
 
-window.selectChapter = function(el, chapterId) {
+window.selectChapter = function(el, chapterId, chapterName) {
 document.querySelectorAll('.chapter-select-item').forEach(item => {
 item.classList.remove('selected');
 });
 el.classList.add('selected');
 selectedChapterId = chapterId;
+selectedChapterName = chapterName;
 };
 
 window.startExam = async function() {
-console.log('=== بدء الاختبار ===');
 try {
 const name = document.getElementById('examParticipantName').value.trim();
 const subject = document.getElementById('examSubjectSelect').value;
@@ -1563,7 +1658,6 @@ if (!selectedChapterId) { showToast('❌ الرجاء اختيار الباب');
 
 showToast('⏳ جاري تحميل الأسئلة...');
 
-// جمع أسئلة الباب المختار
 const q = query(collection(db, 'examQuestions'), where('chapterId', '==', selectedChapterId));
 const snap = await getDocs(q);
 
@@ -1578,23 +1672,20 @@ allQuestions.push({
 });
 });
 
-console.log('عدد الأسئلة المحملة من Firebase:', allQuestions.length);
-
 if (allQuestions.length === 0) { 
-showToast('❌ لا توجد أسئلة مضافة لهذا الباب - أضف أسئلة من لوحة الإدارة'); 
+showToast('❌ لا توجد أسئلة مضافة لهذا الباب'); 
 return; 
 }
 
-// خلط الأسئلة
 const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
 examQuestions = shuffled;
-
-console.log('عدد الأسئلة في الاختبار:', examQuestions.length);
 
 currentExam = {
 name,
 subject: names[subject] || subject,
 subjectKey: subject,
+chapterName: selectedChapterName,
+chapterId: selectedChapterId,
 totalQuestions: examQuestions.length,
 duration: duration,
 startTime: Date.now()
@@ -1712,6 +1803,8 @@ id: Date.now(),
 name: currentExam.name,
 subject: currentExam.subject,
 subjectKey: currentExam.subjectKey,
+chapterName: currentExam.chapterName,
+chapterId: currentExam.chapterId,
 score: Math.round(totalScore / 100 * totalQuestions),
 total: totalQuestions,
 percent: avgScore,
@@ -1724,7 +1817,7 @@ document.getElementById('examModal').classList.remove('show');
 showResult(result);
 };
 
-// ==================== تصحيح ذكي ====================
+// ==================== تصحيح ذكي معتمد على المعنى ====================
 function calculateOpenScore(userAnswer, modelAnswer) {
 if (!userAnswer || userAnswer.length < 3) return 0;
 if (!modelAnswer || modelAnswer.length < 3) return 0;
@@ -1741,7 +1834,7 @@ let matchedPoints = 0;
 let totalPointsWeight = 0;
 
 modelPoints.forEach(modelPoint => {
-const pointWeight = modelPoint.length;
+const pointWeight = Math.max(modelPoint.length, 10);
 const pointScore = findBestMatch(modelPoint, userPoints);
 matchedPoints += pointScore * pointWeight;
 totalPointsWeight += pointWeight;
@@ -1751,10 +1844,13 @@ const pointsScore = totalPointsWeight > 0 ? Math.round((matchedPoints / totalPoi
 
 const keywordsScore = compareKeywords(cleanUser, cleanModel);
 
+const rootScore = compareRootWords(cleanUser, cleanModel);
+
 const finalScore = Math.round(
- (fullTextScore * 0.4) + 
- (pointsScore * 0.4) + 
- (keywordsScore * 0.2)
+ (fullTextScore * 0.30) + 
+ (pointsScore * 0.40) + 
+ (keywordsScore * 0.20) +
+ (rootScore * 0.10)
 );
 
 return Math.min(100, finalScore);
@@ -1784,7 +1880,7 @@ modelWords.forEach(word => {
 if (userWords.includes(word)) commonWords++;
 });
 
-const score = commonWords / modelWords.length;
+const score = Math.min(commonWords / (modelWords.length * 0.8), 1);
 if (score > bestScore) bestScore = score;
 });
 
@@ -1805,7 +1901,38 @@ modelSet.forEach(word => {
 if (userSet.has(word)) matchedKeywords++;
 });
 
-return Math.round((matchedKeywords / modelSet.size) * 100);
+return Math.min(Math.round((matchedKeywords / (modelSet.size * 0.7)) * 100), 100);
+}
+
+function compareRootWords(userText, modelText) {
+const userRoots = extractRoots(userText);
+const modelRoots = extractRoots(modelText);
+
+if (modelRoots.length === 0) return 0;
+
+const userSet = new Set(userRoots);
+const modelSet = new Set(modelRoots);
+
+let matchedRoots = 0;
+modelSet.forEach(root => {
+if (userSet.has(root)) matchedRoots++;
+});
+
+return Math.round((matchedRoots / modelSet.size) * 100);
+}
+
+function extractRoots(text) {
+return text
+.split(/\s+/)
+.filter(w => w.length > 3)
+.map(w => {
+ let root = w
+ .replace(/[ًٌٍَُِّْٰ]/g, '')
+ .replace(/^(ال|و|ف|ب|ك|ل|ت|ن|ي|ا|ه|إ|أ|آ)/g, '')
+ .replace(/(ة|ت|ان|ون|ين|وا|تم|تن|نا|ها|هم|هن|كما|كن|ني|ك|ه|ي)$/g, '');
+ return root;
+})
+.filter(w => w.length > 2);
 }
 
 function calculateTextSimilarity(text1, text2) {
@@ -1833,39 +1960,139 @@ return text
 .trim();
 }
 
+// ==================== تصنيف الإجابة ====================
+function getAnswerClassification(percent) {
+if (percent === 0) return { 
+ key: 'no-answer', 
+ label: 'لم يُجب', 
+ emoji: '⚪', 
+ desc: 'لم يتم كتابة إجابة' 
+};
+if (percent >= 85) return { 
+ key: 'excellent', 
+ label: 'ممتازة', 
+ emoji: '🏆', 
+ desc: 'إجابة ممتازة ومقاربة للنموذج' 
+};
+if (percent >= 70) return { 
+ key: 'very-good', 
+ label: 'جيدة جداً', 
+ emoji: '✨', 
+ desc: 'إجابة جيدة جداً وتقترب من المعنى' 
+};
+if (percent >= 55) return { 
+ key: 'good', 
+ label: 'جيدة', 
+ emoji: '👍', 
+ desc: 'إجابة جيدة لكن تحتاج تفصيل' 
+};
+if (percent >= 40) return { 
+ key: 'acceptable', 
+ label: 'مقبولة', 
+ emoji: '⚠️', 
+ desc: 'إجابة مقبولة لكن غير كاملة' 
+};
+return { 
+ key: 'weak', 
+ label: 'ضعيفة', 
+ emoji: '📚', 
+ desc: 'إجابة تحتاج مراجعة الدروس' 
+};
+}
+
+// ==================== عرض النتيجة مع التصنيفات ====================
 function showResult(result) {
 const container = document.getElementById('resultContent');
 let emoji = result.percent >= 90 ? '🏆' : result.percent >= 80 ? '🎉' : result.percent >= 60 ? '👍' : result.percent >= 40 ? '💪' : '📚';
 let message = result.percent >= 90 ? 'ممتاز! بارك الله فيك' : result.percent >= 80 ? 'أحسنت! تقدم رائع' : result.percent >= 60 ? 'جيد! واصل التقدم' : result.percent >= 40 ? 'حاول مراجعة الدروس' : 'حاول مرة أخرى';
 
+const progressWidth = result.percent + '%';
+
+// حساب إحصائيات التصنيفات
+const classifications = {
+'excellent': 0,
+'very-good': 0,
+'good': 0,
+'acceptable': 0,
+'weak': 0,
+'no-answer': 0
+};
+
 let reviewHtml = '';
 examQuestions.forEach((q, i) => {
 const score = q.score || 0;
-const statusColor = score >= 70 ? '#27ae60' : score >= 40 ? '#d4af37' : '#c0392b';
-const statusText = score >= 70 ? '✓ إجابة صحيحة' : score >= 40 ? '⚠ إجابة مقبولة' : '✗ إجابة خاطئة';
+const classification = getAnswerClassification(score);
+classifications[classification.key]++;
+
+const cardClass = classification.key;
+const badgeClass = classification.key;
 
 reviewHtml += `
-<div style="margin:15px 0;padding:15px;background:#06131f;border-radius:12px;border:1px solid rgba(255,255,255,.1);text-align:right">
-<p style="color:#f5e6b3;font-weight:bold;margin-bottom:10px">السؤال ${i + 1}: ${q.question}</p>
-<p style="color:${statusColor};margin:8px 0;font-size:14px">${statusText} (${score}%)</p>
-<p style="color:#fff;background:rgba(255,255,255,.05);padding:10px;border-radius:8px;line-height:1.8;margin:8px 0">${q.userAnswer || 'لم تُجب'}</p>
-<p style="color:#d4af37;margin:8px 0;font-size:14px">📖 الإجابة النموذجية:</p>
-<p style="color:#aaa;background:rgba(255,255,255,.05);padding:10px;border-radius:8px;line-height:1.8;white-space:pre-line">${q.answer}</p>
+<div class="result-question-card ${cardClass}">
+<div class="question-header-row">
+<div class="question-meta">
+<span class="question-number-badge" style="background:${getClassificationColor(classification.key)};color:#fff">${i + 1}</span>
+<span style="color:#f5e6b3;font-weight:700">${q.question}</span>
+</div>
+<div class="answer-classification">
+<span class="classification-badge ${badgeClass}">${classification.emoji} ${classification.label}</span>
+<span class="score-badge ${badgeClass}">${score}%</span>
+</div>
+</div>
+<div class="user-answer-box">
+<span class="user-answer-label">✏️ إجابة الطالب:</span>
+${q.userAnswer ? `<p style="color:#fff;line-height:1.8">${q.userAnswer}</p>` : '<p class="no-answer-text">لم تُجب على هذا السؤال</p>'}
+</div>
+<div class="model-answer-box">
+<span class="model-answer-label">📖 الإجابة النموذجية (للمراجعة):</span>
+<p style="color:#aaa;line-height:1.8;white-space:pre-line">${q.answer}</p>
+</div>
 </div>
 `;
 });
+
+// بناء ملخص التصنيفات
+const summaryItems = [
+{ key: 'excellent', color: '#27ae60', label: 'ممتازة', icon: '🏆' },
+{ key: 'very-good', color: '#2ecc71', label: 'جيدة جداً', icon: '✨' },
+{ key: 'good', color: '#d4af37', label: 'جيدة', icon: '👍' },
+{ key: 'acceptable', color: '#e67e22', label: 'مقبولة', icon: '⚠️' },
+{ key: 'weak', color: '#e74c3c', label: 'ضعيفة', icon: '📚' },
+{ key: 'no-answer', color: '#95a5a6', label: 'لم يُجب', icon: '⚪' }
+];
+
+const summaryHtml = summaryItems.map(item => `
+<div class="summary-item" style="border-top:3px solid ${item.color}">
+<div class="count" style="color:${item.color}">${classifications[item.key]}</div>
+<div class="label">${item.icon} ${item.label}</div>
+</div>
+`).join('');
 
 container.innerHTML = `
 <div class="result-box">
 <div style="font-size:64px;margin-bottom:10px">${emoji}</div>
 <h2 style="color:#f5e6b3;margin-bottom:20px">${message}</h2>
+
+<div class="progress-bar-container">
+<div class="progress-bar" style="width:${progressWidth}"></div>
+</div>
+
 <div class="result-score">${result.percent}%</div>
 <div class="result-percent">${result.answeredCount}/${result.total} أسئلة تمت الإجابة عليها</div>
-<p style="color:#aaa;margin:15px 0">المادة: ${result.subject}</p>
-<p style="color:#aaa;margin:5px 0">التاريخ: ${result.date}</p>
+
+<p style="color:#aaa;margin:10px 0">📚 المادة: ${result.subject}</p>
+<p style="color:#f5e6b3;font-weight:700;margin:5px 0">📂 الباب: ${result.chapterName}</p>
+<p style="color:#aaa;margin:5px 0">📅 التاريخ: ${result.date}</p>
+
+<div class="summary-box">
+<div class="summary-title">📊 ملخص التصنيفات</div>
+<div class="summary-grid">
+${summaryHtml}
+</div>
+</div>
 
 <div style="margin-top:25px;text-align:right">
-<h3 style="color:#f5e6b3;margin-bottom:15px;text-align:center">📋 مراجعة الأسئلة</h3>
+<h3 style="color:#f5e6b3;margin-bottom:15px;text-align:center">📋 تفاصيل الأسئلة والتصنيفات</h3>
 ${reviewHtml}
 </div>
 
@@ -1881,6 +2108,18 @@ ${reviewHtml}
 `;
 
 document.getElementById('resultModal').classList.add('show');
+}
+
+function getClassificationColor(key) {
+const colors = {
+'excellent': '#27ae60',
+'very-good': '#2ecc71',
+'good': '#d4af37',
+'acceptable': '#e67e22',
+'weak': '#e74c3c',
+'no-answer': '#95a5a6'
+};
+return colors[key] || '#aaa';
 }
 
 window.closeResult = function() {
@@ -1902,6 +2141,7 @@ if (!result) return;
 const text = `🎓 نتيجة الاختبار
 👤 الاسم: ${result.name}
 📚 المادة: ${result.subject}
+📂 الباب: ${result.chapterName}
 ✅ النتيجة: ${result.percent}%
 📅 التاريخ: ${result.date}
 
