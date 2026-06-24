@@ -1157,6 +1157,58 @@ opacity:.5;
 }
 
 /* ===== نهاية CSS الجديد ===== */
+
+
+/* ===== ترتيب المواد حسب نسبة الإنجاز ===== */
+.grid.sorted {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 15px;
+}
+
+.grid.sorted .card {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* تمييز المواد المكتملة */
+.card.completed-subject {
+    border-color: #d4af37;
+    box-shadow: 0 0 25px rgba(212,175,55,.3), 0 0 8px rgba(212,175,55,.15);
+    background: linear-gradient(145deg, rgba(5,15,30,.7), rgba(15,30,50,.7));
+}
+
+.card.completed-subject h3 {
+    color: #d4af37;
+    text-shadow: 0 0 10px rgba(212,175,55,.3);
+}
+
+/* شارة الترتيب */
+.subject-badge {
+    display: flex !important;
+    background: linear-gradient(135deg, #d4af37, #f5e6b3);
+    color: #0b1725;
+    font-weight: 800;
+    box-shadow: 0 2px 8px rgba(212,175,55,.4);
+}
+
+.card.completed-subject .subject-badge {
+    background: linear-gradient(135deg, #4caf50, #81c784);
+    color: #fff;
+}
+
+/* تأثير hover محسّن */
+.card.completed-subject:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 0 35px rgba(212,175,55,.4), 0 15px 40px rgba(0,0,0,.3);
+}
+
+/* فاصل بين المواد */
+.grid.sorted .card:not(:last-child) {
+    border-bottom: 1px solid rgba(212,175,55,.08);
+}
+/* ===== نهاية ترتيب المواد ===== */
 </style>
 
 </head>
@@ -1230,7 +1282,7 @@ id="fawaidText">
 
 </div>
 
-<div class="grid">
+<div class="grid" id="subjectsGrid">
 
 <a class="card"
 href="subject.html?id=aqida"><span class="subject-badge" id="badge-aqida">1</span>
@@ -2712,6 +2764,141 @@ onMessage(messaging,(payload)=>{
 console.log("Message received:", payload);
 });
 
+
+
+/* ===== ترتيب المواد حسب نسبة الإنجاز (لجميع الزوار) ===== */
+const subjectsData = [
+    {id: 'aqida', name: 'العقيدة'},
+    {id: 'hadith', name: 'الحديث'},
+    {id: 'fiqh', name: 'الفقه'},
+    {id: 'usul', name: 'أصول الفقه'},
+    {id: 'history', name: 'تاريخ الخلفاء الراشدين'},
+    {id: 'dawah', name: 'منهج الدعوة'},
+    {id: 'tajweed', name: 'أحكام وتجويد القرآن'},
+    {id: 'literature', name: 'الدراسات الأدبية'},
+    {id: 'nahw', name: 'النحو والصرف'},
+    {id: 'computer', name: 'الحاسوب'},
+    {id: 'english', name: 'الإنجليزي'},
+    {id: 'tafsir', name: 'التفسير'}
+];
+
+async function sortSubjectsByProgress(){
+    try{
+        const grid = document.getElementById('subjectsGrid');
+        if(!grid) return;
+
+        // جمع نسب الإنجاز من DOM
+        let subjectsWithProgress = [];
+
+        for(const subj of subjectsData){
+            const pctEl = document.getElementById('percent-' + subj.id);
+            let percent = 0;
+
+            if(pctEl){
+                const text = pctEl.innerText.replace('%','').trim();
+                percent = parseInt(text) || 0;
+            }
+
+            // البحث عن عنصر البطاقة
+            const card = grid.querySelector(`a[href="subject.html?id=${subj.id}"]`);
+
+            subjectsWithProgress.push({
+                id: subj.id,
+                name: subj.name,
+                percent: percent,
+                element: card
+            });
+        }
+
+        // فرز تنازلي (الأعلى أولاً)
+        subjectsWithProgress.sort((a, b) => b.percent - a.percent);
+
+        // تطبيق الترتيب على DOM
+        grid.classList.add('sorted');
+
+        subjectsWithProgress.forEach((item, index) => {
+            if(item.element){
+                // إضافة تأثير للمواد المكتملة (100%)
+                if(item.percent >= 100){
+                    item.element.classList.add('completed-subject');
+                } else {
+                    item.element.classList.remove('completed-subject');
+                }
+
+                // تحديث رقم الترتيب في الشارة
+                const badge = item.element.querySelector('.subject-badge');
+                if(badge){
+                    badge.innerText = index + 1;
+                    badge.style.display = 'flex';
+                }
+
+                // نقل العنصر إلى النهاية (ليكون في الأعلى بسبب flex-direction: column)
+                grid.appendChild(item.element);
+            }
+        });
+
+        // إضافة زر المشاركة في النهاية دائماً
+        const shareCard = grid.querySelector('.share-card');
+        if(shareCard){
+            grid.appendChild(shareCard);
+        }
+
+    }catch(e){
+        console.log('Sort error:', e);
+    }
+}
+
+// الاستماع لتغييرات نسب الإنجاز
+const sortObserver = new MutationObserver((mutations) => {
+    let shouldSort = false;
+    for(const m of mutations){
+        if(m.target && m.target.id && m.target.id.startsWith('percent-')){
+            shouldSort = true;
+            break;
+        }
+    }
+    if(shouldSort){
+        sortSubjectsByProgress();
+    }
+});
+
+// بدء الاستماع بعد تحميل الصفحة
+function initSortObserver(){
+    const grid = document.getElementById('subjectsGrid');
+    if(grid){
+        sortObserver.observe(grid, {
+            childList: true,
+            subtree: true,
+            characterData: true
+        });
+    }
+}
+
+// تعديل loadProgress لترتيب المواد بعد التحديث
+const _originalLoadProgress = loadProgress;
+window.loadProgress = async function(){
+    await _originalLoadProgress();
+    // تأخير بسيط لضمان تحديث DOM
+    setTimeout(() => {
+        sortSubjectsByProgress();
+        initSortObserver();
+    }, 300);
+};
+
+// ترتيب أولي عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function(){
+    // انتظار تحميل Firestore
+    setTimeout(() => {
+        sortSubjectsByProgress();
+        initSortObserver();
+    }, 2500);
+});
+
+// إعادة الترتيب عند تغيير حجم النافذة (للتأكد)
+window.addEventListener('resize', () => {
+    sortSubjectsByProgress();
+});
+/* ===== نهاية ترتيب المواد ===== */
 </script>
 
 
