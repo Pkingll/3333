@@ -1159,41 +1159,20 @@ opacity:.5;
 /* ===== نهاية CSS الجديد ===== */
 
 
-/* ===== إضافات: ترتيب المواد + هدف اليوم + إحصائيات + احتفال ===== */
+
+
+
+/* ===== إضافات: ترتيب + هدف + إحصائيات + احتفال ===== */
 
 /* ترتيب المواد */
-.grid.sorted {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 15px;
-}
-.grid.sorted .card {
-    width: 100%;
-    box-sizing: border-box;
-}
-.card.completed-subject {
-    border-color: #d4af37;
-    box-shadow: 0 0 25px rgba(212,175,55,.3);
-}
-.card.completed-subject h3 {
-    color: #d4af37;
-    text-shadow: 0 0 10px rgba(212,175,55,.3);
-}
-.subject-badge {
-    display: flex !important;
-    background: linear-gradient(135deg, #d4af37, #f5e6b3);
-    color: #0b1725;
-    font-weight: 800;
-}
+.grid.sorted { display: flex; flex-direction: column; gap: 12px; padding: 15px; }
+.grid.sorted .card { width: 100%; box-sizing: border-box; }
+.card.completed-subject { border-color: #d4af37; box-shadow: 0 0 25px rgba(212,175,55,.3); }
+.card.completed-subject h3 { color: #d4af37; text-shadow: 0 0 10px rgba(212,175,55,.3); }
+.subject-badge { display: flex !important; background: linear-gradient(135deg, #d4af37, #f5e6b3); color: #0b1725; font-weight: 800; }
 
-/* هدف اليوم - مُصغر */
-.daily-goal-section {
-    width: 92%; max-width: 1100px; margin: 15px auto;
-    background: linear-gradient(145deg, rgba(5,15,30,.8), rgba(8,20,35,.8));
-    border: 1px solid rgba(212,175,55,.2); border-radius: 16px;
-    padding: 15px 20px; box-shadow: 0 5px 20px rgba(0,0,0,.2);
-}
+/* هدف اليوم */
+.daily-goal-section { width: 92%; max-width: 1100px; margin: 15px auto; background: linear-gradient(145deg, rgba(5,15,30,.8), rgba(8,20,35,.8)); border: 1px solid rgba(212,175,55,.2); border-radius: 16px; padding: 15px 20px; box-shadow: 0 5px 20px rgba(0,0,0,.2); }
 .daily-goal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .daily-goal-header h3 { margin: 0; color: #f5e6b3; font-size: 16px; }
 .daily-goal-header .goal-date { color: rgba(255,255,255,.4); font-size: 12px; }
@@ -1232,7 +1211,7 @@ opacity:.5;
 .other-goal-bar { height: 5px; background: rgba(255,255,255,.08); border-radius: 5px; overflow: hidden; }
 .other-goal-bar-fill { height: 100%; background: linear-gradient(90deg, #d4af37, #f5e6b3); border-radius: 5px; transition: width .6s; }
 
-/* إحصائيات - مُصغرة */
+/* إحصائيات */
 .stats-section { width: 92%; max-width: 1100px; margin: 15px auto; background: linear-gradient(145deg, rgba(5,15,30,.7), rgba(8,20,35,.7)); border: 1px solid rgba(255,255,255,.06); border-radius: 16px; padding: 0; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,.2); }
 .stats-header { padding: 12px 18px; background: rgba(0,0,0,.15); border-bottom: 1px solid rgba(255,255,255,.05); }
 .stats-header h3 { margin: 0; color: #f5e6b3; font-size: 16px; }
@@ -1257,7 +1236,7 @@ opacity:.5;
 .celebration-overlay.active { display: block; }
 .firework { position: absolute; width: 4px; height: 4px; border-radius: 50%; animation: firework 1s ease-out forwards; }
 @keyframes firework { 0% { transform: translate(0, 0); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)); opacity: 0; } }
-/* ===== نهاية الإضافات ===== */
+/* ===== نهاية الإضافات CSS ===== */
 </style>
 
 </head>
@@ -1663,6 +1642,34 @@ id="shareCount">
 
 </div>
 
+
+
+
+<!-- ===== قسم الهدف اليومي ===== -->
+<div class="daily-goal-section" id="dailyGoalSection">
+    <div class="daily-goal-header">
+        <h3>🎯 هدف اليوم</h3>
+        <span class="goal-date" id="goalDate"></span>
+    </div>
+    <div id="dailyGoalContent"></div>
+</div>
+
+<!-- ===== لوحة الإحصائيات ===== -->
+<div class="stats-section" id="statsSection">
+    <div class="stats-header">
+        <h3>📊 إحصائياتي</h3>
+    </div>
+    <div class="stats-body">
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="stats-chart-container">
+            <h4 class="stats-chart-title">📈 نسب الإنجاز حسب المادة</h4>
+            <div class="stats-bar-chart" id="statsBarChart"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== طبقة الاحتفال ===== -->
+<div class="celebration-overlay" id="celebrationOverlay"></div>
 
 
 
@@ -3148,6 +3155,330 @@ document.addEventListener('DOMContentLoaded', function() {
     ensureUserName();
     setTimeout(() => { renderDailyGoal(); loadStats(); }, 3000);
 });
+setInterval(() => { renderDailyGoal(); }, 60000);
+/* ===== نهاية الإضافات ===== */
+</script>
+
+
+<script>
+/* ===== إضافات: ترتيب + هدف + إحصائيات + مشاركة منشور + تركيز منشور ===== */
+
+const subjectsData = [
+    {id: 'aqida', name: 'العقيدة'},
+    {id: 'hadith', name: 'الحديث'},
+    {id: 'fiqh', name: 'الفقه'},
+    {id: 'usul', name: 'أصول الفقه'},
+    {id: 'history', name: 'تاريخ الخلفاء الراشدين'},
+    {id: 'dawah', name: 'منهج الدعوة'},
+    {id: 'tajweed', name: 'أحكام وتجويد القرآن'},
+    {id: 'literature', name: 'الدراسات الأدبية'},
+    {id: 'nahw', name: 'النحو والصرف'},
+    {id: 'computer', name: 'الحاسوب'},
+    {id: 'english', name: 'الإنجليزي'},
+    {id: 'tafsir', name: 'التفسير'}
+];
+
+/* ===== ترتيب المواد حسب الإنجاز ===== */
+async function sortSubjectsByProgress(){
+    try{
+        const grid = document.getElementById('subjectsGrid');
+        if(!grid) return;
+        let subjectsWithProgress = [];
+        for(const subj of subjectsData){
+            const pctEl = document.getElementById('percent-' + subj.id);
+            let percent = 0;
+            if(pctEl){ const text = pctEl.innerText.replace('%','').trim(); percent = parseInt(text) || 0; }
+            const card = grid.querySelector(`a[href="subject.html?id=${subj.id}"]`);
+            subjectsWithProgress.push({id: subj.id, name: subj.name, percent: percent, element: card});
+        }
+        subjectsWithProgress.sort((a, b) => b.percent - a.percent);
+        grid.classList.add('sorted');
+        subjectsWithProgress.forEach((item, index) => {
+            if(item.element){
+                if(item.percent >= 100){ item.element.classList.add('completed-subject'); }
+                else { item.element.classList.remove('completed-subject'); }
+                const badge = item.element.querySelector('.subject-badge');
+                if(badge){ badge.innerText = index + 1; badge.style.display = 'flex'; }
+                grid.appendChild(item.element);
+            }
+        });
+        const shareCard = grid.querySelector('.share-card');
+        if(shareCard){ grid.appendChild(shareCard); }
+    }catch(e){ console.log('Sort error:', e); }
+}
+
+// استدعاء الترتيب بعد تحميل الصفحة بالكامل
+window.addEventListener('load', function(){
+    // انتظار تحميل Firestore
+    setTimeout(() => {
+        sortSubjectsByProgress();
+        console.log('✅ تم ترتيب المواد');
+    }, 3000);
+});
+
+// إعادة الترتيب عند تغيير حجم النافذة
+window.addEventListener('resize', () => { sortSubjectsByProgress(); });
+
+/* ===== نظام الهدف اليومي (جماعي - Firestore) ===== */
+const GOALS_COLLECTION = "dailyGoals";
+let currentUserName = localStorage.getItem("studentName") || "";
+
+function ensureUserName() {
+    if (!currentUserName) {
+        const name = prompt("أدخلي اسمك لعرض هدفك للجميع:");
+        if (name && name.trim()) { currentUserName = name.trim(); localStorage.setItem("studentName", currentUserName); }
+        else { currentUserName = "طالبة"; localStorage.setItem("studentName", currentUserName); }
+    }
+    return currentUserName;
+}
+
+async function getTodayGoals() {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const q = query(collection(db, GOALS_COLLECTION), where("date", "==", today));
+        const snap = await getDocs(q);
+        let goals = [];
+        snap.forEach(d => goals.push({id: d.id, ...d.data()}));
+        return goals;
+    } catch(e) { console.log('getTodayGoals error:', e); return []; }
+}
+
+async function getMyTodayGoal() {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const myName = ensureUserName();
+        const q = query(collection(db, GOALS_COLLECTION), where("date", "==", today), where("studentName", "==", myName));
+        const snap = await getDocs(q);
+        if (!snap.empty) { const doc = snap.docs[0]; return {id: doc.id, ...doc.data()}; }
+        return null;
+    } catch(e) { console.log('getMyTodayGoal error:', e); return null; }
+}
+
+function getStreak() {
+    const saved = localStorage.getItem("goalStreak");
+    if (!saved) return { count: 0, lastDate: '' };
+    return JSON.parse(saved);
+}
+
+function updateStreak(completed) {
+    const streak = getStreak();
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    if (completed) {
+        if (streak.lastDate === yesterdayStr || streak.lastDate === today) { if (streak.lastDate !== today) { streak.count++; } }
+        else { streak.count = 1; }
+        streak.lastDate = today;
+    } else { if (streak.lastDate && streak.lastDate !== today && streak.lastDate !== yesterdayStr) { streak.count = 0; } }
+    localStorage.setItem("goalStreak", JSON.stringify(streak));
+    return streak;
+}
+
+async function renderDailyGoal() {
+    const container = document.getElementById('dailyGoalContent');
+    const dateEl = document.getElementById('goalDate');
+    if (!container || !dateEl) return;
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('ar-LY', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    dateEl.innerText = dateStr;
+
+    let allGoals = [];
+    let myGoal = null;
+    try {
+        allGoals = await getTodayGoals();
+        myGoal = await getMyTodayGoal();
+    } catch(e) { console.log('renderDailyGoal error:', e); }
+
+    const myName = ensureUserName();
+    const streak = getStreak();
+    let html = '';
+
+    if (!myGoal) {
+        html += `<div style="text-align:center; padding:15px 0;"><div style="font-size:35px; margin-bottom:10px;">🎯</div><p style="margin-bottom:12px; color:rgba(255,255,255,.7); font-size:14px;">ما هو هدفك للمذاكرة اليوم يا <strong style="color:#f5e6b3;">${myName}</strong>؟</p><div class="daily-goal-input-row"><input type="text" class="daily-goal-input" id="newGoalInput" placeholder="مثال: أكمل 3 دروس في الفقه" maxlength="120"><button class="daily-goal-btn" onclick="setDailyGoal()">حددي هدفك</button></div></div>`;
+    } else if (myGoal.completed) {
+        html += `<div class="daily-goal-completed"><div class="celebration">🎉</div><h4>أحسنتِ يا ${myName}! أكملتِ هدفك</h4><p>${myGoal.text}</p><div class="daily-goal-streak"><span class="fire">🔥</span><span>سلسلة الإنجازات: ${streak.count} يوم${streak.count > 1 ? ' متتالي' : ''}</span></div></div>`;
+    } else {
+        html += `<div class="daily-goal-display"><div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;"><span style="background:#d4af37; color:#0b1725; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:700;">${myName}</span><span style="color:rgba(255,255,255,.5); font-size:12px;">هدفك اليوم</span></div><div class="daily-goal-text">${myGoal.text}</div><div class="daily-goal-progress"><div class="daily-goal-bar-bg"><div class="daily-goal-bar-fill" style="width: ${myGoal.progress || 0}%"></div></div><span class="daily-goal-percent">${myGoal.progress || 0}%</span></div></div><div class="daily-goal-actions"><button class="daily-goal-action-btn btn-complete" onclick="updateGoalProgress(100)">✅ أكملتِ</button><button class="daily-goal-action-btn btn-partial" onclick="updateGoalProgress(50)">⏳ نصفه</button><button class="daily-goal-action-btn btn-partial" onclick="updateGoalProgress(25)">📝 قليل</button><button class="daily-goal-action-btn btn-reset" onclick="resetDailyGoal()">🔄 تعديل</button></div>`;
+    }
+
+    const otherGoals = allGoals.filter(g => g.studentName !== myName);
+    if (otherGoals.length > 0) {
+        html += `<div class="other-goals-list"><h4 class="other-goals-title">👥 أهداف الطالبات<span class="other-goals-count">${otherGoals.length}</span></h4>`;
+        otherGoals.forEach(g => {
+            const statusIcon = g.completed ? '✅' : (g.progress > 0 ? '⏳' : '📝');
+            const statusClass = g.completed ? 'status-complete' : (g.progress > 0 ? 'status-progress' : 'status-pending');
+            const statusText = g.completed ? 'مكتمل' : (g.progress > 0 ? g.progress + '%' : 'قيد التنفيذ');
+            const barWidth = g.progress || 0;
+            html += `<div class="other-goal-item"><div class="other-goal-header"><span class="other-goal-name">👤 ${g.studentName}</span><span class="other-goal-status ${statusClass}">${statusIcon} ${statusText}</span></div><div class="other-goal-text">${g.text}</div><div class="other-goal-bar"><div class="other-goal-bar-fill" style="width: ${barWidth}%"></div></div></div>`;
+        });
+        html += `</div>`;
+    }
+    container.innerHTML = html;
+}
+
+window.setDailyGoal = async function() {
+    const input = document.getElementById('newGoalInput');
+    if (!input || !input.value.trim()) { alert('يرجى كتابة هدفك لليوم'); return; }
+    const myName = ensureUserName();
+    const today = new Date().toISOString().split('T')[0];
+    const existing = await getMyTodayGoal();
+    if (existing) { alert('لديك هدف بالفعل لهذا اليوم!'); return; }
+    try {
+        await addDoc(collection(db, GOALS_COLLECTION), { studentName: myName, text: input.value.trim(), progress: 0, completed: false, date: today, createdAt: Date.now() });
+        await renderDailyGoal();
+    } catch(e) { console.log('Goal save error:', e); alert('حدث خطأ في الحفظ'); }
+};
+
+window.updateGoalProgress = async function(percent) {
+    const myGoal = await getMyTodayGoal();
+    if (!myGoal) return;
+    const updates = { progress: percent, completed: percent >= 100, updatedAt: Date.now() };
+    if (percent >= 100) { updates.progress = 100; updates.completed = true; updateStreak(true); triggerCelebration(); }
+    try { await updateDoc(doc(db, GOALS_COLLECTION, myGoal.id), updates); await renderDailyGoal(); setTimeout(loadStats, 500); }
+    catch(e) { console.log('Goal update error:', e); }
+};
+
+window.resetDailyGoal = async function() {
+    if (!confirm('هل تريدين حذف هدفك وإضافة هدف جديد؟')) return;
+    const myGoal = await getMyTodayGoal();
+    if (myGoal) { try { await deleteDoc(doc(db, GOALS_COLLECTION, myGoal.id)); await renderDailyGoal(); } catch(e) { console.log('Goal delete error:', e); } }
+};
+
+window.changeStudentName = function() {
+    const newName = prompt("أدخلي اسمك الجديد:", currentUserName);
+    if (newName && newName.trim()) { currentUserName = newName.trim(); localStorage.setItem("studentName", currentUserName); renderDailyGoal(); }
+};
+
+/* ألعاب نارية */
+function triggerCelebration() {
+    const overlay = document.getElementById('celebrationOverlay');
+    if (!overlay) return;
+    overlay.innerHTML = ''; overlay.classList.add('active');
+    const colors = ['#d4af37', '#f5e6b3', '#81c784', '#4fc3f7', '#ff8a65', '#ba68c8'];
+    for (let i = 0; i < 50; i++) {
+        const fw = document.createElement('div'); fw.className = 'firework';
+        fw.style.left = Math.random() * 100 + '%'; fw.style.top = Math.random() * 60 + 20 + '%';
+        fw.style.background = colors[Math.floor(Math.random() * colors.length)];
+        fw.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
+        fw.style.setProperty('--ty', (Math.random() - 0.5) * 200 + 'px');
+        fw.style.animationDelay = Math.random() * 0.5 + 's';
+        fw.style.animationDuration = (0.8 + Math.random() * 0.7) + 's';
+        overlay.appendChild(fw);
+    }
+    setTimeout(() => { overlay.classList.remove('active'); overlay.innerHTML = ''; }, 2000);
+}
+
+/* ===== لوحة الإحصائيات ===== */
+async function loadStats() {
+    const grid = document.getElementById('statsGrid');
+    const chart = document.getElementById('statsBarChart');
+    if (!grid || !chart) return;
+    try {
+        let totalLessons = 0, completedLessons = 0, totalProgress = 0, subjectCount = 0;
+        let highestProgress = 0, highestSubject = '';
+        let subjectProgressData = [];
+
+        const progressSnap = await getDocs(collection(db, "progress"));
+        progressSnap.forEach(doc => {
+            const percent = doc.data().percent || 0;
+            totalProgress += percent; subjectCount++;
+            if (percent > highestProgress) { highestProgress = percent; highestSubject = getSubjectName(doc.id); }
+            subjectProgressData.push({ id: doc.id, name: getSubjectName(doc.id), percent: percent });
+        });
+
+        for (const subj of subjectsData) {
+            try {
+                const chSnap = await getDocs(collection(db, "chapters", subj.id, "items"));
+                chSnap.forEach(d => {
+                    const data = d.data();
+                    const lessons = data.lessons || [];
+                    totalLessons += lessons.length;
+                    completedLessons += lessons.filter(l => l.completed).length;
+                });
+            } catch(e) {}
+        }
+
+        let completedGoals = 0, totalGoalsToday = 0;
+        try {
+            const todayGoals = await getTodayGoals();
+            completedGoals = todayGoals.filter(g => g.completed).length;
+            totalGoalsToday = todayGoals.length;
+        } catch(e) {}
+
+        const avgProgress = subjectCount > 0 ? Math.round(totalProgress / subjectCount) : 0;
+        const streak = getStreak();
+
+        grid.innerHTML = `<div class="stat-card stat-highlight"><div class="stat-icon">📚</div><div class="stat-value">${avgProgress}%</div><div class="stat-label">متوسط الإنجاز</div></div><div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value">${completedLessons}</div><div class="stat-label">دروس مكتملة</div></div><div class="stat-card"><div class="stat-icon">📖</div><div class="stat-value">${totalLessons}</div><div class="stat-label">إجمالي الدروس</div></div><div class="stat-card stat-highlight"><div class="stat-icon">🏆</div><div class="stat-value">${highestSubject || '-'}</div><div class="stat-label">أعلى مادة (${highestProgress}%)</div></div><div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-value">${completedGoals}/${totalGoalsToday}</div><div class="stat-label">أهداف اليوم</div></div><div class="stat-card stat-highlight"><div class="stat-icon">🔥</div><div class="stat-value">${streak.count}</div><div class="stat-label">أيام متتالية</div></div>`;
+
+        subjectProgressData.sort((a, b) => b.percent - a.percent);
+        const maxPercent = Math.max(...subjectProgressData.map(s => s.percent), 1);
+        chart.innerHTML = subjectProgressData.map(s => {
+            const height = Math.max((s.percent / maxPercent) * 100, 4);
+            return `<div class="stats-bar-item"><div class="stats-bar" style="height: ${height}%; max-height: 110px;"><span class="stats-bar-value">${s.percent}%</span></div><span class="stats-bar-label">${s.name}</span></div>`;
+        }).join('');
+    } catch(e) { console.log('Stats error:', e); }
+}
+
+function getSubjectName(id) {
+    const map = { 'aqida': 'العقيدة', 'hadith': 'الحديث', 'fiqh': 'الفقه', 'usul': 'أصول الفقه', 'history': 'التاريخ', 'dawah': 'الدعوة', 'tajweed': 'التجويد', 'literature': 'الأدب', 'nahw': 'النحو', 'computer': 'الحاسوب', 'english': 'الإنجليزي', 'tafsir': 'التفسير' };
+    return map[id] || id;
+}
+
+/* ===== مشاركة المنشور مع صورة مصغرة ===== */
+window.sharePost=async function(postId){
+    let postData={text:'منشور من طالبة علم شرعي',image:'https://a.top4top.io/p_38068co2c0.jpg'};
+    try{
+        const s=await getDoc(doc(db,"posts",postId));
+        if(s.exists()){ const d=s.data(); postData.text=d.text||postData.text; postData.image=d.image||postData.image; }
+    }catch(e){}
+    const url=location.origin+location.pathname+'?post='+postId;
+    updateMetaTag('og:title',postData.text.substring(0,100));
+    updateMetaTag('og:description',postData.text.substring(0,200));
+    updateMetaTag('og:image',postData.image);
+    updateMetaTag('og:url',url);
+    if(navigator.share){ await navigator.share({ title:postData.text.substring(0,100), text:postData.text.substring(0,200), url:url }); }
+    else{ await navigator.clipboard.writeText(url); alert('تم نسخ رابط المنشور 📋'); }
+};
+
+function updateMetaTag(property,content){
+    let meta=document.querySelector('meta[property="'+property+'"]');
+    if(!meta){ meta=document.createElement('meta'); meta.setAttribute('property',property); document.head.appendChild(meta); }
+    meta.setAttribute('content',content);
+}
+
+/* ===== تركيز المنشور داخل قسم المنشورات ===== */
+function focusSharedPost(){
+    const postId=new URLSearchParams(location.search).get('post');
+    if(!postId) return;
+    if(window.history && window.history.replaceState){
+        const url=new URL(window.location); url.searchParams.delete('post'); window.history.replaceState({},'',url);
+    }
+    let tries=0;
+    const timer=setInterval(()=>{
+        const el=document.getElementById('post-'+postId);
+        const postsContainer=document.getElementById('postsContainer');
+        tries++;
+        if(el && postsContainer){
+            clearInterval(timer); el.classList.add('highlight-post');
+            const scrollTop=el.offsetTop - postsContainer.offsetTop - (postsContainer.clientHeight/2) + (el.offsetHeight/2);
+            postsContainer.scrollTo({ top:Math.max(0,scrollTop), behavior:'smooth' });
+            setTimeout(()=>{ el.classList.remove('highlight-post'); },5000);
+        }
+        if(tries>30) clearInterval(timer);
+    },300);
+}
+
+/* ===== تشغيل ===== */
+window.addEventListener('load', function(){
+    ensureUserName();
+    setTimeout(() => {
+        renderDailyGoal();
+        loadStats();
+        console.log('✅ تم تحميل الأهداف والإحصائيات');
+    }, 4000);
+});
+
+// تحديث كل دقيقة
 setInterval(() => { renderDailyGoal(); }, 60000);
 /* ===== نهاية الإضافات ===== */
 </script>
