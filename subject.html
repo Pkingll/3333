@@ -4,204 +4,945 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>عرض المادة</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Cairo,sans-serif}
-body{background:#06131f;color:#fff;min-height:100vh;overflow-x:hidden}
-body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),url('https://a.top4top.io/p_38068co2c0.jpg');background-size:cover;background-position:center;}
-.marquee{overflow:hidden;background:rgba(0,0,0,.45);padding:12px 0}
-.marquee span{display:inline-block;white-space:nowrap;padding-left:100%;color:#f5e6b3;font-weight:700;animation:move 18s linear infinite;}
-@keyframes move{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
-.header{text-align:center;padding:25px 15px}
-.header h1{color:#f5e6b3}
-.content{width:92%;max-width:900px;margin:20px auto 100px;background:rgba(5,15,30,.65);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:20px;line-height:2;}
-.content img{width:100%;border-radius:12px;margin:10px 0}
-.content a{display:block;margin:10px 0;padding:12px;background:#0d2033;border-radius:10px;color:#f5e6b3;text-decoration:none;}
-.back{position:fixed;left:15px;bottom:15px;padding:14px 20px;border:none;border-radius:14px;background:#d4af37;color:#06131f;font-weight:bold;cursor:pointer;}
-.audio-box{margin:15px 0;padding:14px;background:#0d2033;border-radius:14px;border:1px solid rgba(255,255,255,.08);}
-.audio-title{color:#f5e6b3;margin-bottom:10px;font-weight:700;}
-.audio-box audio{width:100%;border-radius:10px;}
-.box{width:92%;max-width:900px;margin:10px auto;background:rgba(5,15,30,.65);border:1px solid rgba(255,255,255,.1);border-radius:15px;padding:15px;}
-.itemBtn{padding:10px;margin:8px 0;background:#0d2033;border-radius:10px;cursor:pointer;color:#f5e6b3;}
-.lessonBtn{padding:10px;margin:8px 0;background:#112233;border-radius:10px;cursor:pointer;}
-.search-box{width:92%;max-width:900px;margin:15px auto;}
-.search-box input{width:100%;padding:14px;border:1px solid rgba(255,255,255,.2);border-radius:12px;background:#0d2033;color:#fff;font-size:16px;outline:none;}
-.search-box input::placeholder{color:#aaa;}
-.nav-btns{width:92%;max-width:900px;margin:15px auto;display:flex;gap:10px;flex-wrap:wrap;}
-.nav-btn{padding:12px 20px;border:none;border-radius:12px;background:#0d2033;color:#f5e6b3;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.1);}
-.nav-btn:hover{background:#1a3a5c;}
-.nav-btn.active{background:#d4af37;color:#06131f;}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;display:none;justify-content:center;align-items:center;padding:20px;}
-.modal-overlay.show{display:flex;}
-.modal{background:#0d2033;border:1px solid rgba(255,255,255,.15);border-radius:20px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;padding:25px;position:relative;}
-.modal h2{color:#f5e6b3;margin-bottom:20px;text-align:center;}
-.modal input,.modal select,.modal textarea{width:100%;padding:12px;margin:8px 0;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;font-size:16px;outline:none;}
-.modal textarea{min-height:100px;resize:vertical;font-family:Cairo,sans-serif;line-height:1.8;}
-.modal label{display:block;color:#f5e6b3;margin:10px 0 5px;}
-.close-modal{position:absolute;top:15px;left:15px;background:#c0392b;color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:bold;}
-.question-box{background:#06131f;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:20px;margin:15px 0;}
-.question-box h4{color:#f5e6b3;margin-bottom:15px;}
-.question-text{margin-bottom:15px;color:#fff;line-height:1.8;font-size:16px;}
-.choices{display:flex;flex-direction:column;gap:10px;}
-.choice{padding:14px;background:#0d2033;border:1px solid rgba(255,255,255,.1);border-radius:10px;cursor:pointer;transition:.3s;text-align:right;font-size:15px;}
-.choice:hover{background:#1a3a5c;}
-.choice.selected{background:#d4af37;color:#06131f;border-color:#d4af37;}
-.choice.wrong{background:#c0392b;border-color:#c0392b;}
-.choice.correct{background:#27ae60;border-color:#27ae60;}
-.result-box{text-align:center;padding:30px;}
-.result-score{font-size:48px;color:#f5e6b3;font-weight:700;}
-.result-percent{font-size:24px;color:#27ae60;margin:10px 0;}
-.toast{position:fixed;top:20px;right:20px;background:#27ae60;color:#fff;padding:15px 25px;border-radius:12px;z-index:2000;transform:translateX(150%);transition:.5s;font-weight:700;}
-.toast.show{transform:translateX(0);}
-.empty-state{text-align:center;padding:40px;color:#aaa;}
-.btn-primary{background:#d4af37;color:#06131f;border:none;padding:12px 24px;border-radius:12px;font-weight:700;cursor:pointer;font-size:16px;}
-.btn-secondary{background:#0d2033;color:#f5e6b3;border:1px solid rgba(255,255,255,.1);padding:10px 20px;border-radius:10px;cursor:pointer;}
-.btn-danger{background:#c0392b;color:#fff;border:none;padding:10px 20px;border-radius:10px;cursor:pointer;font-weight:700;}
-.timer{text-align:center;font-size:20px;color:#e74c3c;font-weight:700;margin:10px 0;}
-.back-btn{display:block;margin:15px auto;padding:12px 24px;background:#0d2033;color:#f5e6b3;border:1px solid rgba(255,255,255,.1);border-radius:12px;cursor:pointer;font-weight:700;text-align:center;width:92%;max-width:900px;}
-.back-btn:hover{background:#1a3a5c;}
-.open-answer{width:100%;padding:14px;border:1px solid rgba(255,255,255,.2);border-radius:12px;background:#06131f;color:#fff;font-size:16px;outline:none;min-height:120px;resize:vertical;font-family:Cairo,sans-serif;line-height:1.8;margin-top:10px;}
-.open-answer::placeholder{color:#888;}
-.answer-label{color:#f5e6b3;font-weight:700;margin-top:15px;margin-bottom:5px;font-size:15px;}
-.question-counter{text-align:center;color:#f5e6b3;font-size:18px;margin-bottom:15px;padding:10px;background:rgba(212,175,55,0.1);border-radius:10px;}
-.nav-question-btns{display:flex;gap:10px;justify-content:center;margin-top:20px;}
-.nav-question-btn{padding:10px 20px;border:none;border-radius:10px;background:#0d2033;color:#f5e6b3;cursor:pointer;font-weight:700;}
-.nav-question-btn:disabled{opacity:0.5;cursor:not-allowed;}
-.nav-question-btn.primary{background:#d4af37;color:#06131f;}
-.admin-question-item{background:rgba(5,15,30,.65);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:15px;margin:10px 0;}
-.admin-question-item .q-text{color:#f5e6b3;font-weight:700;margin-bottom:8px;}
-.admin-question-item .q-answer{color:#aaa;font-size:14px;margin-bottom:10px;line-height:1.8;}
-.admin-question-item .q-actions{display:flex;gap:8px;}
-.admin-question-item .q-actions button{padding:6px 12px;border:none;border-radius:8px;cursor:pointer;font-size:14px;}
-.edit-btn{background:#d4af37;color:#06131f;}
-.add-question-form{background:rgba(5,15,30,.65);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:20px;margin:15px 0;}
-.add-question-form h3{color:#f5e6b3;margin-bottom:15px;}
-.pin-input{width:200px;text-align:center;font-size:24px;letter-spacing:10px;}
-.chapter-section{background:rgba(5,15,30,.65);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:15px;margin:15px 0;}
-.chapter-header{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;background:#0d2033;border-radius:10px;cursor:pointer;margin-bottom:10px;}
-.chapter-header h4{color:#f5e6b3;font-weight:700;}
-.chapter-actions{display:flex;gap:8px;margin-top:10px;}
-.chapter-actions button{padding:6px 12px;border:none;border-radius:8px;cursor:pointer;font-size:14px;}
-.chapter-select-box{margin:15px 0;padding:15px;background:rgba(5,15,30,.65);border:1px solid rgba(255,255,255,.1);border-radius:14px;}
-.chapter-select-item{padding:12px;margin:8px 0;background:#0d2033;border:1px solid rgba(255,255,255,.1);border-radius:10px;cursor:pointer;transition:.3s;display:flex;justify-content:space-between;align-items:center;}
-.chapter-select-item:hover{background:#1a3a5c;border-color:#d4af37;}
-.chapter-select-item.selected{background:#d4af37;color:#06131f;border-color:#d4af37;}
-.chapter-select-item .q-count{color:#aaa;font-size:14px;}
-.chapter-select-item.selected .q-count{color:#06131f;}
-.progress-bar-container{width:100%;height:8px;background:rgba(255,255,255,.1);border-radius:4px;margin:15px 0;overflow:hidden;}
-.progress-bar{height:100%;background:#d4af37;border-radius:4px;transition:width .3s;}
-.answer-classification{display:flex;align-items:center;gap:8px;margin:10px 0;flex-wrap:wrap;}
-.classification-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700;border:2px solid;}
-.classification-badge.excellent{background:rgba(39,174,96,.15);color:#27ae60;border-color:#27ae60;}
-.classification-badge.very-good{background:rgba(46,204,113,.15);color:#2ecc71;border-color:#2ecc71;}
-.classification-badge.good{background:rgba(212,175,55,.15);color:#d4af37;border-color:#d4af37;}
-.classification-badge.acceptable{background:rgba(230,126,34,.15);color:#e67e22;border-color:#e67e22;}
-.classification-badge.weak{background:rgba(231,76,60,.15);color:#e74c3c;border-color:#e74c3c;}
-.classification-badge.no-answer{background:rgba(149,165,166,.15);color:#95a5a6;border-color:#95a5a6;}
-.score-badge{display:inline-flex;align-items:center;padding:4px 12px;border-radius:20px;font-size:14px;font-weight:700;}
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Cairo,sans-serif
+}
+
+body{
+background:#06131f;
+color:#fff;
+min-height:100vh;
+overflow-x:hidden
+}
+
+body:before{
+content:"";
+position:fixed;
+inset:0;
+z-index:-1;
+background:
+linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),
+url('https://a.top4top.io/p_38068co2c0.jpg');
+background-size:cover;
+background-position:center;
+}
+
+.marquee{
+overflow:hidden;
+background:rgba(0,0,0,.45);
+padding:12px 0
+}
+
+.marquee span{
+display:inline-block;
+white-space:nowrap;
+padding-left:100%;
+color:#f5e6b3;
+font-weight:700;
+animation:move 18s linear infinite;
+}
+
+@keyframes move{
+0%{transform:translateX(0)}
+100%{transform:translateX(-100%)}
+}
+
+.header{
+text-align:center;
+padding:25px 15px
+}
+
+.header h1{
+color:#f5e6b3
+}
+
+.content{
+width:92%;
+max-width:900px;
+margin:20px auto 100px;
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:20px;
+padding:20px;
+line-height:2;
+}
+
+.content img{
+width:100%;
+border-radius:12px;
+margin:10px 0
+}
+
+.content a{
+display:block;
+margin:10px 0;
+padding:12px;
+background:#0d2033;
+border-radius:10px;
+color:#f5e6b3;
+text-decoration:none;
+}
+
+.back{
+position:fixed;
+left:15px;
+bottom:15px;
+padding:14px 20px;
+border:none;
+border-radius:14px;
+background:#d4af37;
+color:#06131f;
+font-weight:bold;
+cursor:pointer;
+}
+
+.audio-box{
+margin:15px 0;
+padding:14px;
+background:#0d2033;
+border-radius:14px;
+border:1px solid rgba(255,255,255,.08);
+}
+
+.audio-title{
+color:#f5e6b3;
+margin-bottom:10px;
+font-weight:700;
+}
+
+.audio-box audio{
+width:100%;
+border-radius:10px;
+}
+
+.box{
+width:92%;
+max-width:900px;
+margin:10px auto;
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:15px;
+padding:15px;
+}
+
+.itemBtn{
+padding:10px;
+margin:8px 0;
+background:#0d2033;
+border-radius:10px;
+cursor:pointer;
+color:#f5e6b3;
+}
+
+.lessonBtn{
+padding:10px;
+margin:8px 0;
+background:#112233;
+border-radius:10px;
+cursor:pointer;
+}
+
+.search-box{
+width:92%;
+max-width:900px;
+margin:15px auto;
+}
+
+.search-box input{
+width:100%;
+padding:14px;
+border:1px solid rgba(255,255,255,.2);
+border-radius:12px;
+background:#0d2033;
+color:#fff;
+font-size:16px;
+outline:none;
+}
+
+.search-box input::placeholder{
+color:#aaa;
+}
+
+.nav-btns{
+width:92%;
+max-width:900px;
+margin:15px auto;
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.nav-btn{
+padding:12px 20px;
+border:none;
+border-radius:12px;
+background:#0d2033;
+color:#f5e6b3;
+font-weight:700;
+cursor:pointer;
+border:1px solid rgba(255,255,255,.1);
+}
+
+.nav-btn:hover{
+background:#1a3a5c;
+}
+
+.nav-btn.active{
+background:#d4af37;
+color:#06131f;
+}
+
+.modal-overlay{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.8);
+z-index:1000;
+display:none;
+justify-content:center;
+align-items:center;
+padding:20px;
+}
+
+.modal-overlay.show{
+display:flex;
+}
+
+.modal{
+background:#0d2033;
+border:1px solid rgba(255,255,255,.15);
+border-radius:20px;
+width:100%;
+max-width:700px;
+max-height:90vh;
+overflow-y:auto;
+padding:25px;
+position:relative;
+}
+
+.modal h2{
+color:#f5e6b3;
+margin-bottom:20px;
+text-align:center;
+}
+
+.modal input, .modal select, .modal textarea{
+width:100%;
+padding:12px;
+margin:8px 0;
+border:1px solid rgba(255,255,255,.2);
+border-radius:10px;
+background:#06131f;
+color:#fff;
+font-size:16px;
+outline:none;
+}
+
+.modal textarea{
+min-height:100px;
+resize:vertical;
+font-family:Cairo,sans-serif;
+line-height:1.8;
+}
+
+.modal label{
+display:block;
+color:#f5e6b3;
+margin:10px 0 5px;
+}
+
+.close-modal{
+position:absolute;
+top:15px;
+left:15px;
+background:#c0392b;
+color:#fff;
+border:none;
+padding:8px 14px;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.question-box{
+background:#06131f;
+border:1px solid rgba(255,255,255,.1);
+border-radius:14px;
+padding:20px;
+margin:15px 0;
+}
+
+.question-box h4{
+color:#f5e6b3;
+margin-bottom:15px;
+}
+
+.question-text{
+margin-bottom:15px;
+color:#fff;
+line-height:1.8;
+font-size:16px;
+}
+
+.choices{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.choice{
+padding:14px;
+background:#0d2033;
+border:1px solid rgba(255,255,255,.1);
+border-radius:10px;
+cursor:pointer;
+transition:.3s;
+text-align:right;
+font-size:15px;
+}
+
+.choice:hover{
+background:#1a3a5c;
+}
+
+.choice.selected{
+background:#d4af37;
+color:#06131f;
+border-color:#d4af37;
+}
+
+.choice.wrong{
+background:#c0392b;
+border-color:#c0392b;
+}
+
+.choice.correct{
+background:#27ae60;
+border-color:#27ae60;
+}
+
+.result-box{
+text-align:center;
+padding:30px;
+}
+
+.result-score{
+font-size:48px;
+color:#f5e6b3;
+font-weight:700;
+}
+
+.result-percent{
+font-size:24px;
+color:#27ae60;
+margin:10px 0;
+}
+
+.toast{
+position:fixed;
+top:20px;
+right:20px;
+background:#27ae60;
+color:#fff;
+padding:15px 25px;
+border-radius:12px;
+z-index:2000;
+transform:translateX(150%);
+transition:.5s;
+font-weight:700;
+}
+
+.toast.show{
+transform:translateX(0);
+}
+
+.empty-state{
+text-align:center;
+padding:40px;
+color:#aaa;
+}
+
+.btn-primary{
+background:#d4af37;
+color:#06131f;
+border:none;
+padding:12px 24px;
+border-radius:12px;
+font-weight:700;
+cursor:pointer;
+font-size:16px;
+}
+
+.btn-secondary{
+background:#0d2033;
+color:#f5e6b3;
+border:1px solid rgba(255,255,255,.1);
+padding:10px 20px;
+border-radius:10px;
+cursor:pointer;
+}
+
+.btn-danger{
+background:#c0392b;
+color:#fff;
+border:none;
+padding:10px 20px;
+border-radius:10px;
+cursor:pointer;
+font-weight:700;
+}
+
+.timer{
+text-align:center;
+font-size:20px;
+color:#e74c3c;
+font-weight:700;
+margin:10px 0;
+}
+
+.back-btn{
+display:block;
+margin:15px auto;
+padding:12px 24px;
+background:#0d2033;
+color:#f5e6b3;
+border:1px solid rgba(255,255,255,.1);
+border-radius:12px;
+cursor:pointer;
+font-weight:700;
+text-align:center;
+width:92%;
+max-width:900px;
+}
+
+.back-btn:hover{
+background:#1a3a5c;
+}
+
+.open-answer{
+width:100%;
+padding:14px;
+border:1px solid rgba(255,255,255,.2);
+border-radius:12px;
+background:#06131f;
+color:#fff;
+font-size:16px;
+outline:none;
+min-height:120px;
+resize:vertical;
+font-family:Cairo,sans-serif;
+line-height:1.8;
+margin-top:10px;
+}
+
+.open-answer::placeholder{
+color:#888;
+}
+
+.answer-label{
+color:#f5e6b3;
+font-weight:700;
+margin-top:15px;
+margin-bottom:5px;
+font-size:15px;
+}
+
+.question-counter{
+text-align:center;
+color:#f5e6b3;
+font-size:18px;
+margin-bottom:15px;
+padding:10px;
+background:rgba(212,175,55,0.1);
+border-radius:10px;
+}
+
+.nav-question-btns{
+display:flex;
+gap:10px;
+justify-content:center;
+margin-top:20px;
+}
+
+.nav-question-btn{
+padding:10px 20px;
+border:none;
+border-radius:10px;
+background:#0d2033;
+color:#f5e6b3;
+cursor:pointer;
+font-weight:700;
+}
+
+.nav-question-btn:disabled{
+opacity:0.5;
+cursor:not-allowed;
+}
+
+.nav-question-btn.primary{
+background:#d4af37;
+color:#06131f;
+}
+
+/* ======== لوحة الإدارة ======== */
+.admin-question-item{
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:14px;
+padding:15px;
+margin:10px 0;
+}
+
+.admin-question-item .q-text{
+color:#f5e6b3;
+font-weight:700;
+margin-bottom:8px;
+}
+
+.admin-question-item .q-answer{
+color:#aaa;
+font-size:14px;
+margin-bottom:10px;
+line-height:1.8;
+}
+
+.admin-question-item .q-actions{
+display:flex;
+gap:8px;
+}
+
+.admin-question-item .q-actions button{
+padding:6px 12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:14px;
+}
+
+.edit-btn{
+background:#d4af37;
+color:#06131f;
+}
+
+.add-question-form{
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:14px;
+padding:20px;
+margin:15px 0;
+}
+
+.add-question-form h3{
+color:#f5e6b3;
+margin-bottom:15px;
+}
+
+.pin-input{
+width:200px;
+text-align:center;
+font-size:24px;
+letter-spacing:10px;
+}
+
+/* ======== أقسام الأبواب للاختبارات فقط ======== */
+.chapter-section{
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:14px;
+padding:15px;
+margin:15px 0;
+}
+
+.chapter-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:12px 15px;
+background:#0d2033;
+border-radius:10px;
+cursor:pointer;
+margin-bottom:10px;
+}
+
+.chapter-header h4{
+color:#f5e6b3;
+font-weight:700;
+}
+
+.chapter-actions{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+.chapter-actions button{
+padding:6px 12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:14px;
+}
+
+.chapter-select-box{
+margin:15px 0;
+padding:15px;
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:14px;
+}
+
+.chapter-select-item{
+padding:12px;
+margin:8px 0;
+background:#0d2033;
+border:1px solid rgba(255,255,255,.1);
+border-radius:10px;
+cursor:pointer;
+transition:.3s;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.chapter-select-item:hover{
+background:#1a3a5c;
+border-color:#d4af37;
+}
+
+.chapter-select-item.selected{
+background:#d4af37;
+color:#06131f;
+border-color:#d4af37;
+}
+
+.chapter-select-item .q-count{
+color:#aaa;
+font-size:14px;
+}
+
+.chapter-select-item.selected .q-count{
+color:#06131f;
+}
+
+/* ======== شريط التقدم ======== */
+.progress-bar-container{
+width:100%;
+height:8px;
+background:rgba(255,255,255,.1);
+border-radius:4px;
+margin:15px 0;
+overflow:hidden;
+}
+
+.progress-bar{
+height:100%;
+background:#d4af37;
+border-radius:4px;
+transition:width .3s;
+}
+
+/* ======== تصنيف الإجابة ======== */
+.answer-classification{
+display:flex;
+align-items:center;
+gap:8px;
+margin:10px 0;
+flex-wrap:wrap;
+}
+
+.classification-badge{
+display:inline-flex;
+align-items:center;
+gap:6px;
+padding:6px 14px;
+border-radius:20px;
+font-size:13px;
+font-weight:700;
+border:2px solid;
+}
+
+.classification-badge.excellent{
+background:rgba(39,174,96,.15);
+color:#27ae60;
+border-color:#27ae60;
+}
+
+.classification-badge.very-good{
+background:rgba(46,204,113,.15);
+color:#2ecc71;
+border-color:#2ecc71;
+}
+
+.classification-badge.good{
+background:rgba(212,175,55,.15);
+color:#d4af37;
+border-color:#d4af37;
+}
+
+.classification-badge.acceptable{
+background:rgba(230,126,34,.15);
+color:#e67e22;
+border-color:#e67e22;
+}
+
+.classification-badge.weak{
+background:rgba(231,76,60,.15);
+color:#e74c3c;
+border-color:#e74c3c;
+}
+
+.classification-badge.no-answer{
+background:rgba(149,165,166,.15);
+color:#95a5a6;
+border-color:#95a5a6;
+}
+
+.score-badge{
+display:inline-flex;
+align-items:center;
+padding:4px 12px;
+border-radius:20px;
+font-size:14px;
+font-weight:700;
+}
+
 .score-badge.excellent{background:#27ae60;color:#fff;}
 .score-badge.very-good{background:#2ecc71;color:#fff;}
 .score-badge.good{background:#d4af37;color:#06131f;}
 .score-badge.acceptable{background:#e67e22;color:#fff;}
 .score-badge.weak{background:#e74c3c;color:#fff;}
 .score-badge.no-answer{background:#95a5a6;color:#fff;}
-.summary-box{background:rgba(5,15,30,.8);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:20px;margin:20px 0;}
-.summary-title{color:#f5e6b3;font-size:18px;font-weight:700;margin-bottom:15px;text-align:center;}
-.summary-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));gap:10px;}
-.summary-item{text-align:center;padding:12px;border-radius:10px;background:rgba(255,255,255,.03);}
-.summary-item .count{font-size:28px;font-weight:700;margin-bottom:5px;}
-.summary-item .label{font-size:13px;color:#aaa;}
-.result-question-card{margin:15px 0;padding:20px;background:#06131f;border-radius:14px;border:1px solid rgba(255,255,255,.08);text-align:right;position:relative;overflow:hidden;}
-.result-question-card::before{content:"";position:absolute;top:0;right:0;width:4px;height:100%;}
+
+/* ======== ملخص التصنيفات ======== */
+.summary-box{
+background:rgba(5,15,30,.8);
+border:1px solid rgba(255,255,255,.1);
+border-radius:14px;
+padding:20px;
+margin:20px 0;
+}
+
+.summary-title{
+color:#f5e6b3;
+font-size:18px;
+font-weight:700;
+margin-bottom:15px;
+text-align:center;
+}
+
+.summary-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));
+gap:10px;
+}
+
+.summary-item{
+text-align:center;
+padding:12px;
+border-radius:10px;
+background:rgba(255,255,255,.03);
+}
+
+.summary-item .count{
+font-size:28px;
+font-weight:700;
+margin-bottom:5px;
+}
+
+.summary-item .label{
+font-size:13px;
+color:#aaa;
+}
+
+/* ======== بطاقة سؤال في النتيجة ======== */
+.result-question-card{
+margin:15px 0;
+padding:20px;
+background:#06131f;
+border-radius:14px;
+border:1px solid rgba(255,255,255,.08);
+text-align:right;
+position:relative;
+overflow:hidden;
+}
+
+.result-question-card::before{
+content:"";
+position:absolute;
+top:0;
+right:0;
+width:4px;
+height:100%;
+}
+
 .result-question-card.excellent::before{background:#27ae60;}
 .result-question-card.very-good::before{background:#2ecc71;}
 .result-question-card.good::before{background:#d4af37;}
 .result-question-card.acceptable::before{background:#e67e22;}
 .result-question-card.weak::before{background:#e74c3c;}
 .result-question-card.no-answer::before{background:#95a5a6;}
-.question-number-badge{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;font-weight:700;font-size:14px;margin-left:10px;}
-.question-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
-.question-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.user-answer-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;margin:10px 0;line-height:1.8;}
-.user-answer-label{color:#aaa;font-size:12px;margin-bottom:5px;display:block;}
-.model-answer-box{background:rgba(212,175,55,.05);border:1px solid rgba(212,175,55,.15);border-radius:10px;padding:12px;margin-top:10px;line-height:1.8;}
-.model-answer-label{color:#d4af37;font-size:12px;margin-bottom:5px;display:block;font-weight:700;}
-.no-answer-text{color:#95a5a6;font-style:italic;}
 
-/* ======== بنية الفصول والدروس المترابطة - FIXED ======== */
-.chapter-group{margin-bottom:15px;border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;background:rgba(5,15,30,.4);}
-.chapter-header-main{padding:14px 18px;background:#0d2033;border-radius:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.3s;border:1px solid rgba(255,255,255,.08);}
-.chapter-header-main:hover{background:#1a3a5c;border-color:#d4af37;}
-.chapter-header-main h4{color:#f5e6b3;font-weight:700;font-size:16px;}
-.chapter-arrow{transition:.3s;color:#f5e6b3;font-size:18px;}
-.chapter-group.expanded .chapter-arrow{transform:rotate(180deg);}
-.chapter-lessons-container{display:none;padding:10px 15px;background:rgba(5,15,30,.3);}
-.chapter-group.expanded .chapter-lessons-container{display:block;}
-.lesson-item{padding:12px 15px;margin:6px 0;background:#112233;border-radius:10px;cursor:pointer;transition:.3s;border:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-between;align-items:center;}
-.lesson-item:hover{background:#1a3a5c;border-color:#d4af37;}
-.lesson-item .lesson-arrow{color:#aaa;font-size:14px;transition:.3s;}
-.lesson-item.active .lesson-arrow{transform:rotate(90deg);color:#d4af37;}
-.lesson-item.active{background:#1a3a5c;border-color:#d4af37;}
-.lesson-content-display{display:none;padding:15px;margin-top:8px;background:rgba(5,15,30,.5);border-radius:10px;border:1px solid rgba(255,255,255,.08);}
-.lesson-item.active + .lesson-content-display{display:block;}
-.lesson-content-display h2{color:#f5e6b3;margin-bottom:12px;}
-.lesson-content-display p{color:#ddd;line-height:2;margin-bottom:10px;}
-.lesson-content-display img{width:100%;border-radius:12px;margin:10px 0;}
-.lesson-content-display .audio-box{margin:15px 0;padding:14px;background:#0d2033;border-radius:14px;border:1px solid rgba(255,255,255,.08);}
-.lesson-content-display a{display:block;margin:10px 0;padding:12px;background:#0d2033;border-radius:10px;color:#f5e6b3;text-decoration:none;}
+.question-number-badge{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:32px;
+height:32px;
+border-radius:50%;
+font-weight:700;
+font-size:14px;
+margin-left:10px;
+}
 
-::-webkit-scrollbar{width:8px;}
-::-webkit-scrollbar-track{background:#06131f;}
-::-webkit-scrollbar-thumb{background:#d4af37;border-radius:4px;}
+.question-header-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:12px;
+flex-wrap:wrap;
+gap:8px;
+}
+
+.question-meta{
+display:flex;
+align-items:center;
+gap:8px;
+flex-wrap:wrap;
+}
+
+.user-answer-box{
+background:rgba(255,255,255,.03);
+border:1px solid rgba(255,255,255,.08);
+border-radius:10px;
+padding:12px;
+margin:10px 0;
+line-height:1.8;
+}
+
+.user-answer-label{
+color:#aaa;
+font-size:12px;
+margin-bottom:5px;
+display:block;
+}
+
+.model-answer-box{
+background:rgba(212,175,55,.05);
+border:1px solid rgba(212,175,55,.15);
+border-radius:10px;
+padding:12px;
+margin-top:10px;
+line-height:1.8;
+}
+
+.model-answer-label{
+color:#d4af37;
+font-size:12px;
+margin-bottom:5px;
+display:block;
+font-weight:700;
+}
+
+.no-answer-text{
+color:#95a5a6;
+font-style:italic;
+}
+
+::-webkit-scrollbar{
+width:8px;
+}
+
+::-webkit-scrollbar-track{
+background:#06131f;
+}
+
+::-webkit-scrollbar-thumb{
+background:#d4af37;
+border-radius:4px;
+}
+
 @media(max-width:600px){
-.summary-grid{grid-template-columns:repeat(2, 1fr);}
-.question-header-row{flex-direction:column;align-items:flex-start;}
+.summary-grid{
+grid-template-columns:repeat(2, 1fr);
+}
+.question-header-row{
+flex-direction:column;
+align-items:flex-start;
+}
 }
 </style>
+
 </head>
 <body>
-<div class="marquee"><span>من يرد الله به خيراً يفقهه في الدين • من يرد الله به خيراً يفقهه في الدين • من يرد الله به خيراً يفقهه في الدين</span></div>
-<div class="header"><h1 id="title">المادة</h1></div>
+
+<div class="marquee">
+<span>
+من يرد الله به خيراً يفقهه في الدين •
+من يرد الله به خيراً يفقهه في الدين •
+من يرد الله به خيراً يفقهه في الدين
+</span>
+</div>
+
+<div class="header">
+<h1 id="title">المادة</h1>
+</div>
+
 <div class="nav-btns">
 <button class="nav-btn" onclick="openExamSection()">✏️ الاختبارات</button>
 <button class="nav-btn" onclick="openAdminLogin()">🔐 إدارة الاختبارات</button>
 </div>
+
 <div class="search-box">
 <input type="text" id="searchInput" placeholder="🔍 ابحث عن فصل أو درس..." oninput="performSearch()">
 </div>
 
 <div id="section-main">
-<!-- المحتوى الرئيسي للمادة -->
-<div class="content" id="subjectContent"></div>
-
-<!-- الفصول -->
 <div class="box">
-<h3 style="color:#f5e6b3;margin-bottom:15px">📂 الفصول</h3>
+<h3 style="color:#f5e6b3">📂 الفصول</h3>
 <div id="chaptersList"></div>
 </div>
+
+<div class="box" id="lessonsBox" style="display:none">
+<h3 style="color:#f5e6b3">📖 الدروس</h3>
+<div id="lessonsList"></div>
 </div>
 
+<div class="content" id="content"></div>
+</div>
+
+<!-- قسم الاختبارات -->
 <div id="section-exam" style="display:none">
 <button class="back-btn" onclick="backToMain()">⬅ العودة للمحتوى</button>
+
 <div class="box">
 <h3 style="color:#f5e6b3">✏️ إنشاء اختبار جديد</h3>
 <p style="color:#aaa;margin-bottom:15px">اختر الباب الذي تريد الاختبار فيه</p>
+
 <div style="margin:15px 0">
 <label style="color:#f5e6b3;display:block;margin-bottom:5px">👤 اسم المشارك:</label>
 <input type="text" id="examParticipantName" placeholder="أدخل اسمك" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
 </div>
+
 <div style="margin:15px 0">
 <label style="color:#f5e6b3;display:block;margin-bottom:5px">📚 اختر المادة:</label>
 <select id="examSubjectSelect" onchange="onExamSubjectChange()" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
 <option value="">-- اختر المادة --</option>
 </select>
 </div>
+
 <div id="examChapterSelectBox" style="display:none">
 <div class="chapter-select-box">
 <h3 style="color:#f5e6b3;margin-bottom:15px">📂 اختر الباب:</h3>
 <div id="examChapterList"></div>
 </div>
 </div>
+
 <div style="margin:15px 0">
 <label style="color:#f5e6b3;display:block;margin-bottom:5px">⏱️ مدة الاختبار (دقيقة):</label>
 <select id="examDuration" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
@@ -213,10 +954,14 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradi
 <option value="90">90 دقيقة</option>
 </select>
 </div>
-<button class="btn-primary" onclick="window.startExam()" style="width:100%;margin-top:15px">🚀 بدء الاختبار</button>
+
+<button class="btn-primary" onclick="window.startExam()" style="width:100%;margin-top:15px">
+🚀 بدء الاختبار
+</button>
 </div>
 </div>
 
+<!-- نافذة تسجيل دخول الإدارة -->
 <div class="modal-overlay" id="adminLoginModal">
 <div class="modal">
 <button class="close-modal" onclick="closeAdminLogin()">✕</button>
@@ -231,24 +976,31 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradi
 </div>
 </div>
 
+<!-- قسم إدارة الاختبارات -->
 <div id="section-admin" style="display:none">
 <button class="back-btn" onclick="backToMain()">⬅ العودة للمحتوى</button>
+
 <div class="box">
 <h3 style="color:#f5e6b3">🔐 إدارة أسئلة الاختبارات</h3>
+
 <div style="margin:15px 0">
 <label style="color:#f5e6b3;display:block;margin-bottom:5px">📚 اختر المادة:</label>
 <select id="adminSubjectSelect" onchange="onAdminSubjectChange()" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#06131f;color:#fff;outline:none">
 <option value="">-- اختر المادة --</option>
 </select>
 </div>
+
+<!-- إدارة الأبواب -->
 <div id="adminChapterBox" style="display:none">
 <div class="add-question-form">
 <h3>➕ إضافة باب جديد</h3>
 <input type="text" id="newChapterName" placeholder="اسم الباب (مثال: باب الصلاة)">
 <button class="btn-primary" onclick="addChapter()" style="width:100%;margin-top:10px">➕ إضافة الباب</button>
 </div>
+
 <div id="adminChaptersList" style="margin-top:20px"></div>
 </div>
+
 <div id="adminQuestionsBox" style="display:none;margin-top:20px">
 <div class="add-question-form">
 <h3>➕ إضافة سؤال جديد</h3>
@@ -264,11 +1016,13 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradi
 <button class="btn-primary" onclick="addQuestion()" style="width:100%">➕ إضافة السؤال</button>
 <button class="btn-secondary" onclick="backToChapters()" style="width:100%;margin-top:10px">⬅ العودة للأبواب</button>
 </div>
+
 <div id="adminQuestionsContainer" style="margin-top:20px"></div>
 </div>
 </div>
 </div>
 
+<!-- نافذة الاختبار -->
 <div class="modal-overlay" id="examModal">
 <div class="modal">
 <button class="close-modal" onclick="closeExamModal()">✕</button>
@@ -283,247 +1037,223 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradi
 </div>
 </div>
 
+<!-- نافذة النتيجة -->
 <div class="modal-overlay" id="resultModal">
 <div class="modal">
 <div id="resultContent"></div>
 </div>
 </div>
 
-<button class="back" onclick="location.href='index.html'">⬅ الرجوع</button>
+<button class="back" onclick="location.href='index.html'">
+⬅ الرجوع
+</button>
+
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs, addDoc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = { apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA", authDomain: "p-726bc.firebaseapp.com", projectId: "p-726bc", storageBucket: "p-726bc.firebasestorage.app", messagingSenderId: "752913389065", appId: "1:752913389065:web:20cf8c03fe4ace03650ad8" };
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getFirestore,
+doc,
+getDoc,
+collection,
+query,
+where,
+getDocs,
+addDoc,
+deleteDoc,
+updateDoc,
+serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+ apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",
+ authDomain: "p-726bc.firebaseapp.com",
+ projectId: "p-726bc",
+ storageBucket: "p-726bc.firebasestorage.app",
+ messagingSenderId: "752913389065",
+ appId: "1:752913389065:web:20cf8c03fe4ace03650ad8"
+};
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const params = new URLSearchParams(location.search);
 const id = params.get("id");
 
-const names = { aqida:"العقيدة", hadith:"الحديث", fiqh:"الفقه", usul:"أصول الفقه", history:"تاريخ الخلفاء الراشدين", dawah:"منهج الدعوة", tajweed:"أحكام وتجويد القرآن", literature:"الدراسات الأدبية", nahw:"النحو والصرف", computer:"الحاسوب", english:"الإنجليزي", tafsir:"التفسير" };
+const names = {
+aqida:"العقيدة",
+hadith:"الحديث",
+fiqh:"الفقه",
+usul:"أصول الفقه",
+history:"تاريخ الخلفاء الراشدين",
+dawah:"منهج الدعوة",
+tajweed:"أحكام وتجويد القرآن",
+literature:"الدراسات الأدبية",
+nahw:"النحو والصرف",
+computer:"الحاسوب",
+english:"الإنجليزي",
+tafsir:"التفسير"
+};
 
 document.getElementById("title").textContent = names[id] || "المادة";
 
-// ======== تحميل محتوى المادة الرئيسي ========
-const subjectContent = document.getElementById("subjectContent");
-
-try {
 const snap = await getDoc(doc(db,"subjects",id));
+const content = document.getElementById("content");
+
 if(snap.exists()){
  const data = snap.data();
  (data.items || []).forEach(item=>{
- if(item.type==="title"){ subjectContent.innerHTML += `<h2 style="color:#f5e6b3">${item.text}</h2>`; }
- if(item.type==="text"){ subjectContent.innerHTML += `<p>${item.text}</p>`; }
- if(item.type==="image"){ subjectContent.innerHTML += `<img src="${item.url}">`; }
- if(item.type==="book"){ subjectContent.innerHTML += `<a href="${item.url}" target="_blank">📚 ${item.name}</a>`; }
- if(item.type==="link"){ subjectContent.innerHTML += `<a href="${item.url}" target="_blank">🔗 ${item.name}</a>`; }
- if(item.type==="audio"){ subjectContent.innerHTML += `<div class="audio-box"><div class="audio-title">🎧 ${item.name}</div><audio controls src="${item.url}"></audio></div>`; }
- });
-} else {
- subjectContent.innerHTML = '<p style="color:#aaa;text-align:center">لا يوجد محتوى رئيسي لهذه المادة</p>';
-}
-} catch(e) { console.log("Error loading subject:", e); subjectContent.innerHTML = '<p style="color:#aaa;text-align:center">حدث خطأ في تحميل المحتوى</p>'; }
-
-// ======== تحميل الفصول ========
-let chaptersList = document.getElementById("chaptersList");
-
-async function loadChapters(){
-try {
-const q = query(collection(db,"chapters"),where("subject","==",id));
-const snap = await getDocs(q);
-chaptersList.innerHTML = "";
-let arr=[];
-snap.forEach(docu=>{ arr.push({id:docu.id,...docu.data()}); });
-arr.sort((a,b)=>(a.order||0)-(b.order||0));
-
-if(arr.length === 0){
- chaptersList.innerHTML = '<p style="color:#aaa;text-align:center;padding:20px">لا توجد فصول مضافة لهذه المادة</p>';
- return;
-}
-
-arr.forEach(data=>{
-const chapterId = data.id;
-chaptersList.innerHTML += `
-<div class="chapter-group" id="chapter-group-${chapterId}">
- <div class="chapter-header-main" onclick="toggleChapter('${chapterId}')">
-  <h4>📂 ${data.title}</h4>
-  <span class="chapter-arrow">▼</span>
- </div>
- <div class="chapter-lessons-container" id="lessons-container-${chapterId}">
-  <!-- الدروس ستُحمّل هنا عند الفتح -->
- </div>
-</div>`;
-});
-} catch(e) {
- console.error("Error loading chapters:", e);
- chaptersList.innerHTML = '<p style="color:#c0392b;text-align:center;padding:20px">حدث خطأ في تحميل الفصول</p>';
-}
-}
-
-// ======== تبديل الفصل (فتح/إغلاق) ========
-window.toggleChapter = async (chapterId) => {
-const group = document.getElementById(`chapter-group-${chapterId}`);
-const container = document.getElementById(`lessons-container-${chapterId}`);
-
-// إغلاق كل الفصول الأخرى وتفريغها
-const allGroups = document.querySelectorAll('.chapter-group');
-allGroups.forEach(g => {
- if (g.id !== `chapter-group-${chapterId}`) {
-  g.classList.remove('expanded');
-  const otherContainer = g.querySelector('.chapter-lessons-container');
-  if(otherContainer) otherContainer.innerHTML = '';
+ if(item.type==="title"){
+ content.innerHTML += `<h2>${item.text}</h2>`;
  }
-});
-
-// إذا كان الفصل مفتوحاً بالفعل، أغلقه
-if (group.classList.contains('expanded')) {
- group.classList.remove('expanded');
- container.innerHTML = '';
- return;
-}
-
-// فتح الفصل وتحميل الدروس
-showToast('⏳ جاري تحميل الدروس...');
-
-try {
- const q = query(collection(db,"lessons"),where("chapterId","==",chapterId));
- const snap = await getDocs(q);
- let arr=[];
- snap.forEach(docu=>{ arr.push({id:docu.id,...docu.data()}); });
- arr.sort((a,b)=>(a.order||0)-(b.order||0));
-
- if (arr.length === 0) {
-  container.innerHTML = '<p style="color:#aaa;text-align:center;padding:15px">لا توجد دروس في هذا الفصل</p>';
-  group.classList.add('expanded');
-  showToast('✅ تم تحميل الدروس');
-  return;
+ if(item.type==="text"){
+ content.innerHTML += `<p>${item.text}</p>`;
  }
-
- container.innerHTML = '';
- arr.forEach(data=>{
- const lessonId = data.id;
- container.innerHTML += `
-  <div class="lesson-item" id="lesson-item-${lessonId}" onclick="toggleLesson('${lessonId}', this)">
-   <span>📖 ${data.title}</span>
-   <span class="lesson-arrow">◀</span>
-  </div>
-  <div class="lesson-content-display" id="lesson-content-${lessonId}"></div>
- `;
- });
-
- group.classList.add('expanded');
- showToast('✅ تم تحميل الدروس');
-} catch (error) {
- console.error('خطأ في تحميل الدروس:', error);
- container.innerHTML = '<p style="color:#c0392b;text-align:center;padding:15px">حدث خطأ في تحميل الدروس</p>';
- group.classList.add('expanded');
-}
-};
-
-// ======== تبديل الدرس (فتح/إغلاق) ========
-window.toggleLesson = async (lessonId, el) => {
-const contentDiv = document.getElementById(`lesson-content-${lessonId}`);
-const isAlreadyActive = el.classList.contains('active');
-
-// إغلاق كل الدروس الأخرى في نفس الفصل
-const parentContainer = el.closest('.chapter-lessons-container');
-if(parentContainer){
- parentContainer.querySelectorAll('.lesson-item').forEach(item => {
-  if(item !== el) item.classList.remove('active');
- });
- parentContainer.querySelectorAll('.lesson-content-display').forEach(c => {
-  if(c !== contentDiv) c.innerHTML = '';
+ if(item.type==="image"){
+ content.innerHTML += `<img src="${item.url}">`;
+ }
+ if(item.type==="book"){
+ content.innerHTML += `<a href="${item.url}" target="_blank">📚 ${item.name}</a>`;
+ }
+ if(item.type==="link"){
+ content.innerHTML += `<a href="${item.url}" target="_blank">🔗 ${item.name}</a>`;
+ }
+ if(item.type==="audio"){
+ content.innerHTML += `
+ <div class="audio-box">
+ <div class="audio-title">🎧 ${item.name}</div>
+ <audio controls src="${item.url}"></audio>
+ </div>`;
+ }
  });
 }
 
-// إذا كان الدرس مفتوحاً بالفعل، أغلقه
-if (isAlreadyActive) {
- el.classList.remove('active');
- contentDiv.innerHTML = '';
- return;
-}
-
-// فتح الدرس وتحميل المحتوى
-showToast('⏳ جاري تحميل الدرس...');
-
-try {
- const docRef = doc(db, 'lessons', lessonId);
- const docSnap = await getDoc(docRef);
-
- if (!docSnap.exists()) {
-  contentDiv.innerHTML = '<p style="color:#c0392b">الدرس غير موجود</p>';
-  el.classList.add('active');
-  return;
- }
-
- const data = docSnap.data();
-
- contentDiv.innerHTML = `
-  <h2 style="color:#f5e6b3">${data.title}</h2>
-  <p style="color:#ddd;line-height:2">${data.text || ""}</p>
-  ${data.image ? `<img src="${data.image}" style="width:100%;border-radius:12px;margin:10px 0">` : ""}
-  ${data.audio ? `<div class="audio-box"><div class="audio-title">🎧 ${data.title}</div><audio controls src="${data.audio}"></audio></div>` : ""}
-  ${data.link ? `<a href="${data.link}" target="_blank">🔗 ${data.link}</a>` : ""}
- `;
-
- el.classList.add('active');
- showToast('✅ تم تحميل الدرس');
-
- // تمرير الدرس إلى الأعلى
- setTimeout(() => {
-  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
- }, 100);
-
-} catch (error) {
- console.error('خطأ في تحميل الدرس:', error);
- contentDiv.innerHTML = '<p style="color:#c0392b">حدث خطأ في تحميل الدرس</p>';
- el.classList.add('active');
-}
-};
-
-// ======== البحث ========
-window.performSearch = function() {
-const queryText = document.getElementById('searchInput').value.trim().toLowerCase();
-if (!queryText) {
- // إعادة عرض كل الفصول وإغلاقها
- document.querySelectorAll('.chapter-group').forEach(el => { el.style.display = 'block'; el.classList.remove('expanded'); });
- document.querySelectorAll('.chapter-lessons-container').forEach(el => { el.innerHTML = ''; });
- return;
-}
-
-// البحث في الفصول
-const allGroups = document.querySelectorAll('.chapter-group');
-allGroups.forEach(group => {
- const chapterTitle = group.querySelector('.chapter-header-main h4').textContent.toLowerCase();
- if (chapterTitle.includes(queryText)) {
-  group.style.display = 'block';
- } else {
-  group.style.display = 'none';
- }
-});
-};
-
-// ======== تحديث وقت المشاهدة ========
 try{
 const qLatest = query(collection(db,"lessons"),where("subject","==",id));
 const sLatest = await getDocs(qLatest);
 let latestTime = 0;
-sLatest.forEach(d=>{ const t=d.data().time || 0; if(t>latestTime) latestTime=t; });
+sLatest.forEach(d=>{
+ const t=d.data().time || 0;
+ if(t>latestTime) latestTime=t;
+});
 localStorage.setItem("seenTime_"+id, latestTime);
 }catch(e){console.log(e);}
+
+let chaptersList = document.getElementById("chaptersList");
+let lessonsList = document.getElementById("lessonsList");
+
+async function loadChapters(){
+const q = query(collection(db,"chapters"),where("subject","==",id));
+const snap = await getDocs(q);
+chaptersList.innerHTML = "";
+let arr=[];
+snap.forEach(docu=>{
+arr.push({id:docu.id,...docu.data()});
+});
+arr.sort((a,b)=>(a.order||0)-(b.order||0));
+arr.forEach(data=>{
+const chapterId = data.id;
+chaptersList.innerHTML += `
+<div class="itemBtn" onclick="openChapter('${chapterId}')">
+📂 ${data.title}
+</div>`;
+});
+}
+
+window.openChapter = async (chapterId)=>{
+document.getElementById("lessonsBox").style.display="block";
+const q = query(collection(db,"lessons"),where("chapterId","==",chapterId));
+const snap = await getDocs(q);
+lessonsList.innerHTML = "";
+let arr=[];
+snap.forEach(docu=>{
+arr.push(docu.data());
+});
+arr.sort((a,b)=>(a.order||0)-(b.order||0));
+arr.forEach(data=>{
+lessonsList.innerHTML += `
+<div class="lessonBtn" onclick='openLesson(${JSON.stringify(data)})'>
+📖 ${data.title}
+</div>`;
+});
+};
+
+window.openLesson = (d)=>{
+content.innerHTML = `
+<h2 style="color:#f5e6b3">${d.title}</h2>
+<p>${d.text || ""}</p>
+${d.image ? `<img src="${d.image}">` : ""}
+${d.audio ? `
+<div class="audio-box">
+<div class="audio-title">🎧 ${d.title}</div>
+<audio controls src="${d.audio}"></audio>
+</div>` : ""}
+${d.link ? `<a href="${d.link}" target="_blank">🔗 ${d.link}</a>` : ""}
+`;
+};
+
+window.performSearch = function() {
+const query = document.getElementById('searchInput').value.trim().toLowerCase();
+if (!query) {
+document.querySelectorAll('.itemBtn, .lessonBtn').forEach(el => {
+el.style.display = 'block';
+});
+return;
+}
+document.querySelectorAll('.itemBtn').forEach(el => {
+const text = el.textContent.toLowerCase();
+el.style.display = text.includes(query) ? 'block' : 'none';
+});
+document.querySelectorAll('.lessonBtn').forEach(el => {
+const text = el.textContent.toLowerCase();
+el.style.display = text.includes(query) ? 'block' : 'none';
+});
+document.getElementById('lessonsBox').style.display = 'block';
+};
+
+window.openExamSection = function() {
+document.getElementById('section-main').style.display = 'none';
+document.getElementById('section-admin').style.display = 'none';
+document.getElementById('section-exam').style.display = 'block';
+document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+event.target.classList.add('active');
+loadSubjectsForExam();
+};
+
+window.backToMain = function() {
+document.getElementById('section-main').style.display = 'block';
+document.getElementById('section-exam').style.display = 'none';
+document.getElementById('section-admin').style.display = 'none';
+document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+};
 
 // ==================== نظام الإدارة ====================
 const ADMIN_PIN = '1997';
 
-window.openAdminLogin = function() { document.getElementById('adminLoginModal').classList.add('show'); document.getElementById('adminPin').value = ''; document.getElementById('adminPin').focus(); };
-window.closeAdminLogin = function() { document.getElementById('adminLoginModal').classList.remove('show'); };
+window.openAdminLogin = function() {
+document.getElementById('adminLoginModal').classList.add('show');
+document.getElementById('adminPin').value = '';
+document.getElementById('adminPin').focus();
+};
+
+window.closeAdminLogin = function() {
+document.getElementById('adminLoginModal').classList.remove('show');
+};
+
 window.checkAdminPin = function() {
 const pin = document.getElementById('adminPin').value;
-if (pin === ADMIN_PIN) { document.getElementById('adminLoginModal').classList.remove('show'); openAdminPanel(); showToast('✅ تم الدخول بنجاح!'); }
-else { showToast('❌ رمز الدخول غير صحيح!'); document.getElementById('adminPin').value = ''; document.getElementById('adminPin').focus(); }
+if (pin === ADMIN_PIN) {
+document.getElementById('adminLoginModal').classList.remove('show');
+openAdminPanel();
+showToast('✅ تم الدخول بنجاح!');
+} else {
+showToast('❌ رمز الدخول غير صحيح!');
+document.getElementById('adminPin').value = '';
+document.getElementById('adminPin').focus();
+}
 };
 
 window.openAdminPanel = function() {
@@ -531,20 +1261,32 @@ document.getElementById('section-main').style.display = 'none';
 document.getElementById('section-exam').style.display = 'none';
 document.getElementById('section-admin').style.display = 'block';
 document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
 const select = document.getElementById('adminSubjectSelect');
 select.innerHTML = '<option value="">-- اختر المادة --</option>';
-for (const [key, name] of Object.entries(names)) { select.innerHTML += `<option value="${key}">${name}</option>`; }
-if (id && names[id]) { select.value = id; onAdminSubjectChange(); }
+for (const [key, name] of Object.entries(names)) {
+select.innerHTML += `<option value="${key}">${name}</option>`;
+}
+if (id && names[id]) {
+select.value = id;
+onAdminSubjectChange();
+}
 };
 
-// ==================== إدارة الأبواب (للاختبارات) ====================
+// ==================== إدارة الأبواب (للاختبارات فقط) ====================
 let currentAdminSubject = '';
 let currentAdminChapter = null;
 
 window.onAdminSubjectChange = async function() {
 const subject = document.getElementById('adminSubjectSelect').value;
 currentAdminSubject = subject;
-if (!subject) { document.getElementById('adminChapterBox').style.display = 'none'; document.getElementById('adminQuestionsBox').style.display = 'none'; return; }
+
+if (!subject) {
+document.getElementById('adminChapterBox').style.display = 'none';
+document.getElementById('adminQuestionsBox').style.display = 'none';
+return;
+}
+
 document.getElementById('adminChapterBox').style.display = 'block';
 document.getElementById('adminQuestionsBox').style.display = 'none';
 loadAdminChapters();
@@ -554,30 +1296,64 @@ window.addChapter = async function() {
 const name = document.getElementById('newChapterName').value.trim();
 if (!name) { showToast('❌ أدخل اسم الباب'); return; }
 if (!currentAdminSubject) { showToast('❌ اختر المادة أولاً'); return; }
+
 showToast('⏳ جاري إضافة الباب...');
+
 try {
-await addDoc(collection(db, 'examChapters'), { subject: currentAdminSubject, name: name, createdAt: serverTimestamp() });
+await addDoc(collection(db, 'examChapters'), {
+ subject: currentAdminSubject,
+ name: name,
+ createdAt: serverTimestamp()
+});
 document.getElementById('newChapterName').value = '';
 showToast('✅ تم إضافة الباب بنجاح!');
 loadAdminChapters();
-} catch (error) { console.error('خطأ:', error); showToast('❌ حدث خطأ: ' + error.message); }
+} catch (error) {
+console.error('خطأ:', error);
+showToast('❌ حدث خطأ: ' + error.message);
+}
 };
 
 window.loadAdminChapters = async function() {
 const container = document.getElementById('adminChaptersList');
 if (!currentAdminSubject) return;
+
 showToast('⏳ جاري تحميل الأبواب...');
+
 try {
 const q = query(collection(db, 'examChapters'), where('subject', '==', currentAdminSubject));
 const snap = await getDocs(q);
-if (snap.empty) { container.innerHTML = '<p style="color:#aaa;text-align:center">لا توجد أبواب مضافة لهذه المادة</p>'; return; }
+
+if (snap.empty) {
+container.innerHTML = '<p style="color:#aaa;text-align:center">لا توجد أبواب مضافة لهذه المادة</p>';
+return;
+}
+
 container.innerHTML = '';
 snap.forEach(docu => {
-const data = docu.data(); const chapterId = docu.id; const qCount = data.questionCount || 0;
-container.innerHTML += `<div class="chapter-section"><div class="chapter-header" onclick="openChapterQuestions('${chapterId}', '${data.name}')"><h4>📂 ${data.name}</h4><span style="color:#aaa;font-size:14px">${qCount} سؤال</span></div><div class="chapter-actions"><button class="edit-btn" onclick="event.stopPropagation(); editChapterName('${chapterId}', '${data.name}')">✏️ تعديل الاسم</button><button class="delete-btn" onclick="event.stopPropagation(); deleteChapter('${chapterId}')">🗑️ حذف</button></div></div>`;
+const data = docu.data();
+const chapterId = docu.id;
+const qCount = data.questionCount || 0;
+
+container.innerHTML += `
+<div class="chapter-section">
+<div class="chapter-header" onclick="openChapterQuestions('${chapterId}', '${data.name}')">
+<h4>📂 ${data.name}</h4>
+<span style="color:#aaa;font-size:14px">${qCount} سؤال</span>
+</div>
+<div class="chapter-actions">
+<button class="edit-btn" onclick="event.stopPropagation(); editChapterName('${chapterId}', '${data.name}')">✏️ تعديل الاسم</button>
+<button class="delete-btn" onclick="event.stopPropagation(); deleteChapter('${chapterId}')">🗑️ حذف</button>
+</div>
+</div>
+`;
 });
+
 showToast('✅ تم تحميل الأبواب');
-} catch (error) { console.error('خطأ:', error); container.innerHTML = '<p style="color:#c0392b;text-align:center">حدث خطأ في تحميل الأبواب</p>'; }
+} catch (error) {
+console.error('خطأ:', error);
+container.innerHTML = '<p style="color:#c0392b;text-align:center">حدث خطأ في تحميل الأبواب</p>';
+}
 };
 
 window.openChapterQuestions = async function(chapterId, chapterName) {
@@ -600,97 +1376,198 @@ loadAdminChapters();
 window.editChapterName = async function(chapterId, currentName) {
 const newName = prompt('أدخل الاسم الجديد:', currentName);
 if (!newName || newName.trim() === '' || newName === currentName) return;
+
 try {
-await updateDoc(doc(db, 'examChapters', chapterId), { name: newName.trim() });
-showToast('✅ تم تعديل الاسم'); loadAdminChapters();
-} catch (error) { showToast('❌ حدث خطأ'); }
+await updateDoc(doc(db, 'examChapters', chapterId), {
+ name: newName.trim()
+});
+showToast('✅ تم تعديل الاسم');
+loadAdminChapters();
+} catch (error) {
+showToast('❌ حدث خطأ');
+}
 };
 
 window.deleteChapter = async function(chapterId) {
 if (!confirm('هل أنت متأكد من حذف هذا الباب؟ سيتم حذف جميع أسئلته أيضاً!')) return;
+
 showToast('⏳ جاري الحذف...');
+
 try {
 const q = query(collection(db, 'examQuestions'), where('chapterId', '==', chapterId));
 const snap = await getDocs(q);
 const batch = [];
-snap.forEach(docu => { batch.push(deleteDoc(doc(db, 'examQuestions', docu.id))); });
+snap.forEach(docu => {
+ batch.push(deleteDoc(doc(db, 'examQuestions', docu.id)));
+});
 await Promise.all(batch);
+
 await deleteDoc(doc(db, 'examChapters', chapterId));
-showToast('🗑️ تم حذف الباب وأسئلته'); loadAdminChapters();
-} catch (error) { console.error('خطأ:', error); showToast('❌ حدث خطأ أثناء الحذف'); }
+showToast('🗑️ تم حذف الباب وأسئلته');
+loadAdminChapters();
+} catch (error) {
+console.error('خطأ:', error);
+showToast('❌ حدث خطأ أثناء الحذف');
+}
 };
 
 // ==================== إدارة الأسئلة ====================
 window.addQuestion = async function() {
 const questionText = document.getElementById('newQuestionText').value.trim();
 const answerText = document.getElementById('newQuestionAnswer').value.trim();
+
 if (!currentAdminChapter) { showToast('❌ اختر الباب أولاً'); return; }
 if (!questionText) { showToast('❌ أدخل السؤال'); return; }
 if (!answerText) { showToast('❌ أدخل الإجابة'); return; }
+
 showToast('⏳ جاري حفظ السؤال...');
+
 try {
-await addDoc(collection(db, 'examQuestions'), { chapterId: currentAdminChapter, subject: currentAdminSubject, question: questionText, answer: answerText, createdAt: serverTimestamp() });
+await addDoc(collection(db, 'examQuestions'), {
+ chapterId: currentAdminChapter,
+ subject: currentAdminSubject,
+ question: questionText,
+ answer: answerText,
+ createdAt: serverTimestamp()
+});
+
 const chapterRef = doc(db, 'examChapters', currentAdminChapter);
 const chapterSnap = await getDoc(chapterRef);
 const currentCount = chapterSnap.data()?.questionCount || 0;
 await updateDoc(chapterRef, { questionCount: currentCount + 1 });
+
 document.getElementById('newQuestionText').value = '';
 document.getElementById('newQuestionAnswer').value = '';
-showToast('✅ تم إضافة السؤال بنجاح!'); loadAdminQuestions();
-} catch (error) { console.error('خطأ:', error); showToast('❌ حدث خطأ أثناء الحفظ: ' + error.message); }
+
+showToast('✅ تم إضافة السؤال بنجاح!');
+loadAdminQuestions();
+} catch (error) {
+console.error('خطأ:', error);
+showToast('❌ حدث خطأ أثناء الحفظ: ' + error.message);
+}
 };
 
 window.loadAdminQuestions = async function() {
 const container = document.getElementById('adminQuestionsContainer');
-if (!currentAdminChapter) { container.innerHTML = '<p style="color:#aaa;text-align:center">اختر الباب لعرض الأسئلة</p>'; return; }
+
+if (!currentAdminChapter) {
+container.innerHTML = '<p style="color:#aaa;text-align:center">اختر الباب لعرض الأسئلة</p>';
+return;
+}
+
 showToast('⏳ جاري تحميل الأسئلة...');
+
 try {
 const q = query(collection(db, 'examQuestions'), where('chapterId', '==', currentAdminChapter));
 const snap = await getDocs(q);
-if (snap.empty) { container.innerHTML = '<p style="color:#aaa;text-align:center">لا توجد أسئلة مضافة لهذا الباب</p>'; return; }
+
+if (snap.empty) {
+container.innerHTML = '<p style="color:#aaa;text-align:center">لا توجد أسئلة مضافة لهذا الباب</p>';
+return;
+}
+
 container.innerHTML = '';
 let index = 0;
 snap.forEach(docu => {
-const data = docu.data(); index++;
-container.innerHTML += `<div class="admin-question-item" id="q-item-${docu.id}"><div class="q-text">س${index}: ${data.question}</div><div class="q-answer">📖 ${data.answer}</div><div class="q-actions"><button class="edit-btn" onclick="editQuestion('${docu.id}')">✏️ تعديل</button><button class="delete-btn" onclick="deleteQuestion('${docu.id}')">🗑️ حذف</button></div></div>`;
+const data = docu.data();
+index++;
+container.innerHTML += `
+<div class="admin-question-item" id="q-item-${docu.id}">
+<div class="q-text">س${index}: ${data.question}</div>
+<div class="q-answer">📖 ${data.answer}</div>
+<div class="q-actions">
+<button class="edit-btn" onclick="editQuestion('${docu.id}')">✏️ تعديل</button>
+<button class="delete-btn" onclick="deleteQuestion('${docu.id}')">🗑️ حذف</button>
+</div>
+</div>
+`;
 });
+
 showToast(`✅ تم تحميل ${index} سؤال`);
-} catch (error) { console.error('خطأ:', error); container.innerHTML = '<p style="color:#c0392b;text-align:center">حدث خطأ في تحميل الأسئلة</p>'; }
+} catch (error) {
+console.error('خطأ:', error);
+container.innerHTML = '<p style="color:#c0392b;text-align:center">حدث خطأ في تحميل الأسئلة</p>';
+}
 };
 
 window.editQuestion = async function(questionId) {
 try {
 const docRef = doc(db, 'examQuestions', questionId);
 const docSnap = await getDoc(docRef);
-if (!docSnap.exists()) { showToast('❌ السؤال غير موجود'); return; }
+
+if (!docSnap.exists()) {
+showToast('❌ السؤال غير موجود');
+return;
+}
+
 const data = docSnap.data();
+
 const item = document.getElementById(`q-item-${questionId}`);
-item.innerHTML = `<div style="margin-bottom:10px"><textarea id="edit-q-${questionId}" style="width:100%;min-height:60px">${data.question}</textarea></div><div style="margin-bottom:10px"><textarea id="edit-a-${questionId}" style="width:100%;min-height:80px">${data.answer}</textarea></div><div class="q-actions"><button class="btn-primary" onclick="saveEdit('${questionId}')">💾 حفظ</button><button class="btn-secondary" onclick="loadAdminQuestions()">❌ إلغاء</button></div>`;
-} catch (error) { console.error('خطأ:', error); showToast('❌ حدث خطأ'); }
+item.innerHTML = `
+<div style="margin-bottom:10px">
+<textarea id="edit-q-${questionId}" style="width:100%;min-height:60px">${data.question}</textarea>
+</div>
+<div style="margin-bottom:10px">
+<textarea id="edit-a-${questionId}" style="width:100%;min-height:80px">${data.answer}</textarea>
+</div>
+<div class="q-actions">
+<button class="btn-primary" onclick="saveEdit('${questionId}')">💾 حفظ</button>
+<button class="btn-secondary" onclick="loadAdminQuestions()">❌ إلغاء</button>
+</div>
+`;
+} catch (error) {
+console.error('خطأ:', error);
+showToast('❌ حدث خطأ');
+}
 };
 
 window.saveEdit = async function(questionId) {
 const newQuestion = document.getElementById(`edit-q-${questionId}`).value.trim();
 const newAnswer = document.getElementById(`edit-a-${questionId}`).value.trim();
-if (!newQuestion || !newAnswer) { showToast('❌ لا يمكن ترك الحقول فارغة'); return; }
+
+if (!newQuestion || !newAnswer) {
+showToast('❌ لا يمكن ترك الحقول فارغة');
+return;
+}
+
 showToast('⏳ جاري الحفظ...');
+
 try {
-await updateDoc(doc(db, 'examQuestions', questionId), { question: newQuestion, answer: newAnswer, updatedAt: serverTimestamp() });
-showToast('✅ تم التعديل بنجاح!'); loadAdminQuestions();
-} catch (error) { console.error('خطأ:', error); showToast('❌ حدث خطأ أثناء الحفظ'); }
+await updateDoc(doc(db, 'examQuestions', questionId), {
+ question: newQuestion,
+ answer: newAnswer,
+ updatedAt: serverTimestamp()
+});
+
+showToast('✅ تم التعديل بنجاح!');
+loadAdminQuestions();
+} catch (error) {
+console.error('خطأ:', error);
+showToast('❌ حدث خطأ أثناء الحفظ');
+}
 };
 
 window.deleteQuestion = async function(questionId) {
 if (!confirm('هل أنت متأكد من حذف هذا السؤال؟')) return;
+
 showToast('⏳ جاري الحذف...');
+
 try {
 await deleteDoc(doc(db, 'examQuestions', questionId));
+
 const chapterRef = doc(db, 'examChapters', currentAdminChapter);
 const chapterSnap = await getDoc(chapterRef);
 const currentCount = chapterSnap.data()?.questionCount || 0;
-if (currentCount > 0) { await updateDoc(chapterRef, { questionCount: currentCount - 1 }); }
-showToast('🗑️ تم حذف السؤال'); loadAdminQuestions();
-} catch (error) { console.error('خطأ:', error); showToast('❌ حدث خطأ أثناء الحذف'); }
+if (currentCount > 0) {
+ await updateDoc(chapterRef, { questionCount: currentCount - 1 });
+}
+
+showToast('🗑️ تم حذف السؤال');
+loadAdminQuestions();
+} catch (error) {
+console.error('خطأ:', error);
+showToast('❌ حدث خطأ أثناء الحذف');
+}
 };
 
 // ==================== نظام الاختبار ====================
@@ -705,34 +1582,68 @@ let selectedChapterName = '';
 async function loadSubjectsForExam() {
 const select = document.getElementById('examSubjectSelect');
 select.innerHTML = '<option value="">-- اختر المادة --</option>';
-for (const [key, name] of Object.entries(names)) { select.innerHTML += `<option value="${key}">${name}</option>`; }
-if (id && names[id]) { select.value = id; onExamSubjectChange(); }
+for (const [key, name] of Object.entries(names)) {
+select.innerHTML += `<option value="${key}">${name}</option>`;
+}
+if (id && names[id]) {
+select.value = id;
+onExamSubjectChange();
+}
 }
 
 window.onExamSubjectChange = async function() {
 const subject = document.getElementById('examSubjectSelect').value;
 const box = document.getElementById('examChapterSelectBox');
 const list = document.getElementById('examChapterList');
-selectedChapterId = ''; selectedChapterName = '';
-if (!subject) { box.style.display = 'none'; return; }
+
+selectedChapterId = '';
+selectedChapterName = '';
+
+if (!subject) {
+box.style.display = 'none';
+return;
+}
+
 showToast('⏳ جاري تحميل الأبواب...');
+
 try {
 const q = query(collection(db, 'examChapters'), where('subject', '==', subject));
 const snap = await getDocs(q);
-if (snap.empty) { list.innerHTML = '<p style="color:#aaa;text-align:center">لا توجد أبواب مضافة لهذه المادة</p>'; box.style.display = 'block'; return; }
+
+if (snap.empty) {
+list.innerHTML = '<p style="color:#aaa;text-align:center">لا توجد أبواب مضافة لهذه المادة</p>';
+box.style.display = 'block';
+return;
+}
+
 list.innerHTML = '';
 snap.forEach(docu => {
-const data = docu.data(); const qCount = data.questionCount || 0;
-list.innerHTML += `<div class="chapter-select-item" onclick="selectChapter(this, '${docu.id}', '${data.name}')" data-chapter="${docu.id}"><div><strong style="color:#f5e6b3">📂 ${data.name}</strong></div><div class="q-count">${qCount} سؤال</div></div>`;
+const data = docu.data();
+const qCount = data.questionCount || 0;
+list.innerHTML += `
+<div class="chapter-select-item" onclick="selectChapter(this, '${docu.id}', '${data.name}')" data-chapter="${docu.id}">
+<div>
+<strong style="color:#f5e6b3">📂 ${data.name}</strong>
+</div>
+<div class="q-count">${qCount} سؤال</div>
+</div>
+`;
 });
+
 box.style.display = 'block';
-} catch (error) { console.error('خطأ:', error); showToast('❌ حدث خطأ في تحميل الأبواب'); }
+} catch (error) {
+console.error('خطأ:', error);
+showToast('❌ حدث خطأ في تحميل الأبواب');
+}
 };
 
 window.selectChapter = function(el, chapterId, chapterName) {
-document.querySelectorAll('.chapter-select-item').forEach(item => { item.classList.remove('selected'); });
+document.querySelectorAll('.chapter-select-item').forEach(item => {
+item.classList.remove('selected');
+});
 el.classList.add('selected');
-selectedChapterId = chapterId; selectedChapterName = chapterName;
+selectedChapterId = chapterId;
+selectedChapterName = chapterName;
 };
 
 window.startExam = async function() {
@@ -740,185 +1651,407 @@ try {
 const name = document.getElementById('examParticipantName').value.trim();
 const subject = document.getElementById('examSubjectSelect').value;
 const duration = parseInt(document.getElementById('examDuration').value);
+
 if (!name) { showToast('❌ الرجاء إدخال اسم المشارك'); return; }
 if (!subject) { showToast('❌ الرجاء اختيار المادة'); return; }
 if (!selectedChapterId) { showToast('❌ الرجاء اختيار الباب'); return; }
+
 showToast('⏳ جاري تحميل الأسئلة...');
+
 const q = query(collection(db, 'examQuestions'), where('chapterId', '==', selectedChapterId));
 const snap = await getDocs(q);
+
 let allQuestions = [];
-snap.forEach(docu => { const data = docu.data(); allQuestions.push({ id: docu.id, question: data.question, answer: data.answer, isOpenEnded: true }); });
-if (allQuestions.length === 0) { showToast('❌ لا توجد أسئلة مضافة لهذا الباب'); return; }
+snap.forEach(docu => {
+const data = docu.data();
+allQuestions.push({
+ id: docu.id,
+ question: data.question,
+ answer: data.answer,
+ isOpenEnded: true
+});
+});
+
+if (allQuestions.length === 0) { 
+showToast('❌ لا توجد أسئلة مضافة لهذا الباب'); 
+return; 
+}
+
 const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
 examQuestions = shuffled;
-currentExam = { name, subject: names[subject] || subject, subjectKey: subject, chapterName: selectedChapterName, chapterId: selectedChapterId, totalQuestions: examQuestions.length, duration: duration, startTime: Date.now() };
-currentQuestionIndex = 0; userAnswers = {};
+
+currentExam = {
+name,
+subject: names[subject] || subject,
+subjectKey: subject,
+chapterName: selectedChapterName,
+chapterId: selectedChapterId,
+totalQuestions: examQuestions.length,
+duration: duration,
+startTime: Date.now()
+};
+
+currentQuestionIndex = 0;
+userAnswers = {};
+
 renderCurrentQuestion();
 document.getElementById('examModal').classList.add('show');
 startTimer(duration * 60);
-} catch (error) { console.error('خطأ:', error); showToast('❌ حدث خطأ: ' + error.message); }
+
+} catch (error) {
+console.error('خطأ:', error);
+showToast('❌ حدث خطأ: ' + error.message);
+}
 };
 
 function renderCurrentQuestion() {
 const container = document.getElementById('examContent');
 const counter = document.getElementById('questionCounter');
 const q = examQuestions[currentQuestionIndex];
+
 counter.textContent = `السؤال ${currentQuestionIndex + 1} من ${examQuestions.length}`;
+
 document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
 const nextBtn = document.getElementById('nextBtn');
-if (currentQuestionIndex === examQuestions.length - 1) { nextBtn.textContent = '✅ إنهاء الاختبار'; nextBtn.onclick = submitExam; }
-else { nextBtn.textContent = 'التالي ➡'; nextBtn.onclick = nextQuestion; }
-const savedAnswer = userAnswers[currentQuestionIndex] || '';
-container.innerHTML = `<div class="question-box"><h4>السؤال ${currentQuestionIndex + 1} من ${examQuestions.length}</h4><p class="question-text">${q.question}</p><div class="answer-label">✏️ اكتب إجابتك:</div><textarea class="open-answer" id="answer-${currentQuestionIndex}" placeholder="اكتب إجابتك هنا..." rows="6" oninput="saveAnswer(${currentQuestionIndex}, this.value)">${savedAnswer}</textarea></div>`;
+if (currentQuestionIndex === examQuestions.length - 1) {
+nextBtn.textContent = '✅ إنهاء الاختبار';
+nextBtn.onclick = submitExam;
+} else {
+nextBtn.textContent = 'التالي ➡';
+nextBtn.onclick = nextQuestion;
 }
 
-window.saveAnswer = function(index, value) { userAnswers[index] = value.trim(); };
-window.nextQuestion = function() { if (currentQuestionIndex < examQuestions.length - 1) { currentQuestionIndex++; renderCurrentQuestion(); } };
-window.prevQuestion = function() { if (currentQuestionIndex > 0) { currentQuestionIndex--; renderCurrentQuestion(); } };
+const savedAnswer = userAnswers[currentQuestionIndex] || '';
+container.innerHTML = `
+<div class="question-box">
+<h4>السؤال ${currentQuestionIndex + 1} من ${examQuestions.length}</h4>
+<p class="question-text">${q.question}</p>
+<div class="answer-label">✏️ اكتب إجابتك:</div>
+<textarea class="open-answer" id="answer-${currentQuestionIndex}" placeholder="اكتب إجابتك هنا..." rows="6" oninput="saveAnswer(${currentQuestionIndex}, this.value)">${savedAnswer}</textarea>
+</div>
+`;
+}
+
+window.saveAnswer = function(index, value) {
+userAnswers[index] = value.trim();
+};
+
+window.nextQuestion = function() {
+if (currentQuestionIndex < examQuestions.length - 1) {
+currentQuestionIndex++;
+renderCurrentQuestion();
+}
+};
+
+window.prevQuestion = function() {
+if (currentQuestionIndex > 0) {
+currentQuestionIndex--;
+renderCurrentQuestion();
+}
+};
 
 function startTimer(seconds) {
 const timerEl = document.getElementById('examTimer');
 let remaining = seconds;
+
 examTimerInterval = setInterval(() => {
 remaining--;
 const mins = Math.floor(remaining / 60);
 const secs = remaining % 60;
 timerEl.textContent = `⏱️ ${mins}:${secs.toString().padStart(2, '0')}`;
-if (remaining <= 0) { clearInterval(examTimerInterval); submitExam(); showToast('⏰ انتهى وقت الاختبار!'); }
+
+if (remaining <= 0) {
+clearInterval(examTimerInterval);
+submitExam();
+showToast('⏰ انتهى وقت الاختبار!');
+}
 }, 1000);
 }
 
 window.closeExamModal = function() {
-if (confirm('هل أنت متأكد من إغلاق الاختبار؟ سيتم فقدان تقدمك!')) { clearInterval(examTimerInterval); document.getElementById('examModal').classList.remove('show'); }
+if (confirm('هل أنت متأكد من إغلاق الاختبار؟ سيتم فقدان تقدمك!')) {
+clearInterval(examTimerInterval);
+document.getElementById('examModal').classList.remove('show');
+}
 };
 
 window.submitExam = function() {
 clearInterval(examTimerInterval);
-let totalScore = 0; let answeredCount = 0;
+
+let totalScore = 0;
+let answeredCount = 0;
+
 examQuestions.forEach((q, i) => {
-const userAnswer = userAnswers[i] || ''; q.userAnswer = userAnswer;
-if (userAnswer.length > 0) { answeredCount++; const score = calculateOpenScore(userAnswer, q.answer); q.score = score; totalScore += score; } else { q.score = 0; }
+const userAnswer = userAnswers[i] || '';
+q.userAnswer = userAnswer;
+
+if (userAnswer.length > 0) {
+answeredCount++;
+const score = calculateOpenScore(userAnswer, q.answer);
+q.score = score;
+totalScore += score;
+} else {
+q.score = 0;
+}
 });
+
 const avgScore = answeredCount > 0 ? Math.round(totalScore / answeredCount) : 0;
 const totalQuestions = examQuestions.length;
-const result = { id: Date.now(), name: currentExam.name, subject: currentExam.subject, subjectKey: currentExam.subjectKey, chapterName: currentExam.chapterName, chapterId: currentExam.chapterId, score: Math.round(totalScore / 100 * totalQuestions), total: totalQuestions, percent: avgScore, answeredCount: answeredCount, date: new Date().toLocaleString('ar-SA') };
+
+const result = {
+id: Date.now(),
+name: currentExam.name,
+subject: currentExam.subject,
+subjectKey: currentExam.subjectKey,
+chapterName: currentExam.chapterName,
+chapterId: currentExam.chapterId,
+score: Math.round(totalScore / 100 * totalQuestions),
+total: totalQuestions,
+percent: avgScore,
+answeredCount: answeredCount,
+date: new Date().toLocaleString('ar-SA')
+};
+
 saveResult(result);
 document.getElementById('examModal').classList.remove('show');
 showResult(result);
 };
 
+// ==================== تصحيح ذكي معتمد على المعنى ====================
 function calculateOpenScore(userAnswer, modelAnswer) {
 if (!userAnswer || userAnswer.length < 3) return 0;
 if (!modelAnswer || modelAnswer.length < 3) return 0;
+
 const cleanUser = cleanTextForComparison(userAnswer);
 const cleanModel = cleanTextForComparison(modelAnswer);
+
 const fullTextScore = calculateTextSimilarity(cleanUser, cleanModel);
+
 const modelPoints = extractKeyPoints(modelAnswer);
 const userPoints = extractKeyPoints(userAnswer);
-let matchedPoints = 0; let totalPointsWeight = 0;
+
+let matchedPoints = 0;
+let totalPointsWeight = 0;
+
 modelPoints.forEach(modelPoint => {
 const pointWeight = Math.max(modelPoint.length, 10);
 const pointScore = findBestMatch(modelPoint, userPoints);
 matchedPoints += pointScore * pointWeight;
 totalPointsWeight += pointWeight;
 });
+
 const pointsScore = totalPointsWeight > 0 ? Math.round((matchedPoints / totalPointsWeight) * 100) : 0;
+
 const keywordsScore = compareKeywords(cleanUser, cleanModel);
+
 const rootScore = compareRootWords(cleanUser, cleanModel);
-const finalScore = Math.round((fullTextScore * 0.30) + (pointsScore * 0.40) + (keywordsScore * 0.20) + (rootScore * 0.10));
+
+const finalScore = Math.round(
+ (fullTextScore * 0.30) + 
+ (pointsScore * 0.40) + 
+ (keywordsScore * 0.20) +
+ (rootScore * 0.10)
+);
+
 return Math.min(100, finalScore);
 }
 
 function extractKeyPoints(text) {
-const points = text.split(/[
-.،,;:.!؟"'()\[\]{}]+/).map(s => s.trim()).filter(s => s.length > 5);
+const points = text
+.split(/[\n.،,;:.!؟"'()\[\]{}]+/)
+.map(s => s.trim())
+.filter(s => s.length > 5);
+
 return points;
 }
 
 function findBestMatch(modelPoint, userPoints) {
 let bestScore = 0;
 const modelWords = cleanTextForComparison(modelPoint).split(/\s+/).filter(w => w.length > 2);
+
 if (modelWords.length === 0) return 0;
+
 userPoints.forEach(userPoint => {
 const userWords = cleanTextForComparison(userPoint).split(/\s+/).filter(w => w.length > 2);
 if (userWords.length === 0) return;
+
 let commonWords = 0;
-modelWords.forEach(word => { if (userWords.includes(word)) commonWords++; });
+modelWords.forEach(word => {
+if (userWords.includes(word)) commonWords++;
+});
+
 const score = Math.min(commonWords / (modelWords.length * 0.8), 1);
 if (score > bestScore) bestScore = score;
 });
+
 return bestScore;
 }
 
 function compareKeywords(userText, modelText) {
 const userWords = userText.split(/\s+/).filter(w => w.length > 3);
 const modelWords = modelText.split(/\s+/).filter(w => w.length > 3);
+
 if (modelWords.length === 0) return 0;
+
 const userSet = new Set(userWords);
 const modelSet = new Set(modelWords);
+
 let matchedKeywords = 0;
-modelSet.forEach(word => { if (userSet.has(word)) matchedKeywords++; });
+modelSet.forEach(word => {
+if (userSet.has(word)) matchedKeywords++;
+});
+
 return Math.min(Math.round((matchedKeywords / (modelSet.size * 0.7)) * 100), 100);
 }
 
 function compareRootWords(userText, modelText) {
 const userRoots = extractRoots(userText);
 const modelRoots = extractRoots(modelText);
+
 if (modelRoots.length === 0) return 0;
+
 const userSet = new Set(userRoots);
 const modelSet = new Set(modelRoots);
+
 let matchedRoots = 0;
-modelSet.forEach(root => { if (userSet.has(root)) matchedRoots++; });
+modelSet.forEach(root => {
+if (userSet.has(root)) matchedRoots++;
+});
+
 return Math.round((matchedRoots / modelSet.size) * 100);
 }
 
 function extractRoots(text) {
-return text.split(/\s+/).filter(w => w.length > 3).map(w => {
- let root = w.replace(/[ًٌٍَُِّْٰ]/g, '').replace(/^(ال|و|ف|ب|ك|ل|ت|ن|ي|ا|ه|إ|أ|آ)/g, '').replace(/(ة|ت|ان|ون|ين|وا|تم|تن|نا|ها|هم|هن|كما|كن|ني|ك|ه|ي)$/g, '');
+return text
+.split(/\s+/)
+.filter(w => w.length > 3)
+.map(w => {
+ let root = w
+ .replace(/[ًٌٍَُِّْٰ]/g, '')
+ .replace(/^(ال|و|ف|ب|ك|ل|ت|ن|ي|ا|ه|إ|أ|آ)/g, '')
+ .replace(/(ة|ت|ان|ون|ين|وا|تم|تن|نا|ها|هم|هن|كما|كن|ني|ك|ه|ي)$/g, '');
  return root;
-}).filter(w => w.length > 2);
+})
+.filter(w => w.length > 2);
 }
 
 function calculateTextSimilarity(text1, text2) {
 if (!text1 || !text2) return 0;
+
 const words1 = text1.split(/\s+/).filter(w => w.length > 2);
 const words2 = text2.split(/\s+/).filter(w => w.length > 2);
+
 if (words1.length === 0 || words2.length === 0) return 0;
+
 const set1 = new Set(words1);
 const set2 = new Set(words2);
+
 const intersection = [...set1].filter(w => set2.has(w));
 const union = new Set([...set1, ...set2]);
+
 return Math.round((intersection.length / union.size) * 100);
 }
 
 function cleanTextForComparison(text) {
-return text.toLowerCase().replace(/[،,؛;:.!؟"'()\[\]{}]/g, ' ').replace(/\s+/g, ' ').trim();
+return text
+.toLowerCase()
+.replace(/[،,؛;:.!؟"'()\[\]{}]/g, ' ')
+.replace(/\s+/g, ' ')
+.trim();
 }
 
+// ==================== تصنيف الإجابة ====================
 function getAnswerClassification(percent) {
-if (percent === 0) return { key: 'no-answer', label: 'لم يُجب', emoji: '⚪', desc: 'لم يتم كتابة إجابة' };
-if (percent >= 85) return { key: 'excellent', label: 'ممتازة', emoji: '🏆', desc: 'إجابة ممتازة ومقاربة للنموذج' };
-if (percent >= 70) return { key: 'very-good', label: 'جيدة جداً', emoji: '✨', desc: 'إجابة جيدة جداً وتقترب من المعنى' };
-if (percent >= 55) return { key: 'good', label: 'جيدة', emoji: '👍', desc: 'إجابة جيدة لكن تحتاج تفصيل' };
-if (percent >= 40) return { key: 'acceptable', label: 'مقبولة', emoji: '⚠️', desc: 'إجابة مقبولة لكن غير كاملة' };
-return { key: 'weak', label: 'ضعيفة', emoji: '📚', desc: 'إجابة تحتاج مراجعة الدروس' };
+if (percent === 0) return { 
+ key: 'no-answer', 
+ label: 'لم يُجب', 
+ emoji: '⚪', 
+ desc: 'لم يتم كتابة إجابة' 
+};
+if (percent >= 85) return { 
+ key: 'excellent', 
+ label: 'ممتازة', 
+ emoji: '🏆', 
+ desc: 'إجابة ممتازة ومقاربة للنموذج' 
+};
+if (percent >= 70) return { 
+ key: 'very-good', 
+ label: 'جيدة جداً', 
+ emoji: '✨', 
+ desc: 'إجابة جيدة جداً وتقترب من المعنى' 
+};
+if (percent >= 55) return { 
+ key: 'good', 
+ label: 'جيدة', 
+ emoji: '👍', 
+ desc: 'إجابة جيدة لكن تحتاج تفصيل' 
+};
+if (percent >= 40) return { 
+ key: 'acceptable', 
+ label: 'مقبولة', 
+ emoji: '⚠️', 
+ desc: 'إجابة مقبولة لكن غير كاملة' 
+};
+return { 
+ key: 'weak', 
+ label: 'ضعيفة', 
+ emoji: '📚', 
+ desc: 'إجابة تحتاج مراجعة الدروس' 
+};
 }
 
+// ==================== عرض النتيجة مع التصنيفات ====================
 function showResult(result) {
 const container = document.getElementById('resultContent');
 let emoji = result.percent >= 90 ? '🏆' : result.percent >= 80 ? '🎉' : result.percent >= 60 ? '👍' : result.percent >= 40 ? '💪' : '📚';
 let message = result.percent >= 90 ? 'ممتاز! بارك الله فيك' : result.percent >= 80 ? 'أحسنت! تقدم رائع' : result.percent >= 60 ? 'جيد! واصل التقدم' : result.percent >= 40 ? 'حاول مراجعة الدروس' : 'حاول مرة أخرى';
+
 const progressWidth = result.percent + '%';
-const classifications = { 'excellent': 0, 'very-good': 0, 'good': 0, 'acceptable': 0, 'weak': 0, 'no-answer': 0 };
+
+// حساب إحصائيات التصنيفات
+const classifications = {
+'excellent': 0,
+'very-good': 0,
+'good': 0,
+'acceptable': 0,
+'weak': 0,
+'no-answer': 0
+};
+
 let reviewHtml = '';
 examQuestions.forEach((q, i) => {
 const score = q.score || 0;
 const classification = getAnswerClassification(score);
 classifications[classification.key]++;
+
 const cardClass = classification.key;
 const badgeClass = classification.key;
-reviewHtml += `<div class="result-question-card ${cardClass}"><div class="question-header-row"><div class="question-meta"><span class="question-number-badge" style="background:${getClassificationColor(classification.key)};color:#fff">${i + 1}</span><span style="color:#f5e6b3;font-weight:700">${q.question}</span></div><div class="answer-classification"><span class="classification-badge ${badgeClass}">${classification.emoji} ${classification.label}</span><span class="score-badge ${badgeClass}">${score}%</span></div></div><div class="user-answer-box"><span class="user-answer-label">✏️ إجابة الطالب:</span>${q.userAnswer ? `<p style="color:#fff;line-height:1.8">${q.userAnswer}</p>` : '<p class="no-answer-text">لم تُجب على هذا السؤال</p>'}</div><div class="model-answer-box"><span class="model-answer-label">📖 الإجابة النموذجية (للمراجعة):</span><p style="color:#aaa;line-height:1.8;white-space:pre-line">${q.answer}</p></div></div>`;
+
+reviewHtml += `
+<div class="result-question-card ${cardClass}">
+<div class="question-header-row">
+<div class="question-meta">
+<span class="question-number-badge" style="background:${getClassificationColor(classification.key)};color:#fff">${i + 1}</span>
+<span style="color:#f5e6b3;font-weight:700">${q.question}</span>
+</div>
+<div class="answer-classification">
+<span class="classification-badge ${badgeClass}">${classification.emoji} ${classification.label}</span>
+<span class="score-badge ${badgeClass}">${score}%</span>
+</div>
+</div>
+<div class="user-answer-box">
+<span class="user-answer-label">✏️ إجابة الطالب:</span>
+${q.userAnswer ? `<p style="color:#fff;line-height:1.8">${q.userAnswer}</p>` : '<p class="no-answer-text">لم تُجب على هذا السؤال</p>'}
+</div>
+<div class="model-answer-box">
+<span class="model-answer-label">📖 الإجابة النموذجية (للمراجعة):</span>
+<p style="color:#aaa;line-height:1.8;white-space:pre-line">${q.answer}</p>
+</div>
+</div>
+`;
 });
+
+// بناء ملخص التصنيفات
 const summaryItems = [
 { key: 'excellent', color: '#27ae60', label: 'ممتازة', icon: '🏆' },
 { key: 'very-good', color: '#2ecc71', label: 'جيدة جداً', icon: '✨' },
@@ -927,17 +2060,71 @@ const summaryItems = [
 { key: 'weak', color: '#e74c3c', label: 'ضعيفة', icon: '📚' },
 { key: 'no-answer', color: '#95a5a6', label: 'لم يُجب', icon: '⚪' }
 ];
-const summaryHtml = summaryItems.map(item => `<div class="summary-item" style="border-top:3px solid ${item.color}"><div class="count" style="color:${item.color}">${classifications[item.key]}</div><div class="label">${item.icon} ${item.label}</div></div>`).join('');
-container.innerHTML = `<div class="result-box"><div style="font-size:64px;margin-bottom:10px">${emoji}</div><h2 style="color:#f5e6b3;margin-bottom:20px">${message}</h2><div class="progress-bar-container"><div class="progress-bar" style="width:${progressWidth}"></div></div><div class="result-score">${result.percent}%</div><div class="result-percent">${result.answeredCount}/${result.total} أسئلة تمت الإجابة عليها</div><p style="color:#aaa;margin:10px 0">📚 المادة: ${result.subject}</p><p style="color:#f5e6b3;font-weight:700;margin:5px 0">📂 الباب: ${result.chapterName}</p><p style="color:#aaa;margin:5px 0">📅 التاريخ: ${result.date}</p><div class="summary-box"><div class="summary-title">📊 ملخص التصنيفات</div><div class="summary-grid">${summaryHtml}</div></div><div style="margin-top:25px;text-align:right"><h3 style="color:#f5e6b3;margin-bottom:15px;text-align:center">📋 تفاصيل الأسئلة والتصنيفات</h3>${reviewHtml}</div><div style="margin-top:25px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn-primary" onclick="shareResult(${result.id})">📤 مشاركة عبر واتساب</button><button class="btn-secondary" onclick="closeResult()">❌ إغلاق</button></div></div>`;
+
+const summaryHtml = summaryItems.map(item => `
+<div class="summary-item" style="border-top:3px solid ${item.color}">
+<div class="count" style="color:${item.color}">${classifications[item.key]}</div>
+<div class="label">${item.icon} ${item.label}</div>
+</div>
+`).join('');
+
+container.innerHTML = `
+<div class="result-box">
+<div style="font-size:64px;margin-bottom:10px">${emoji}</div>
+<h2 style="color:#f5e6b3;margin-bottom:20px">${message}</h2>
+
+<div class="progress-bar-container">
+<div class="progress-bar" style="width:${progressWidth}"></div>
+</div>
+
+<div class="result-score">${result.percent}%</div>
+<div class="result-percent">${result.answeredCount}/${result.total} أسئلة تمت الإجابة عليها</div>
+
+<p style="color:#aaa;margin:10px 0">📚 المادة: ${result.subject}</p>
+<p style="color:#f5e6b3;font-weight:700;margin:5px 0">📂 الباب: ${result.chapterName}</p>
+<p style="color:#aaa;margin:5px 0">📅 التاريخ: ${result.date}</p>
+
+<div class="summary-box">
+<div class="summary-title">📊 ملخص التصنيفات</div>
+<div class="summary-grid">
+${summaryHtml}
+</div>
+</div>
+
+<div style="margin-top:25px;text-align:right">
+<h3 style="color:#f5e6b3;margin-bottom:15px;text-align:center">📋 تفاصيل الأسئلة والتصنيفات</h3>
+${reviewHtml}
+</div>
+
+<div style="margin-top:25px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+<button class="btn-primary" onclick="shareResult(${result.id})">
+📤 مشاركة عبر واتساب
+</button>
+<button class="btn-secondary" onclick="closeResult()">
+❌ إغلاق
+</button>
+</div>
+</div>
+`;
+
 document.getElementById('resultModal').classList.add('show');
 }
 
 function getClassificationColor(key) {
-const colors = { 'excellent': '#27ae60', 'very-good': '#2ecc71', 'good': '#d4af37', 'acceptable': '#e67e22', 'weak': '#e74c3c', 'no-answer': '#95a5a6' };
+const colors = {
+'excellent': '#27ae60',
+'very-good': '#2ecc71',
+'good': '#d4af37',
+'acceptable': '#e67e22',
+'weak': '#e74c3c',
+'no-answer': '#95a5a6'
+};
 return colors[key] || '#aaa';
 }
 
-window.closeResult = function() { document.getElementById('resultModal').classList.remove('show'); };
+window.closeResult = function() {
+document.getElementById('resultModal').classList.remove('show');
+};
 
 function saveResult(result) {
 let results = JSON.parse(localStorage.getItem('examResults') || '[]');
@@ -950,6 +2137,7 @@ window.shareResult = function(resultId) {
 let results = JSON.parse(localStorage.getItem('examResults') || '[]');
 const result = results.find(r => r.id === resultId);
 if (!result) return;
+
 const text = `🎓 نتيجة الاختبار
 👤 الاسم: ${result.name}
 📚 المادة: ${result.subject}
@@ -958,6 +2146,7 @@ const text = `🎓 نتيجة الاختبار
 📅 التاريخ: ${result.date}
 
 🌟 تم الاختبار عبر تطبيق التعليم`;
+
 const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
 window.open(url, '_blank');
 };
@@ -969,24 +2158,9 @@ toast.classList.add('show');
 setTimeout(() => toast.classList.remove('show'), 3000);
 };
 
-window.openExamSection = function() {
-document.getElementById('section-main').style.display = 'none';
-document.getElementById('section-admin').style.display = 'none';
-document.getElementById('section-exam').style.display = 'block';
-document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-event.target.classList.add('active');
-loadSubjectsForExam();
-};
-
-window.backToMain = function() {
-document.getElementById('section-main').style.display = 'block';
-document.getElementById('section-exam').style.display = 'none';
-document.getElementById('section-admin').style.display = 'none';
-document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-};
-
-// تحميل الفصول عند بدء الصفحة
 loadChapters();
+
 </script>
+
 </body>
 </html>
