@@ -1209,6 +1209,467 @@ opacity:.5;
     border-bottom: 1px solid rgba(212,175,55,.08);
 }
 /* ===== نهاية ترتيب المواد ===== */
+
+
+
+/* ===== نظام الهدف اليومي (جماعي - Firestore) ===== */
+
+const GOALS_COLLECTION = "dailyGoals";
+let currentUserName = localStorage.getItem("studentName") || "";
+
+// طلب اسم الطالبة عند أول استخدام
+function ensureUserName() {
+    if (!currentUserName) {
+        const name = prompt("أدخلي اسمك لعرض هدفك للجميع:");
+        if (name && name.trim()) {
+            currentUserName = name.trim();
+            localStorage.setItem("studentName", currentUserName);
+        } else {
+            currentUserName = "طالبة";
+            localStorage.setItem("studentName", currentUserName);
+        }
+    }
+    return currentUserName;
+}
+
+async function getTodayGoals() {
+    const today = getTodayDate();
+    const q = query(collection(db, GOALS_COLLECTION), where("date", "==", today));
+    const snap = await getDocs(q);
+    let goals = [];
+    snap.forEach(d => goals.push({id: d.id, ...d.data()}));
+    return goals;
+}
+
+async function getMyTodayGoal() {
+    const today = getTodayDate();
+    const myName = ensureUserName();
+    const q = query(
+        collection(db, GOALS_COLLECTION),
+        where("date", "==", today),
+        where("studentName", "==", myName)
+    );
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+        const doc = snap.docs[0];
+        return {id: doc.id, ...doc.data()};
+    }
+    return null;
+}
+
+function getTodayDate() {
+    return new Date().toISOString().split('T')[0];
+}
+
+function getStreak() {
+    const saved = localStorage.getItem("goalStreak");
+    if (!saved) return { count: 0, lastDate: '' };
+    return JSON.parse(saved);
+}
+
+function updateStreak(completed) {
+    const streak = getStreak();
+    const today = getTodayDate();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    if (completed) {
+        if (streak.lastDate === yesterdayStr || streak.lastDate === today) {
+            if (streak.lastDate !== today) {
+                streak.count++;
+            }
+        } else {
+            streak.count = 1;
+        }
+        streak.lastDate = today;
+    } else {
+        if (streak.lastDate && streak.lastDate !== today && streak.lastDate !== yesterdayStr) {
+            streak.count = 0;
+        }
+    }
+
+    localStorage.setItem("goalStreak", JSON.stringify(streak));
+    return streak;
+}
+
+async function renderDailyGoal() {
+    const container = document.getElementById('dailyGoalContent');
+    const dateEl = document.getElementById('goalDate');
+
+    if (!container || !dateEl) return;
+
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('ar-LY', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    dateEl.innerText = dateStr;
+
+    // جلب أهداف اليوم للجميع
+    const allGoals = await getTodayGoals();
+    const myGoal = await getMyTodayGoal();
+    const myName = ensureUserName();
+    const streak = getStreak();
+
+    let html = '';
+
+    // قسم هدفي
+    if (!myGoal) {
+        // لم أحدد هدفاً بعد
+        html += `
+            <div style="text-align:center; padding:20px 0;">
+                <div style="font-size:40px; margin-bottom:15px;">🎯</div>
+                <p style="margin-bottom:15px; color:rgba(255,255,255,.7);">ما هو هدفك للمذاكرة اليوم يا <strong style="color:#f5e6b3;">${myName}</strong>؟</p>
+                <div class="daily-goal-input-row">
+                    <input type="text" class="daily-goal-input" id="newGoalInput" 
+                        placeholder="مثال: أكمل 3 دروس في الفقه ومراجعة التفسير" 
+                        maxlength="120">
+                    <button class="daily-goal-btn" onclick="setDailyGoal()">حددي هدفك</button>
+                </div>
+            </div>
+        `;
+    } else if (myGoal.completed) {
+        html += `
+            <div class="daily-goal-completed">
+                <div class="celebration">🎉</div>
+                <h4>أحسنتِ يا ${myName}! أكملتِ هدفك</h4>
+                <p>${myGoal.text}</p>
+                <div class="daily-goal-streak">
+                    <span class="fire">🔥</span>
+                    <span>سلسلة الإنجازات: ${streak.count} يوم${streak.count > 1 ? ' متتالي' : ''}</span>
+                </div>
+            </div>
+        `;
+    } else {
+        html += `
+            <div class="daily-goal-display">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                    <span style="background:#d4af37; color:#0b1725; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:700;">${myName}</span>
+                    <span style="color:rgba(255,255,255,.5); font-size:13px;">هدفك اليوم</span>
+                </div>
+                <div class="daily-goal-text">${myGoal.text}</div>
+                <div class="daily-goal-progress">
+                    <div class="daily-goal-bar-bg">
+                        <div class="daily-goal-bar-fill" style="width: ${myGoal.progress || 0}%"></div>
+                    </div>
+                    <span class="daily-goal-percent">${myGoal.progress || 0}%</span>
+                </div>
+            </div>
+            <div class="daily-goal-actions">
+                <button class="daily-goal-action-btn btn-complete" onclick="updateGoalProgress(100)">
+                    ✅ أكملتِ الهدف
+                </button>
+                <button class="daily-goal-action-btn btn-partial" onclick="updateGoalProgress(50)">
+                    ⏳ أنجزتِ نصفه
+                </button>
+                <button class="daily-goal-action-btn btn-partial" onclick="updateGoalProgress(25)">
+                    📝 أنجزتِ القليل
+                </button>
+                <button class="daily-goal-action-btn btn-reset" onclick="resetDailyGoal()">
+                    🔄 تعديل الهدف
+                </button>
+            </div>
+        `;
+    }
+
+    // قسم أهداف الطالبات الأخريات
+    if (allGoals.length > 0) {
+        const otherGoals = allGoals.filter(g => g.studentName !== myName);
+        if (otherGoals.length > 0) {
+            html += `
+                <div style="margin-top:20px; padding-top:20px; border-top:1px solid rgba(255,255,255,.08);">
+                    <h4 style="color:#f5e6b3; font-size:15px; margin:0 0 15px; display:flex; align-items:center; gap:8px;">
+                        👥 أهداف الطالبات اليوم
+                        <span style="background:rgba(212,175,55,.2); color:#d4af37; padding:2px 10px; border-radius:20px; font-size:12px;">${otherGoals.length}</span>
+                    </h4>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+            `;
+
+            otherGoals.forEach(g => {
+                const statusIcon = g.completed ? '✅' : (g.progress > 0 ? '⏳' : '📝');
+                const statusColor = g.completed ? '#81c784' : (g.progress > 0 ? '#ffd54f' : 'rgba(255,255,255,.5)');
+                const barWidth = g.progress || 0;
+
+                html += `
+                    <div style="background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:12px; padding:12px 15px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:20px;">👤</span>
+                                <span style="color:#f5e6b3; font-weight:600;">${g.studentName}</span>
+                            </div>
+                            <span style="color:${statusColor}; font-size:13px; font-weight:600;">${statusIcon} ${g.completed ? 'مكتمل' : (g.progress > 0 ? g.progress + '%' : 'قيد التنفيذ')}</span>
+                        </div>
+                        <div style="font-size:13px; color:rgba(255,255,255,.7); margin-bottom:8px;">${g.text}</div>
+                        <div style="height:6px; background:rgba(255,255,255,.08); border-radius:10px; overflow:hidden;">
+                            <div style="height:100%; width:${barWidth}%; background:linear-gradient(90deg, #d4af37, #f5e6b3); border-radius:10px; transition:width .6s;"></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`;
+        }
+    }
+
+    container.innerHTML = html;
+}
+
+window.setDailyGoal = async function() {
+    const input = document.getElementById('newGoalInput');
+    if (!input || !input.value.trim()) {
+        alert('يرجى كتابة هدفك لليوم');
+        return;
+    }
+
+    const myName = ensureUserName();
+    const today = getTodayDate();
+
+    // التحقق من عدم وجود هدف مسبق
+    const existing = await getMyTodayGoal();
+    if (existing) {
+        alert('لديك هدف بالفعل لهذا اليوم! يمكنك تعديله');
+        return;
+    }
+
+    try {
+        await addDoc(collection(db, GOALS_COLLECTION), {
+            studentName: myName,
+            text: input.value.trim(),
+            progress: 0,
+            completed: false,
+            date: today,
+            createdAt: Date.now()
+        });
+
+        await renderDailyGoal();
+    } catch(e) {
+        console.log('Goal save error:', e);
+        alert('حدث خطأ في الحفظ');
+    }
+};
+
+window.updateGoalProgress = async function(percent) {
+    const myGoal = await getMyTodayGoal();
+    if (!myGoal) return;
+
+    const updates = {
+        progress: percent,
+        completed: percent >= 100,
+        updatedAt: Date.now()
+    };
+
+    if (percent >= 100) {
+        updates.progress = 100;
+        updates.completed = true;
+        updateStreak(true);
+        triggerCelebration();
+    }
+
+    try {
+        await updateDoc(doc(db, GOALS_COLLECTION, myGoal.id), updates);
+        await renderDailyGoal();
+        setTimeout(loadStats, 500);
+    } catch(e) {
+        console.log('Goal update error:', e);
+    }
+};
+
+window.resetDailyGoal = async function() {
+    if (!confirm('هل تريدين حذف هدفك وإضافة هدف جديد؟')) return;
+
+    const myGoal = await getMyTodayGoal();
+    if (myGoal) {
+        try {
+            await deleteDoc(doc(db, GOALS_COLLECTION, myGoal.id));
+            await renderDailyGoal();
+        } catch(e) {
+            console.log('Goal delete error:', e);
+        }
+    }
+};
+
+// تغيير الاسم
+window.changeStudentName = function() {
+    const newName = prompt("أدخلي اسمك الجديد:", currentUserName);
+    if (newName && newName.trim()) {
+        currentUserName = newName.trim();
+        localStorage.setItem("studentName", currentUserName);
+        renderDailyGoal();
+    }
+};
+
+/* ===== ألعاب نارية ===== */
+function triggerCelebration() {
+    const overlay = document.getElementById('celebrationOverlay');
+    if (!overlay) return;
+    overlay.innerHTML = '';
+    overlay.classList.add('active');
+
+    const colors = ['#d4af37', '#f5e6b3', '#81c784', '#4fc3f7', '#ff8a65', '#ba68c8'];
+
+    for (let i = 0; i < 50; i++) {
+        const fw = document.createElement('div');
+        fw.className = 'firework';
+        fw.style.left = Math.random() * 100 + '%';
+        fw.style.top = Math.random() * 60 + 20 + '%';
+        fw.style.background = colors[Math.floor(Math.random() * colors.length)];
+        fw.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
+        fw.style.setProperty('--ty', (Math.random() - 0.5) * 200 + 'px');
+        fw.style.animationDelay = Math.random() * 0.5 + 's';
+        fw.style.animationDuration = (0.8 + Math.random() * 0.7) + 's';
+        overlay.appendChild(fw);
+    }
+
+    setTimeout(() => {
+        overlay.classList.remove('active');
+        overlay.innerHTML = '';
+    }, 2000);
+}
+
+/* ===== لوحة الإحصائيات ===== */
+async function loadStats() {
+    const grid = document.getElementById('statsGrid');
+    const chart = document.getElementById('statsBarChart');
+
+    if (!grid || !chart) return;
+
+    try {
+        let totalLessons = 0;
+        let completedLessons = 0;
+        let totalProgress = 0;
+        let subjectCount = 0;
+        let highestProgress = 0;
+        let highestSubject = '';
+        let subjectProgressData = [];
+
+        const progressSnap = await getDocs(collection(db, "progress"));
+        progressSnap.forEach(doc => {
+            const percent = doc.data().percent || 0;
+            totalProgress += percent;
+            subjectCount++;
+
+            if (percent > highestProgress) {
+                highestProgress = percent;
+                highestSubject = getSubjectName(doc.id);
+            }
+
+            subjectProgressData.push({
+                id: doc.id,
+                name: getSubjectName(doc.id),
+                percent: percent
+            });
+        });
+
+        for (const subj of subjectsData) {
+            try {
+                const chSnap = await getDocs(collection(db, "chapters", subj.id, "items"));
+                chSnap.forEach(d => {
+                    const data = d.data();
+                    const lessons = data.lessons || [];
+                    totalLessons += lessons.length;
+                    completedLessons += lessons.filter(l => l.completed).length;
+                });
+            } catch(e) {}
+        }
+
+        // أهداف اليوم من Firestore
+        const todayGoals = await getTodayGoals();
+        const completedGoals = todayGoals.filter(g => g.completed).length;
+        const totalGoalsToday = todayGoals.length;
+
+        const avgProgress = subjectCount > 0 ? Math.round(totalProgress / subjectCount) : 0;
+        const streak = getStreak();
+
+        grid.innerHTML = `
+            <div class="stat-card stat-highlight">
+                <div class="stat-icon">📚</div>
+                <div class="stat-value">${avgProgress}%</div>
+                <div class="stat-label">متوسط الإنجاز</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value">${completedLessons}</div>
+                <div class="stat-label">دروس مكتملة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📖</div>
+                <div class="stat-value">${totalLessons}</div>
+                <div class="stat-label">إجمالي الدروس</div>
+            </div>
+            <div class="stat-card stat-highlight">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-value">${highestSubject || '-'}</div>
+                <div class="stat-label">أعلى مادة (${highestProgress}%)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-value">${completedGoals}/${totalGoalsToday}</div>
+                <div class="stat-label">أهداف اليوم</div>
+            </div>
+            <div class="stat-card stat-highlight">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-value">${streak.count}</div>
+                <div class="stat-label">أيام متتالية</div>
+            </div>
+        `;
+
+        subjectProgressData.sort((a, b) => b.percent - a.percent);
+        const maxPercent = Math.max(...subjectProgressData.map(s => s.percent), 1);
+
+        chart.innerHTML = subjectProgressData.map(s => {
+            const height = Math.max((s.percent / maxPercent) * 100, 4);
+            return `
+                <div class="stats-bar-item">
+                    <div class="stats-bar" style="height: ${height}%; max-height: 140px;">
+                        <span class="stats-bar-value">${s.percent}%</span>
+                    </div>
+                    <span class="stats-bar-label">${s.name}</span>
+                </div>
+            `;
+        }).join('');
+
+    } catch(e) {
+        console.log('Stats error:', e);
+    }
+}
+
+function getSubjectName(id) {
+    const map = {
+        'aqida': 'العقيدة',
+        'hadith': 'الحديث',
+        'fiqh': 'الفقه',
+        'usul': 'أصول الفقه',
+        'history': 'التاريخ',
+        'dawah': 'الدعوة',
+        'tajweed': 'التجويد',
+        'literature': 'الأدب',
+        'nahw': 'النحو',
+        'computer': 'الحاسوب',
+        'english': 'الإنجليزي',
+        'tafsir': 'التفسير'
+    };
+    return map[id] || id;
+}
+
+// تشغيل عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    ensureUserName();
+    setTimeout(() => {
+        renderDailyGoal();
+        loadStats();
+    }, 3000);
+});
+
+// تحديث كل دقيقة
+setInterval(() => {
+    renderDailyGoal();
+}, 60000);
+
+/* ===== نهاية الإضافات ===== */
+/* ===== نهاية الإضافات ===== */
 </style>
 
 </head>
@@ -1614,6 +2075,40 @@ id="shareCount">
 
 </div>
 
+
+
+
+<!-- ===== قسم الهدف اليومي ===== -->
+<div class="daily-goal-section" id="dailyGoalSection">
+    <div class="daily-goal-header">
+        <h3>🎯 هدف اليوم</h3>
+        <span class="goal-date" id="goalDate"></span>
+    </div>
+    <div id="dailyGoalContent">
+        <!-- يُملأ بالـ JavaScript -->
+    </div>
+</div>
+
+<!-- ===== لوحة الإحصائيات ===== -->
+<div class="stats-section" id="statsSection">
+    <div class="stats-header">
+        <h3>📊 إحصائياتي</h3>
+    </div>
+    <div class="stats-body">
+        <div class="stats-grid" id="statsGrid">
+            <!-- يُملأ بالـ JavaScript -->
+        </div>
+        <div class="stats-chart-container">
+            <h4 class="stats-chart-title">📈 نسب الإنجاز حسب المادة</h4>
+            <div class="stats-bar-chart" id="statsBarChart">
+                <!-- يُملأ بالـ JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== طبقة الاحتفال ===== -->
+<div class="celebration-overlay" id="celebrationOverlay"></div>
 
 <div class="posts-section">
 <div class="posts-header">
@@ -2899,6 +3394,369 @@ window.addEventListener('resize', () => {
     sortSubjectsByProgress();
 });
 /* ===== نهاية ترتيب المواد ===== */
+
+
+/* ===== نظام الهدف اليومي ===== */
+const GOAL_STORAGE_KEY = 'dailyGoalData';
+const STREAK_STORAGE_KEY = 'goalStreak';
+
+function getTodayDate() {
+    return new Date().toISOString().split('T')[0];
+}
+
+function loadDailyGoal() {
+    const saved = localStorage.getItem(GOAL_STORAGE_KEY);
+    const today = getTodayDate();
+
+    if (saved) {
+        const data = JSON.parse(saved);
+        if (data.date === today) {
+            return data;
+        }
+    }
+
+    // هدف جديد لليوم
+    return {
+        date: today,
+        text: '',
+        progress: 0,
+        completed: false,
+        partial: false
+    };
+}
+
+function saveDailyGoal(data) {
+    localStorage.setItem(GOAL_STORAGE_KEY, JSON.stringify(data));
+}
+
+function getStreak() {
+    const saved = localStorage.getItem(STREAK_STORAGE_KEY);
+    if (!saved) return { count: 0, lastDate: '' };
+    return JSON.parse(saved);
+}
+
+function updateStreak(completed) {
+    const streak = getStreak();
+    const today = getTodayDate();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    if (completed) {
+        if (streak.lastDate === yesterdayStr || streak.lastDate === today) {
+            if (streak.lastDate !== today) {
+                streak.count++;
+            }
+        } else {
+            streak.count = 1;
+        }
+        streak.lastDate = today;
+    } else {
+        // إذا فات يوم بدون إنجاز
+        if (streak.lastDate && streak.lastDate !== today && streak.lastDate !== yesterdayStr) {
+            streak.count = 0;
+        }
+    }
+
+    localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify(streak));
+    return streak;
+}
+
+function renderDailyGoal() {
+    const container = document.getElementById('dailyGoalContent');
+    const dateEl = document.getElementById('goalDate');
+    const goal = loadDailyGoal();
+    const streak = getStreak();
+
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('ar-LY', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    dateEl.innerText = dateStr;
+
+    if (!goal.text) {
+        // وضع الإدخال
+        container.innerHTML = `
+            <div style="text-align:center; padding:20px; color:rgba(255,255,255,.5);">
+                <div style="font-size:40px; margin-bottom:15px;">🎯</div>
+                <p style="margin-bottom:20px;">ما هو هدفك للمذاكرة اليوم؟</p>
+                <div class="daily-goal-input-row">
+                    <input type="text" class="daily-goal-input" id="newGoalInput" 
+                        placeholder="مثال: أكمل 3 دروس في الفقه ومراجعة التفسير" 
+                        maxlength="100">
+                    <button class="daily-goal-btn" onclick="setDailyGoal()">حددي هدفك</button>
+                </div>
+            </div>
+        `;
+    } else if (goal.completed) {
+        // الهدف مكتمل
+        container.innerHTML = `
+            <div class="daily-goal-completed">
+                <div class="celebration">🎉</div>
+                <h4>أحسنتِ! أكملتِ هدف اليوم</h4>
+                <p>${goal.text}</p>
+                <div class="daily-goal-streak">
+                    <span class="fire">🔥</span>
+                    <span>سلسلة الإنجازات: ${streak.count} يوم${streak.count > 1 ? ' متتالي' : ''}</span>
+                </div>
+            </div>
+        `;
+    } else {
+        // عرض الهدف مع شريط التقدم
+        container.innerHTML = `
+            <div class="daily-goal-display">
+                <div class="daily-goal-text">${goal.text}</div>
+                <div class="daily-goal-progress">
+                    <div class="daily-goal-bar-bg">
+                        <div class="daily-goal-bar-fill" style="width: ${goal.progress}%"></div>
+                    </div>
+                    <span class="daily-goal-percent">${goal.progress}%</span>
+                </div>
+            </div>
+            <div class="daily-goal-actions">
+                <button class="daily-goal-action-btn btn-complete" onclick="updateGoalProgress(100)">
+                    ✅ أكملتِ الهدف
+                </button>
+                <button class="daily-goal-action-btn btn-partial" onclick="updateGoalProgress(50)">
+                    ⏳ أنجزتِ نصفه
+                </button>
+                <button class="daily-goal-action-btn btn-partial" onclick="updateGoalProgress(25)">
+                    📝 أنجزتِ القليل
+                </button>
+                <button class="daily-goal-action-btn btn-reset" onclick="resetDailyGoal()">
+                    🔄 تعديل الهدف
+                </button>
+            </div>
+            <div class="daily-goal-streak" style="margin-top:15px;">
+                <span class="fire">🔥</span>
+                <span>سلسلة الإنجازات: ${streak.count} يوم${streak.count > 1 ? ' متتالي' : ''}</span>
+            </div>
+        `;
+    }
+}
+
+window.setDailyGoal = function() {
+    const input = document.getElementById('newGoalInput');
+    if (!input || !input.value.trim()) {
+        alert('يرجى كتابة هدفك لليوم');
+        return;
+    }
+
+    const goal = loadDailyGoal();
+    goal.text = input.value.trim();
+    goal.progress = 0;
+    goal.completed = false;
+    saveDailyGoal(goal);
+    renderDailyGoal();
+};
+
+window.updateGoalProgress = function(percent) {
+    const goal = loadDailyGoal();
+    goal.progress = percent;
+
+    if (percent >= 100) {
+        goal.completed = true;
+        goal.progress = 100;
+        updateStreak(true);
+        triggerCelebration();
+    } else {
+        goal.partial = true;
+    }
+
+    saveDailyGoal(goal);
+    renderDailyGoal();
+
+    // تحديث الإحصائيات
+    setTimeout(loadStats, 500);
+};
+
+window.resetDailyGoal = function() {
+    if (!confirm('هل تريدين تعديل هدف اليوم؟')) return;
+
+    localStorage.removeItem(GOAL_STORAGE_KEY);
+    renderDailyGoal();
+};
+
+/* ===== ألعاب نارية ===== */
+function triggerCelebration() {
+    const overlay = document.getElementById('celebrationOverlay');
+    overlay.innerHTML = '';
+    overlay.classList.add('active');
+
+    const colors = ['#d4af37', '#f5e6b3', '#81c784', '#4fc3f7', '#ff8a65', '#ba68c8'];
+
+    for (let i = 0; i < 50; i++) {
+        const fw = document.createElement('div');
+        fw.className = 'firework';
+        fw.style.left = Math.random() * 100 + '%';
+        fw.style.top = Math.random() * 60 + 20 + '%';
+        fw.style.background = colors[Math.floor(Math.random() * colors.length)];
+        fw.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
+        fw.style.setProperty('--ty', (Math.random() - 0.5) * 200 + 'px');
+        fw.style.animationDelay = Math.random() * 0.5 + 's';
+        fw.style.animationDuration = (0.8 + Math.random() * 0.7) + 's';
+        overlay.appendChild(fw);
+    }
+
+    setTimeout(() => {
+        overlay.classList.remove('active');
+        overlay.innerHTML = '';
+    }, 2000);
+}
+
+/* ===== لوحة الإحصائيات ===== */
+async function loadStats() {
+    const grid = document.getElementById('statsGrid');
+    const chart = document.getElementById('statsBarChart');
+
+    if (!grid || !chart) return;
+
+    try {
+        // جمع البيانات
+        let totalLessons = 0;
+        let completedLessons = 0;
+        let totalProgress = 0;
+        let subjectCount = 0;
+        let highestProgress = 0;
+        let highestSubject = '';
+        let subjectProgressData = [];
+
+        // من Firestore
+        const progressSnap = await getDocs(collection(db, "progress"));
+        progressSnap.forEach(doc => {
+            const percent = doc.data().percent || 0;
+            totalProgress += percent;
+            subjectCount++;
+
+            if (percent > highestProgress) {
+                highestProgress = percent;
+                highestSubject = getSubjectName(doc.id);
+            }
+
+            subjectProgressData.push({
+                id: doc.id,
+                name: getSubjectName(doc.id),
+                percent: percent
+            });
+        });
+
+        // من الفصول
+        for (const subj of subjectsData) {
+            try {
+                const chSnap = await getDocs(collection(db, "chapters", subj.id, "items"));
+                chSnap.forEach(d => {
+                    const data = d.data();
+                    const lessons = data.lessons || [];
+                    totalLessons += lessons.length;
+                    completedLessons += lessons.filter(l => l.completed).length;
+                });
+            } catch(e) {}
+        }
+
+        // من الأهداف
+        const allGoals = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('dailyGoalData')) {
+                try {
+                    const g = JSON.parse(localStorage.getItem(key));
+                    if (g && g.completed) allGoals.push(g);
+                } catch(e) {}
+            }
+        }
+
+        // حساب المتوسط
+        const avgProgress = subjectCount > 0 ? Math.round(totalProgress / subjectCount) : 0;
+
+        // سلسلة الإنجازات
+        const streak = getStreak();
+
+        // عرض البطاقات
+        grid.innerHTML = `
+            <div class="stat-card stat-highlight">
+                <div class="stat-icon">📚</div>
+                <div class="stat-value">${avgProgress}%</div>
+                <div class="stat-label">متوسط الإنجاز</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value">${completedLessons}</div>
+                <div class="stat-label">دروس مكتملة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📖</div>
+                <div class="stat-value">${totalLessons}</div>
+                <div class="stat-label">إجمالي الدروس</div>
+            </div>
+            <div class="stat-card stat-highlight">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-value">${highestSubject || '-'}</div>
+                <div class="stat-label">أعلى مادة (${highestProgress}%)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-value">${allGoals.length}</div>
+                <div class="stat-label">أهداف مكتملة</div>
+            </div>
+            <div class="stat-card stat-highlight">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-value">${streak.count}</div>
+                <div class="stat-label">أيام متتالية</div>
+            </div>
+        `;
+
+        // رسم بياني
+        subjectProgressData.sort((a, b) => b.percent - a.percent);
+        const maxPercent = Math.max(...subjectProgressData.map(s => s.percent), 1);
+
+        chart.innerHTML = subjectProgressData.map(s => {
+            const height = Math.max((s.percent / maxPercent) * 100, 4);
+            return `
+                <div class="stats-bar-item">
+                    <div class="stats-bar" style="height: ${height}%; max-height: 140px;">
+                        <span class="stats-bar-value">${s.percent}%</span>
+                    </div>
+                    <span class="stats-bar-label">${s.name}</span>
+                </div>
+            `;
+        }).join('');
+
+    } catch(e) {
+        console.log('Stats error:', e);
+        grid.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.5);padding:20px;">جاري تحميل الإحصائيات...</div>';
+    }
+}
+
+function getSubjectName(id) {
+    const map = {
+        'aqida': 'العقيدة',
+        'hadith': 'الحديث',
+        'fiqh': 'الفقه',
+        'usul': 'أصول الفقه',
+        'history': 'التاريخ',
+        'dawah': 'الدعوة',
+        'tajweed': 'التجويد',
+        'literature': 'الأدب',
+        'nahw': 'النحو',
+        'computer': 'الحاسوب',
+        'english': 'الإنجليزي',
+        'tafsir': 'التفسير'
+    };
+    return map[id] || id;
+}
+
+// تشغيل عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        renderDailyGoal();
+        loadStats();
+    }, 3000);
+});
+
+/* ===== نهاية الإضافات ===== */
 </script>
 
 
