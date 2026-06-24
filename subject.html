@@ -63,126 +63,24 @@ padding:25px 15px
 color:#f5e6b3
 }
 
-/* ======== التصميم الهرمي الجديد ======== */
-.chapters-container{
+.content{
 width:92%;
 max-width:900px;
-margin:20px auto;
-}
-
-.chapter-item{
+margin:20px auto 100px;
 background:rgba(5,15,30,.65);
 border:1px solid rgba(255,255,255,.1);
-border-radius:15px;
-margin:10px 0;
-overflow:hidden;
-transition:all .3s;
-}
-
-.chapter-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:15px 20px;
-cursor:pointer;
-background:rgba(5,15,30,.8);
-transition:background .3s;
-}
-
-.chapter-header:hover{
-background:rgba(13,32,51,.9);
-}
-
-.chapter-header.active{
-background:#0d2033;
-border-bottom:1px solid rgba(212,175,55,.3);
-}
-
-.chapter-header h3{
-color:#f5e6b3;
-font-size:18px;
-}
-
-.chapter-toggle{
-color:#d4af37;
-font-size:20px;
-transition:transform .3s;
-}
-
-.chapter-header.active .chapter-toggle{
-transform:rotate(180deg);
-}
-
-.chapter-lessons{
-display:none;
-padding:10px 20px 20px;
-background:rgba(5,15,30,.4);
-}
-
-.chapter-lessons.show{
-display:block;
-}
-
-.lesson-item{
-background:#0d2033;
-border:1px solid rgba(255,255,255,.08);
-border-radius:10px;
-margin:8px 0;
-overflow:hidden;
-}
-
-.lesson-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:12px 15px;
-cursor:pointer;
-transition:background .3s;
-}
-
-.lesson-header:hover{
-background:#1a3a5c;
-}
-
-.lesson-header h4{
-color:#fff;
-font-size:15px;
-font-weight:400;
-}
-
-.lesson-toggle{
-color:#aaa;
-font-size:16px;
-transition:transform .3s;
-}
-
-.lesson-header.active .lesson-toggle{
-transform:rotate(180deg);
-}
-
-.lesson-content{
-display:none;
-padding:15px;
-border-top:1px solid rgba(255,255,255,.05);
-}
-
-.lesson-content.show{
-display:block;
-}
-
-.lesson-content p{
-color:#ddd;
+border-radius:20px;
+padding:20px;
 line-height:2;
-margin-bottom:10px;
 }
 
-.lesson-content img{
+.content img{
 width:100%;
 border-radius:12px;
 margin:10px 0
 }
 
-.lesson-content a{
+.content a{
 display:block;
 margin:10px 0;
 padding:12px;
@@ -190,6 +88,19 @@ background:#0d2033;
 border-radius:10px;
 color:#f5e6b3;
 text-decoration:none;
+}
+
+.back{
+position:fixed;
+left:15px;
+bottom:15px;
+padding:14px 20px;
+border:none;
+border-radius:14px;
+background:#d4af37;
+color:#06131f;
+font-weight:bold;
+cursor:pointer;
 }
 
 .audio-box{
@@ -211,7 +122,33 @@ width:100%;
 border-radius:10px;
 }
 
-/* ======== باقي التنسيقات ======== */
+.box{
+width:92%;
+max-width:900px;
+margin:10px auto;
+background:rgba(5,15,30,.65);
+border:1px solid rgba(255,255,255,.1);
+border-radius:15px;
+padding:15px;
+}
+
+.itemBtn{
+padding:10px;
+margin:8px 0;
+background:#0d2033;
+border-radius:10px;
+cursor:pointer;
+color:#f5e6b3;
+}
+
+.lessonBtn{
+padding:10px;
+margin:8px 0;
+background:#112233;
+border-radius:10px;
+cursor:pointer;
+}
+
 .search-box{
 width:92%;
 max-width:900px;
@@ -425,6 +362,12 @@ font-weight:700;
 transform:translateX(0);
 }
 
+.empty-state{
+text-align:center;
+padding:40px;
+color:#aaa;
+}
+
 .btn-primary{
 background:#d4af37;
 color:#06131f;
@@ -616,7 +559,7 @@ padding:15px;
 margin:15px 0;
 }
 
-.chapter-header-admin{
+.chapter-header{
 display:flex;
 justify-content:space-between;
 align-items:center;
@@ -627,7 +570,7 @@ cursor:pointer;
 margin-bottom:10px;
 }
 
-.chapter-header-admin h4{
+.chapter-header h4{
 color:#f5e6b3;
 font-weight:700;
 }
@@ -933,30 +876,6 @@ flex-direction:column;
 align-items:flex-start;
 }
 }
-
-.empty-state{
-text-align:center;
-padding:40px;
-color:#aaa;
-}
-
-.back{
-position:fixed;
-left:15px;
-bottom:15px;
-padding:14px 20px;
-border:none;
-border-radius:14px;
-background:#d4af37;
-color:#06131f;
-font-weight:bold;
-cursor:pointer;
-}
-
-/* إخفاء الأقسام */
-.section-hidden{
-display:none !important;
-}
 </style>
 
 </head>
@@ -983,17 +902,25 @@ display:none !important;
 <input type="text" id="searchInput" placeholder="🔍 ابحث عن فصل أو درس..." oninput="performSearch()">
 </div>
 
-<!-- ======== القسم الرئيسي للمحتوى ======== -->
 <div id="section-main">
-<!-- هنا ستظهر الفصول بشكل هرمي -->
-<div class="chapters-container" id="chaptersContainer"></div>
+<div class="box">
+<h3 style="color:#f5e6b3">📂 الفصول</h3>
+<div id="chaptersList"></div>
 </div>
 
-<!-- ======== قسم الاختبارات ======== -->
-<div id="section-exam" class="section-hidden">
+<div class="box" id="lessonsBox" style="display:none">
+<h3 style="color:#f5e6b3">📖 الدروس</h3>
+<div id="lessonsList"></div>
+</div>
+
+<div class="content" id="content"></div>
+</div>
+
+<!-- قسم الاختبارات -->
+<div id="section-exam" style="display:none">
 <button class="back-btn" onclick="backToMain()">⬅ العودة للمحتوى</button>
 
-<div class="box" style="width:92%;max-width:900px;margin:10px auto;background:rgba(5,15,30,.65);border:1px solid rgba(255,255,255,.1);border-radius:15px;padding:15px;">
+<div class="box">
 <h3 style="color:#f5e6b3">✏️ إنشاء اختبار جديد</h3>
 <p style="color:#aaa;margin-bottom:15px">اختر الباب الذي تريد الاختبار فيه</p>
 
@@ -1034,7 +961,7 @@ display:none !important;
 </div>
 </div>
 
-<!-- ======== نافذة تسجيل دخول الإدارة ======== -->
+<!-- نافذة تسجيل دخول الإدارة -->
 <div class="modal-overlay" id="adminLoginModal">
 <div class="modal">
 <button class="close-modal" onclick="closeAdminLogin()">✕</button>
@@ -1049,11 +976,11 @@ display:none !important;
 </div>
 </div>
 
-<!-- ======== قسم إدارة الاختبارات ======== -->
-<div id="section-admin" class="section-hidden">
+<!-- قسم إدارة الاختبارات -->
+<div id="section-admin" style="display:none">
 <button class="back-btn" onclick="backToMain()">⬅ العودة للمحتوى</button>
 
-<div class="box" style="width:92%;max-width:900px;margin:10px auto;background:rgba(5,15,30,.65);border:1px solid rgba(255,255,255,.1);border-radius:15px;padding:15px;">
+<div class="box">
 <h3 style="color:#f5e6b3">🔐 إدارة أسئلة الاختبارات</h3>
 
 <div style="margin:15px 0">
@@ -1095,7 +1022,7 @@ display:none !important;
 </div>
 </div>
 
-<!-- ======== نافذة الاختبار ======== -->
+<!-- نافذة الاختبار -->
 <div class="modal-overlay" id="examModal">
 <div class="modal">
 <button class="close-modal" onclick="closeExamModal()">✕</button>
@@ -1110,7 +1037,7 @@ display:none !important;
 </div>
 </div>
 
-<!-- ======== نافذة النتيجة ======== -->
+<!-- نافذة النتيجة -->
 <div class="modal-overlay" id="resultModal">
 <div class="modal">
 <div id="resultContent"></div>
@@ -1173,226 +1100,120 @@ tafsir:"التفسير"
 
 document.getElementById("title").textContent = names[id] || "المادة";
 
-// ======== التحميل الأولي للمحتوى ========
-async function loadChapters() {
-const container = document.getElementById('chaptersContainer');
-container.innerHTML = '';
+const snap = await getDoc(doc(db,"subjects",id));
+const content = document.getElementById("content");
 
-try {
-const q = query(collection(db,"chapters"), where("subject","==",id));
+if(snap.exists()){
+ const data = snap.data();
+ (data.items || []).forEach(item=>{
+ if(item.type==="title"){
+ content.innerHTML += `<h2>${item.text}</h2>`;
+ }
+ if(item.type==="text"){
+ content.innerHTML += `<p>${item.text}</p>`;
+ }
+ if(item.type==="image"){
+ content.innerHTML += `<img src="${item.url}">`;
+ }
+ if(item.type==="book"){
+ content.innerHTML += `<a href="${item.url}" target="_blank">📚 ${item.name}</a>`;
+ }
+ if(item.type==="link"){
+ content.innerHTML += `<a href="${item.url}" target="_blank">🔗 ${item.name}</a>`;
+ }
+ if(item.type==="audio"){
+ content.innerHTML += `
+ <div class="audio-box">
+ <div class="audio-title">🎧 ${item.name}</div>
+ <audio controls src="${item.url}"></audio>
+ </div>`;
+ }
+ });
+}
+
+try{
+const qLatest = query(collection(db,"lessons"),where("subject","==",id));
+const sLatest = await getDocs(qLatest);
+let latestTime = 0;
+sLatest.forEach(d=>{
+ const t=d.data().time || 0;
+ if(t>latestTime) latestTime=t;
+});
+localStorage.setItem("seenTime_"+id, latestTime);
+}catch(e){console.log(e);}
+
+let chaptersList = document.getElementById("chaptersList");
+let lessonsList = document.getElementById("lessonsList");
+
+async function loadChapters(){
+const q = query(collection(db,"chapters"),where("subject","==",id));
 const snap = await getDocs(q);
-
-if (snap.empty) {
-container.innerHTML = '<div class="empty-state">لا توجد فصول مضافة لهذه المادة</div>';
-return;
-}
-
-let arr = [];
-snap.forEach(docu => {
-arr.push({id: docu.id, ...docu.data()});
+chaptersList.innerHTML = "";
+let arr=[];
+snap.forEach(docu=>{
+arr.push({id:docu.id,...docu.data()});
 });
-arr.sort((a,b) => (a.order || 0) - (b.order || 0));
-
-arr.forEach((chapter, index) => {
-const chapterId = chapter.id;
-const chapterHTML = `
-<div class="chapter-item" id="chapter-${chapterId}">
-<div class="chapter-header" onclick="toggleChapter('${chapterId}')">
-<h3>📂 ${chapter.title}</h3>
-<span class="chapter-toggle">▼</span>
-</div>
-<div class="chapter-lessons" id="lessons-${chapterId}">
-<!-- الدروس ستُحمل هنا -->
-</div>
-</div>
-`;
-container.innerHTML += chapterHTML;
+arr.sort((a,b)=>(a.order||0)-(b.order||0));
+arr.forEach(data=>{
+const chapterId = data.id;
+chaptersList.innerHTML += `
+<div class="itemBtn" onclick="openChapter('${chapterId}')">
+📂 ${data.title}
+</div>`;
 });
-
-} catch (error) {
-console.error('خطأ في تحميل الفصول:', error);
-container.innerHTML = '<div class="empty-state">حدث خطأ في تحميل الفصول</div>';
-}
 }
 
-// ======== فتح/إغلاق الفصل ========
-window.toggleChapter = async function(chapterId) {
-const header = document.querySelector(`#chapter-${chapterId} .chapter-header`);
-const lessonsDiv = document.getElementById(`lessons-${chapterId}`);
-
-// إغلاق الفصول الأخرى (اختياري - إذا أردت فتح فصل واحد فقط)
-// لن أغلقها حتى تتمكن من فتح أكثر من فصل
-
-// إذا كانت الدروس محملة بالفعل، فقط نبدل العرض
-if (lessonsDiv.dataset.loaded === 'true') {
-lessonsDiv.classList.toggle('show');
-header.classList.toggle('active');
-return;
-}
-
-// تحميل الدروس لأول مرة
-header.classList.add('active');
-lessonsDiv.classList.add('show');
-lessonsDiv.innerHTML = '<div style="text-align:center;padding:20px;color:#aaa">⏳ جاري تحميل الدروس...</div>';
-
-try {
-const q = query(collection(db,"lessons"), where("chapterId","==",chapterId));
+window.openChapter = async (chapterId)=>{
+document.getElementById("lessonsBox").style.display="block";
+const q = query(collection(db,"lessons"),where("chapterId","==",chapterId));
 const snap = await getDocs(q);
-
-if (snap.empty) {
-lessonsDiv.innerHTML = '<div class="empty-state" style="padding:20px">لا توجد دروس في هذا الفصل</div>';
-lessonsDiv.dataset.loaded = 'true';
-return;
-}
-
-let arr = [];
-snap.forEach(docu => {
-arr.push({id: docu.id, ...docu.data()});
+lessonsList.innerHTML = "";
+let arr=[];
+snap.forEach(docu=>{
+arr.push(docu.data());
 });
-arr.sort((a,b) => (a.order || 0) - (b.order || 0));
-
-let lessonsHTML = '';
-arr.forEach((lesson, index) => {
-const lessonId = lesson.id;
-lessonsHTML += `
-<div class="lesson-item" id="lesson-${lessonId}">
-<div class="lesson-header" onclick="toggleLesson('${lessonId}', '${chapterId}')">
-<h4>📖 ${lesson.title}</h4>
-<span class="lesson-toggle">▼</span>
-</div>
-<div class="lesson-content" id="content-${lessonId}">
-<!-- محتوى الدرس سيُحمل هنا -->
-</div>
-</div>
-`;
+arr.sort((a,b)=>(a.order||0)-(b.order||0));
+arr.forEach(data=>{
+lessonsList.innerHTML += `
+<div class="lessonBtn" onclick='openLesson(${JSON.stringify(data)})'>
+📖 ${data.title}
+</div>`;
 });
-
-lessonsDiv.innerHTML = lessonsHTML;
-lessonsDiv.dataset.loaded = 'true';
-
-} catch (error) {
-console.error('خطأ في تحميل الدروس:', error);
-lessonsDiv.innerHTML = '<div class="empty-state" style="padding:20px">حدث خطأ في تحميل الدروس</div>';
-lessonsDiv.dataset.loaded = 'true';
-}
 };
 
-// ======== فتح/إغلاق الدرس ========
-window.toggleLesson = async function(lessonId, chapterId) {
-const header = document.querySelector(`#lesson-${lessonId} .lesson-header`);
-const contentDiv = document.getElementById(`content-${lessonId}`);
-
-// إغلاق الدروس الأخرى في نفس الفصل (اختياري)
-const parentLessons = document.getElementById(`lessons-${chapterId}`);
-parentLessons.querySelectorAll('.lesson-content').forEach(div => {
-if (div.id !== `content-${lessonId}`) {
-div.classList.remove('show');
-}
-});
-parentLessons.querySelectorAll('.lesson-header').forEach(h => {
-if (!h.isSameNode(header)) {
-h.classList.remove('active');
-}
-});
-
-// إذا كان المحتوى محملاً بالفعل، فقط نبدل العرض
-if (contentDiv.dataset.loaded === 'true') {
-contentDiv.classList.toggle('show');
-header.classList.toggle('active');
-return;
-}
-
-// تحميل محتوى الدرس لأول مرة
-header.classList.add('active');
-contentDiv.classList.add('show');
-contentDiv.innerHTML = '<div style="text-align:center;padding:20px;color:#aaa">⏳ جاري تحميل المحتوى...</div>';
-
-try {
-const docRef = doc(db, "lessons", lessonId);
-const docSnap = await getDoc(docRef);
-
-if (!docSnap.exists()) {
-contentDiv.innerHTML = '<div class="empty-state">محتوى الدرس غير موجود</div>';
-contentDiv.dataset.loaded = 'true';
-return;
-}
-
-const data = docSnap.data();
-
-let contentHTML = '';
-
-if (data.text) {
-contentHTML += `<p>${data.text}</p>`;
-}
-
-if (data.image) {
-contentHTML += `<img src="${data.image}" alt="${data.title}">`;
-}
-
-if (data.audio) {
-contentHTML += `
+window.openLesson = (d)=>{
+content.innerHTML = `
+<h2 style="color:#f5e6b3">${d.title}</h2>
+<p>${d.text || ""}</p>
+${d.image ? `<img src="${d.image}">` : ""}
+${d.audio ? `
 <div class="audio-box">
-<div class="audio-title">🎧 ${data.title}</div>
-<audio controls src="${data.audio}"></audio>
-</div>
+<div class="audio-title">🎧 ${d.title}</div>
+<audio controls src="${d.audio}"></audio>
+</div>` : ""}
+${d.link ? `<a href="${d.link}" target="_blank">🔗 ${d.link}</a>` : ""}
 `;
-}
-
-if (data.link) {
-contentHTML += `<a href="${data.link}" target="_blank">🔗 ${data.link}</a>`;
-}
-
-contentDiv.innerHTML = contentHTML || '<div class="empty-state">لا يوجد محتوى لهذا الدرس</div>';
-contentDiv.dataset.loaded = 'true';
-
-} catch (error) {
-console.error('خطأ في تحميل الدرس:', error);
-contentDiv.innerHTML = '<div class="empty-state">حدث خطأ في تحميل المحتوى</div>';
-contentDiv.dataset.loaded = 'true';
-}
 };
 
-// ======== البحث ========
 window.performSearch = function() {
 const query = document.getElementById('searchInput').value.trim().toLowerCase();
 if (!query) {
-// إعادة عرض كل شيء
-document.querySelectorAll('.chapter-item').forEach(el => {
-el.style.display = 'block';
-});
-document.querySelectorAll('.lesson-item').forEach(el => {
+document.querySelectorAll('.itemBtn, .lessonBtn').forEach(el => {
 el.style.display = 'block';
 });
 return;
 }
-
-// البحث في الفصول
-document.querySelectorAll('.chapter-item').forEach(chapter => {
-const chapterTitle = chapter.querySelector('.chapter-header h3').textContent.toLowerCase();
-const chapterId = chapter.id.replace('chapter-', '');
-const lessonsDiv = document.getElementById(`lessons-${chapterId}`);
-
-let hasMatch = chapterTitle.includes(query);
-
-// البحث في الدروس
-if (lessonsDiv && lessonsDiv.dataset.loaded === 'true') {
-const lessons = lessonsDiv.querySelectorAll('.lesson-item');
-lessons.forEach(lesson => {
-const lessonTitle = lesson.querySelector('.lesson-header h4').textContent.toLowerCase();
-if (lessonTitle.includes(query)) {
-lesson.style.display = 'block';
-hasMatch = true;
-} else {
-lesson.style.display = 'none';
-}
+document.querySelectorAll('.itemBtn').forEach(el => {
+const text = el.textContent.toLowerCase();
+el.style.display = text.includes(query) ? 'block' : 'none';
 });
-}
-
-chapter.style.display = hasMatch ? 'block' : 'none';
+document.querySelectorAll('.lessonBtn').forEach(el => {
+const text = el.textContent.toLowerCase();
+el.style.display = text.includes(query) ? 'block' : 'none';
 });
+document.getElementById('lessonsBox').style.display = 'block';
 };
 
-// ======== التنقل بين الأقسام ========
 window.openExamSection = function() {
 document.getElementById('section-main').style.display = 'none';
 document.getElementById('section-admin').style.display = 'none';
@@ -1409,7 +1230,7 @@ document.getElementById('section-admin').style.display = 'none';
 document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
 };
 
-// ======== نظام الإدارة ========
+// ==================== نظام الإدارة ====================
 const ADMIN_PIN = '1997';
 
 window.openAdminLogin = function() {
@@ -1452,7 +1273,7 @@ onAdminSubjectChange();
 }
 };
 
-// ======== إدارة الأبواب (للاختبارات فقط) ========
+// ==================== إدارة الأبواب (للاختبارات فقط) ====================
 let currentAdminSubject = '';
 let currentAdminChapter = null;
 
@@ -1516,7 +1337,7 @@ const qCount = data.questionCount || 0;
 
 container.innerHTML += `
 <div class="chapter-section">
-<div class="chapter-header-admin" onclick="openChapterQuestions('${chapterId}', '${data.name}')">
+<div class="chapter-header" onclick="openChapterQuestions('${chapterId}', '${data.name}')">
 <h4>📂 ${data.name}</h4>
 <span style="color:#aaa;font-size:14px">${qCount} سؤال</span>
 </div>
@@ -1590,7 +1411,7 @@ showToast('❌ حدث خطأ أثناء الحذف');
 }
 };
 
-// ======== إدارة الأسئلة ========
+// ==================== إدارة الأسئلة ====================
 window.addQuestion = async function() {
 const questionText = document.getElementById('newQuestionText').value.trim();
 const answerText = document.getElementById('newQuestionAnswer').value.trim();
@@ -1749,7 +1570,7 @@ showToast('❌ حدث خطأ أثناء الحذف');
 }
 };
 
-// ======== نظام الاختبار ========
+// ==================== نظام الاختبار ====================
 let examQuestions = [];
 let currentExam = {};
 let examTimerInterval;
@@ -1996,7 +1817,7 @@ document.getElementById('examModal').classList.remove('show');
 showResult(result);
 };
 
-// ======== تصحيح ذكي معتمد على المعنى ========
+// ==================== تصحيح ذكي معتمد على المعنى ====================
 function calculateOpenScore(userAnswer, modelAnswer) {
 if (!userAnswer || userAnswer.length < 3) return 0;
 if (!modelAnswer || modelAnswer.length < 3) return 0;
@@ -2139,7 +1960,7 @@ return text
 .trim();
 }
 
-// ======== تصنيف الإجابة ========
+// ==================== تصنيف الإجابة ====================
 function getAnswerClassification(percent) {
 if (percent === 0) return { 
  key: 'no-answer', 
@@ -2179,7 +2000,7 @@ return {
 };
 }
 
-// ======== عرض النتيجة مع التصنيفات ========
+// ==================== عرض النتيجة مع التصنيفات ====================
 function showResult(result) {
 const container = document.getElementById('resultContent');
 let emoji = result.percent >= 90 ? '🏆' : result.percent >= 80 ? '🎉' : result.percent >= 60 ? '👍' : result.percent >= 40 ? '💪' : '📚';
@@ -2337,7 +2158,6 @@ toast.classList.add('show');
 setTimeout(() => toast.classList.remove('show'), 3000);
 };
 
-// تحميل الفصول عند بدء الصفحة
 loadChapters();
 
 </script>
