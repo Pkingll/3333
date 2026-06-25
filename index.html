@@ -1,1638 +1,633 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>
-طالبة علم شرعي - السنة الثانية
-</title>
-
-<meta property="og:title"
-content="طالبة علم شرعي - السنة الثانية" />
-
-<meta property="og:description"
-content="منصة الملخصات والكتب والفوائد العلمية" />
-
-<meta property="og:image"
-content="https://a.top4top.io/p_38068co2c0.jpg" />
-
-<meta property="og:url"
-content="https://pkingll.github.io/3333/" />
-
-<meta property="og:type"
-content="website" />
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>طالبة علم شرعي - السنة الثانية</title>
+<meta property="og:title" content="طالبة علم شرعي - السنة الثانية" />
+<meta property="og:description" content="منصة الملخصات والكتب والفوائد العلمية" />
+<meta property="og:image" content="https://a.top4top.io/p_38068co2c0.jpg" />
+<meta property="og:url" content="https://pkingll.github.io/3333/" />
+<meta property="og:type" content="website" />
 <style>
-
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
-
-body{
-margin:0;
-font-family:Cairo,sans-serif;
-background:#06131f;
-color:white;
-overflow-x:hidden;
-}
-
-/* خلفية الصفحة */
-
-body::before{
-content:"";
-position:fixed;
-inset:0;
-z-index:-1;
-
-background:
-linear-gradient(rgba(0,0,0,.65),
-rgba(0,0,0,.85)),
-url('https://a.top4top.io/p_38068co2c0.jpg');
-
-background-size:cover;
-background-position:center;
-background-repeat:no-repeat;
-}
-
-/* زر القائمة */
-
-.menu-btn{
-position:fixed;
-top:15px;
-left:15px;
-z-index:1000;
-cursor:pointer;
-}
-
-.menu-btn div{
-width:32px;
-height:4px;
-margin:6px 0;
-background:#d4af37;
-border-radius:5px;
-}
-
-/* القائمة الجانبية */
-
-.sidebar{
-position:fixed;
-top:0;
-left:-260px;
-width:240px;
-height:100%;
-background:#0b1725;
-transition:.4s;
-padding:20px;
-z-index:999;
-overflow:auto;
-}
-
-.sidebar.active{
-left:0;
-}
-
-.sidebar button{
-width:100%;
-padding:12px;
-margin:10px 0;
-border:none;
-border-radius:10px;
-cursor:pointer;
-background:#d4af37;
-font-weight:bold;
-}
-
-/* الشريط العلوي */
-
-.marquee{
-overflow:hidden;
-white-space:nowrap;
-background:rgba(0,0,0,.35);
-padding:4px 0;
-height:24px;
-display:flex;
-align-items:center;
-}
-
-.marquee span{
-display:inline-block;
-padding-left:100%;
-animation:move 20s linear infinite;
-color:#f5e6b3;
-font-size:12px;
-line-height:24px;
-}
-
-@keyframes move{
-
-0%{
-transform:translateX(0);
-}
-
-100%{
-transform:translateX(-100%);
-}
-
-}
-
-/* صندوق طالبة العلم */
-
-.intro-box{
-display:block;
-margin:15px;
-padding:20px;
-border-radius:14px;
-
-background:
-linear-gradient(rgba(0,0,0,.55),
-rgba(0,0,0,.65)),
-url('https://c.top4top.io/p_3807ka9e10.jpg');
-
-background-size:cover;
-background-position:center;
-background-repeat:no-repeat;
-
-border:1px solid rgba(255,255,255,.15);
-
-text-align:center;
-
-box-shadow:0 0 25px rgba(0,0,0,.4);
-
-color:#fff;
-
-text-decoration:none;
-
-transition:.4s;
-}
-
-.intro-box:hover{
-transform:translateY(-5px) scale(1.01);
-}
-
-.intro-box h2{
-margin:0;
-color:#f5e6b3;
-font-size:18px;
-}
-
-/* صندوق الفوائد */
-
-.fawaid-box{
-margin:8px 15px 15px;
-height:45px;
-border-radius:12px;
-
-background:rgba(0,0,0,.40);
-
-border:1px solid rgba(212,175,55,.35);
-
-overflow:hidden;
-
-position:relative;
-
-display:flex;
-align-items:center;
-}
-
-.fawaid-track{
-position:absolute;
-
-white-space:nowrap;
-
-font-size:14px;
-
-color:#f5e6b3;
-
-left:-100%;
-
-animation:fawaidMove 18s linear infinite;
-
-padding:0 15px;
-}
-
-@keyframes fawaidMove{
-
-0%{
-left:-100%;
-}
-
-100%{
-left:100%;
-}
-
-}
-
-/* المواد */
-
-.grid{
-display:grid;
-
-grid-template-columns:
-repeat(auto-fit,minmax(200px,1fr));
-
-gap:12px;
-
-padding:15px;
-}
-
-.card{
-background:rgba(5,15,30,.6);
-
-border:1px solid rgba(255,255,255,.12);
-
-border-radius:14px;
-
-padding:14px 16px;
-
-text-decoration:none;
-
-color:white;
-
-transition:.3s;
-position:relative;
-overflow:hidden;
-}
-
-.card:hover{
-transform:translateY(-6px);
-border-color:#d4af37;
-}
-
-.card h3{
-margin:0;
-color:#f5e6b3;
-font-size:16px;
-}
-
-.summary{
-margin-top:10px;
-font-size:14px;
-opacity:.85;
-}
-
-
-.subject-badge{
-position:absolute;
-top:10px;
-left:10px;
-background:#d32f2f;
-color:#fff;
-width:22px;
-height:22px;
-border-radius:50%;
-display:none;
-align-items:center;
-justify-content:center;
-font-size:12px;
-font-weight:bold;
-}
-
-/* ===== نسبة الإنجاز العمودية ===== */
-.progress-container{
-margin-top:10px;
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-.progress-label{
-display:flex;
-flex-direction:column;
-align-items:flex-start;
-font-size:12px;
-color:#f5e6b3;
-flex:1;
-}
-
-.progress-label span:first-child{
-font-weight:700;
-font-size:11px;
-opacity:.8;
-}
-
-.progress-label span:last-child{
-font-weight:800;
-font-size:18px;
-color:#d4af37;
-margin-top:2px;
-}
-
-.progress-bar-bg{
-width:8px;
-height:50px;
-background:rgba(255,255,255,.08);
-border-radius:10px;
-overflow:hidden;
-position:relative;
-flex-shrink:0;
-}
-
-.progress-bar-fill{
-width:100%;
-border-radius:10px;
-background:linear-gradient(180deg, #d4af37, #f5e6b3, #d4af37);
-background-size:100% 200%;
-animation:shimmer 2s infinite;
-transition:height 1s ease;
-position:absolute;
-bottom:0;
-left:0;
-}
-
-.progress-bar-fill::after{
-content:"";
-position:absolute;
-left:0;
-right:0;
-top:0;
-height:3px;
-background:rgba(255,255,255,.5);
-border-radius:2px;
-box-shadow:0 0 8px rgba(255,255,255,.6);
-}
-
-@keyframes shimmer{
-0%{background-position:0 200%;}
-100%{background-position:0 -200%;}
-}
-
-/* ===== زر الفصول المجتازة ===== */
-.chapters-btn{
-margin-top:8px;
-padding:6px 10px;
-background:rgba(212,175,55,.08);
-border:1px solid rgba(212,175,55,.25);
-border-radius:8px;
-color:#d4af37;
-font-size:12px;
-font-family:Cairo,sans-serif;
-cursor:pointer;
-transition:all .3s;
-width:100%;
-text-align:center;
-position:relative;
-overflow:hidden;
-}
-
-.chapters-btn::before{
-content:"";
-position:absolute;
-inset:0;
-background:linear-gradient(90deg, transparent, rgba(212,175,55,.1), transparent);
-transform:translateX(-100%);
-transition:transform .5s;
-}
-
-.chapters-btn:hover::before{
-transform:translateX(100%);
-}
-
-.chapters-btn:hover{
-background:rgba(212,175,55,.15);
-border-color:rgba(212,175,55,.5);
-color:#f5e6b3;
-}
-
-.chapters-btn:active{
-transform:scale(.97);
-}
-
-/* ===== نافذة الفصول المجتازة ===== */
-.chapters-modal{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.8);
-display:none;
-justify-content:center;
-align-items:center;
-z-index:6000;
-backdrop-filter:blur(4px);
-}
-
-.chapters-modal.active{
-display:flex;
-}
-
-.chapters-content{
-width:90%;
-max-width:500px;
-max-height:80vh;
-overflow-y:auto;
-background:linear-gradient(145deg, #0b1725, #0d1e30);
-padding:25px;
-border-radius:18px;
-border:1px solid rgba(212,175,55,.2);
-box-shadow:0 20px 60px rgba(0,0,0,.6), 0 0 30px rgba(212,175,55,.1);
-}
-
-.chapters-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
-padding-bottom:15px;
-border-bottom:1px solid rgba(255,255,255,.08);
-}
-
-.chapters-header h3{
-margin:0;
-color:#f5e6b3;
-font-size:18px;
-}
-
-.chapters-close{
-background:rgba(212,175,55,.15);
-border:1px solid rgba(212,175,55,.3);
-color:#d4af37;
-padding:6px 14px;
-border-radius:8px;
-cursor:pointer;
-font-family:Cairo,sans-serif;
-font-weight:600;
-transition:all .3s;
-}
-
-.chapters-close:hover{
-background:rgba(212,175,55,.25);
-}
-
-.chapter-item{
-background:rgba(255,255,255,.04);
-border:1px solid rgba(255,255,255,.06);
-border-radius:12px;
-padding:14px 16px;
-margin-bottom:10px;
-transition:all .3s;
-}
-
-.chapter-item:hover{
-background:rgba(255,255,255,.06);
-border-color:rgba(212,175,55,.2);
-}
-
-.chapter-item.completed{
-background:rgba(212,175,55,.08);
-border-color:rgba(212,175,55,.3);
-}
-
-.chapter-item-header{
-display:flex;
-align-items:center;
-gap:10px;
-margin-bottom:8px;
-}
-
-.chapter-checkbox{
-width:20px;
-height:20px;
-border:2px solid rgba(212,175,55,.5);
-border-radius:5px;
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-transition:all .3s;
-flex-shrink:0;
-}
-
-.chapter-checkbox.checked{
-background:#d4af37;
-border-color:#d4af37;
-}
-
-.chapter-checkbox.checked::after{
-content:"✓";
-color:#0b1725;
-font-weight:bold;
-font-size:14px;
-}
-
-.chapter-title{
-font-size:15px;
-font-weight:600;
-color:#fff;
-margin:0;
-}
-
-.chapter-item.completed .chapter-title{
-color:#d4af37;
-opacity:.95;
-}
-
-.chapter-lessons{
-padding-right:30px;
-}
-
-.lesson-item{
-display:flex;
-align-items:center;
-gap:8px;
-padding:6px 0;
-font-size:13px;
-color:rgba(255,255,255,.7);
-}
-
-.lesson-item.completed{
-color:#d4af37;
-}
-
-.lesson-checkbox{
-width:16px;
-height:16px;
-border:1.5px solid rgba(255,255,255,.3);
-border-radius:4px;
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-transition:all .3s;
-flex-shrink:0;
-}
-
-.lesson-checkbox.checked{
-background:#d4af37;
-border-color:#d4af37;
-}
-
-.lesson-checkbox.checked::after{
-content:"✓";
-color:#0b1725;
-font-weight:bold;
-font-size:10px;
-}
-
-.lesson-item.completed span{
-opacity:.85;
-}
-
-/* ===== نهاية الفصول ===== */
-
-/* زر المشاركة */
-
-.share-card{
-background:rgba(212,175,55,.12);
-
-border:1px dashed rgba(212,175,55,.6);
-
-text-align:center;
-
-cursor:pointer;
-
-position:relative;
-}
-
-.share-card:hover{
-transform:translateY(-6px);
-border-color:#fff;
-}
-
-.share-badge{
-position:absolute;
-
-top:10px;
-left:10px;
-
-background:rgba(0,0,0,.6);
-
-border:1px solid #d4af37;
-
-color:#d4af37;
-
-padding:4px 10px;
-
-border-radius:20px;
-
-font-size:12px;
-}
-
-/* نافذة الفوائد */
-
-.fawaid-panel{
-position:fixed;
-inset:0;
-
-background:rgba(0,0,0,.75);
-
-display:none;
-
-justify-content:center;
-
-align-items:center;
-
-z-index:5000;
-}
-
-.fawaid-content{
-max-height:85vh;
-overflow-y:auto;
-width:90%;
-max-width:500px;
-
-background:#0b1725;
-
-padding:20px;
-
-border-radius:18px;
-
-border:1px solid rgba(255,255,255,.1);
-}
-
-.fawaid-content textarea{
-width:100%;
-height:120px;
-
-border:none;
-outline:none;
-
-padding:12px;
-
-border-radius:10px;
-
-resize:none;
-
-margin-bottom:12px;
-
-font-family:Cairo,sans-serif;
-}
-
-.fawaid-content button{
-padding:10px 14px;
-
-border:none;
-
-border-radius:10px;
-
-cursor:pointer;
-
-margin:5px;
-
-background:#d4af37;
-
-font-weight:bold;
-}
-
-.fawaid-list{
-margin-top:15px;
-max-height:200px;
-overflow:auto;
-}
-
-.fawaid-item{
-background:rgba(255,255,255,.05);
-
-padding:10px;
-
-border-radius:10px;
-
-margin-bottom:10px;
-}
-
-
+body{margin:0;font-family:Cairo,sans-serif;background:#06131f;color:white;overflow-x:hidden;}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),url('https://a.top4top.io/p_38068co2c0.jpg');background-size:cover;background-position:center;background-repeat:no-repeat;}
+.menu-btn{position:fixed;top:15px;left:15px;z-index:1000;cursor:pointer;}
+.menu-btn div{width:32px;height:4px;margin:6px 0;background:#d4af37;border-radius:5px;}
+.sidebar{position:fixed;top:0;left:-260px;width:240px;height:100%;background:#0b1725;transition:.4s;padding:20px;z-index:999;overflow:auto;}
+.sidebar.active{left:0;}
+.sidebar button{width:100%;padding:12px;margin:10px 0;border:none;border-radius:10px;cursor:pointer;background:#d4af37;font-weight:bold;}
+.marquee{overflow:hidden;white-space:nowrap;background:rgba(0,0,0,.35);padding:4px 0;height:24px;display:flex;align-items:center;}
+.marquee span{display:inline-block;padding-left:100%;animation:move 20s linear infinite;color:#f5e6b3;font-size:12px;line-height:24px;}
+@keyframes move{0%{transform:translateX(0);}100%{transform:translateX(-100%);}}
+.intro-box{display:block;margin:15px;padding:20px;border-radius:14px;background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.65)),url('https://c.top4top.io/p_3807ka9e10.jpg');background-size:cover;background-position:center;background-repeat:no-repeat;border:1px solid rgba(255,255,255,.15);text-align:center;box-shadow:0 0 25px rgba(0,0,0,.4);color:#fff;text-decoration:none;transition:.4s;}
+.intro-box:hover{transform:translateY(-5px) scale(1.01);}
+.intro-box h2{margin:0;color:#f5e6b3;font-size:18px;}
+.fawaid-box{margin:8px 15px 15px;height:45px;border-radius:12px;background:rgba(0,0,0,.40);border:1px solid rgba(212,175,55,.35);overflow:hidden;position:relative;display:flex;align-items:center;}
+.fawaid-track{position:absolute;white-space:nowrap;font-size:14px;color:#f5e6b3;left:-100%;animation:fawaidMove 18s linear infinite;padding:0 15px;}
+@keyframes fawaidMove{0%{left:-100%;}100%{left:100%;}}
+
+/* ===== زر عائم للدائرة (الحالة المطوية) ===== */
+.circle-fab {
+  position: fixed;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, rgba(212,175,55,.9), rgba(212,175,55,.6));
+  border: 2px solid rgba(212,175,55,.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 888;
+  box-shadow: 0 4px 20px rgba(212,175,55,.4), 0 0 30px rgba(212,175,55,.2);
+  transition: all .4s cubic-bezier(.22,1,.36,1);
+  animation: fabPulse 3s ease-in-out infinite;
+}
+
+@keyframes fabPulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(212,175,55,.4), 0 0 30px rgba(212,175,55,.2); }
+  50% { box-shadow: 0 4px 30px rgba(212,175,55,.6), 0 0 50px rgba(212,175,55,.3); }
+}
+
+.circle-fab:hover {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 35px rgba(212,175,55,.6), 0 0 60px rgba(212,175,55,.35);
+}
+
+.circle-fab .fab-icon {
+  font-size: 24px;
+  transition: transform .4s ease;
+}
+
+.circle-fab.active .fab-icon {
+  transform: rotate(45deg);
+}
+
+.circle-fab.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) scale(.5);
+}
+
+/* ===== الدائرة الموسعة (الحالة المفتوحة) ===== */
+.circle-widget-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.75);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 889;
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity .4s ease;
+}
+
+.circle-widget-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.circle-widget-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: scale(.3);
+  opacity: 0;
+  transition: all .5s cubic-bezier(.22,1,.36,1);
+}
+
+.circle-widget-overlay.active .circle-widget-container {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.circle-widget-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(145deg, rgba(212,175,55,.12), rgba(11,23,37,.7));
+  border: 1px solid rgba(212,175,55,.2);
+  box-shadow: 0 0 50px rgba(212,175,55,.15), inset 0 0 80px rgba(0,0,0,.4);
+  animation: circlePulse 4s ease-in-out infinite;
+}
+
+@keyframes circlePulse {
+  0%, 100% { box-shadow: 0 0 50px rgba(212,175,55,.15), inset 0 0 80px rgba(0,0,0,.4); transform: scale(1); }
+  50% { box-shadow: 0 0 70px rgba(212,175,55,.25), inset 0 0 100px rgba(0,0,0,.3); transform: scale(1.02); }
+}
+
+.circle-widget-center {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, rgba(11,23,37,.95), rgba(5,15,30,.98));
+  border: 2px solid rgba(212,175,55,.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  cursor: pointer;
+  transition: all .3s ease;
+  box-shadow: 0 0 40px rgba(212,175,55,.2);
+}
+
+.circle-widget-center:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 60px rgba(212,175,55,.35);
+  border-color: rgba(212,175,55,.8);
+}
+
+.circle-widget-center .center-icon {
+  font-size: 32px;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 0 8px rgba(212,175,55,.4));
+}
+
+.circle-widget-center .center-label {
+  font-size: 12px;
+  color: #f5e6b3;
+  font-weight: 700;
+  text-align: center;
+  padding: 0 8px;
+}
+
+.circle-widget-center .center-value {
+  font-size: 10px;
+  color: rgba(255,255,255,.55);
+  margin-top: 3px;
+  text-align: center;
+  padding: 0 6px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.circle-icon {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, rgba(11,23,37,.98), rgba(5,15,30,.99));
+  border: 2px solid rgba(212,175,55,.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all .3s ease;
+  z-index: 20;
+  box-shadow: 0 4px 15px rgba(0,0,0,.5);
+}
+
+.circle-icon:hover {
+  transform: scale(1.2);
+  border-color: rgba(212,175,55,.9);
+  box-shadow: 0 0 30px rgba(212,175,55,.4);
+}
+
+.circle-icon .icon-emoji {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.circle-icon .icon-label {
+  font-size: 8px;
+  color: #f5e6b3;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Position icons around the circle */
+.circle-icon-top { top: 0; left: 50%; transform: translateX(-50%); }
+.circle-icon-top:hover { transform: translateX(-50%) scale(1.2); }
+.circle-icon-right { right: 0; top: 50%; transform: translateY(-50%); }
+.circle-icon-right:hover { transform: translateY(-50%) scale(1.2); }
+.circle-icon-bottom { bottom: 0; left: 50%; transform: translateX(-50%); }
+.circle-icon-bottom:hover { transform: translateX(-50%) scale(1.2); }
+.circle-icon-left { left: 0; top: 50%; transform: translateY(-50%); }
+.circle-icon-left:hover { transform: translateY(-50%) scale(1.2); }
+
+/* زر إغلاق الدائرة */
+.circle-close-btn {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(211,47,47,.8);
+  border: 2px solid rgba(255,255,255,.2);
+  color: #fff;
+  font-size: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all .3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,.4);
+}
+
+.circle-close-btn:hover {
+  background: rgba(211,47,47,1);
+  transform: translateX(-50%) scale(1.1);
+}
+
+/* نافذة معلومات الدائرة */
+.circle-info-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.85);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 900;
+  backdrop-filter: blur(6px);
+}
+
+.circle-info-modal.active {
+  display: flex;
+}
+
+.circle-info-content {
+  width: 90%;
+  max-width: 420px;
+  background: linear-gradient(145deg, #0b1725, #0d1e30);
+  padding: 25px;
+  border-radius: 20px;
+  border: 1px solid rgba(212,175,55,.25);
+  box-shadow: 0 20px 60px rgba(0,0,0,.6), 0 0 40px rgba(212,175,55,.1);
+  animation: modalSlideIn .4s ease;
+}
+
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: translateY(30px) scale(.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.circle-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.circle-info-header h3 {
+  margin: 0;
+  color: #f5e6b3;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.circle-info-close {
+  background: rgba(212,175,55,.15);
+  border: 1px solid rgba(212,175,55,.3);
+  color: #d4af37;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: Cairo,sans-serif;
+  font-weight: 600;
+  transition: all .3s;
+}
+
+.circle-info-close:hover {
+  background: rgba(212,175,55,.25);
+}
+
+.circle-info-body {
+  color: rgba(255,255,255,.9);
+  font-size: 15px;
+  line-height: 1.8;
+  min-height: 80px;
+}
+
+.circle-info-body.empty {
+  color: rgba(255,255,255,.4);
+  text-align: center;
+  font-style: italic;
+}
+
+.circle-info-date {
+  margin-top: 15px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  font-size: 12px;
+  color: rgba(212,175,55,.7);
+  text-align: left;
+}
+
+/* ===== نهاية الدائرة ===== */
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:15px;}
+.card{background:rgba(5,15,30,.6);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 16px;text-decoration:none;color:white;transition:.3s;position:relative;overflow:hidden;}
+.card:hover{transform:translateY(-6px);border-color:#d4af37;}
+.card h3{margin:0;color:#f5e6b3;font-size:16px;}
+.summary{margin-top:10px;font-size:14px;opacity:.85;}
+.subject-badge{position:absolute;top:10px;left:10px;background:#d32f2f;color:#fff;width:22px;height:22px;border-radius:50%;display:none;align-items:center;justify-content:center;font-size:12px;font-weight:bold;}
+.progress-container{margin-top:10px;display:flex;align-items:center;gap:10px;}
+.progress-label{display:flex;flex-direction:column;align-items:flex-start;font-size:12px;color:#f5e6b3;flex:1;}
+.progress-label span:first-child{font-weight:700;font-size:11px;opacity:.8;}
+.progress-label span:last-child{font-weight:800;font-size:18px;color:#d4af37;margin-top:2px;}
+.progress-bar-bg{width:8px;height:50px;background:rgba(255,255,255,.08);border-radius:10px;overflow:hidden;position:relative;flex-shrink:0;}
+.progress-bar-fill{width:100%;border-radius:10px;background:linear-gradient(180deg, #d4af37, #f5e6b3, #d4af37);background-size:100% 200%;animation:shimmer 2s infinite;transition:height 1s ease;position:absolute;bottom:0;left:0;}
+.progress-bar-fill::after{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:rgba(255,255,255,.5);border-radius:2px;box-shadow:0 0 8px rgba(255,255,255,.6);}
+@keyframes shimmer{0%{background-position:0 200%;}100%{background-position:0 -200%;}}
+.chapters-btn{margin-top:8px;padding:6px 10px;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.25);border-radius:8px;color:#d4af37;font-size:12px;font-family:Cairo,sans-serif;cursor:pointer;transition:all .3s;width:100%;text-align:center;position:relative;overflow:hidden;}
+.chapters-btn::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg, transparent, rgba(212,175,55,.1), transparent);transform:translateX(-100%);transition:transform .5s;}
+.chapters-btn:hover::before{transform:translateX(100%);}
+.chapters-btn:hover{background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.5);color:#f5e6b3;}
+.chapters-btn:active{transform:scale(.97);}
+.chapters-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:6000;backdrop-filter:blur(4px);}
+.chapters-modal.active{display:flex;}
+.chapters-content{width:90%;max-width:500px;max-height:80vh;overflow-y:auto;background:linear-gradient(145deg, #0b1725, #0d1e30);padding:25px;border-radius:18px;border:1px solid rgba(212,175,55,.2);box-shadow:0 20px 60px rgba(0,0,0,.6), 0 0 30px rgba(212,175,55,.1);}
+.chapters-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid rgba(255,255,255,.08);}
+.chapters-header h3{margin:0;color:#f5e6b3;font-size:18px;}
+.chapters-close{background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.3);color:#d4af37;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:600;transition:all .3s;}
+.chapters-close:hover{background:rgba(212,175,55,.25);}
+.chapter-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:14px 16px;margin-bottom:10px;transition:all .3s;}
+.chapter-item:hover{background:rgba(255,255,255,.06);border-color:rgba(212,175,55,.2);}
+.chapter-item.completed{background:rgba(212,175,55,.08);border-color:rgba(212,175,55,.3);}
+.chapter-item-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.chapter-checkbox{width:20px;height:20px;border:2px solid rgba(212,175,55,.5);border-radius:5px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;flex-shrink:0;}
+.chapter-checkbox.checked{background:#d4af37;border-color:#d4af37;}
+.chapter-checkbox.checked::after{content:"✓";color:#0b1725;font-weight:bold;font-size:14px;}
+.chapter-title{font-size:15px;font-weight:600;color:#fff;margin:0;}
+.chapter-item.completed .chapter-title{color:#d4af37;opacity:.95;}
+.chapter-lessons{padding-right:30px;}
+.lesson-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;color:rgba(255,255,255,.7);}
+.lesson-item.completed{color:#d4af37;}
+.lesson-checkbox{width:16px;height:16px;border:1.5px solid rgba(255,255,255,.3);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;flex-shrink:0;}
+.lesson-checkbox.checked{background:#d4af37;border-color:#d4af37;}
+.lesson-checkbox.checked::after{content:"✓";color:#0b1725;font-weight:bold;font-size:10px;}
+.lesson-item.completed span{opacity:.85;}
+.share-card{background:rgba(212,175,55,.12);border:1px dashed rgba(212,175,55,.6);text-align:center;cursor:pointer;position:relative;}
+.share-card:hover{transform:translateY(-6px);border-color:#fff;}
+.share-badge{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.6);border:1px solid #d4af37;color:#d4af37;padding:4px 10px;border-radius:20px;font-size:12px;}
+.fawaid-panel{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;justify-content:center;align-items:center;z-index:5000;}
+.fawaid-content{max-height:85vh;overflow-y:auto;width:90%;max-width:500px;background:#0b1725;padding:20px;border-radius:18px;border:1px solid rgba(255,255,255,.1);}
+.fawaid-content textarea{width:100%;height:120px;border:none;outline:none;padding:12px;border-radius:10px;resize:none;margin-bottom:12px;font-family:Cairo,sans-serif;}
+.fawaid-content button{padding:10px 14px;border:none;border-radius:10px;cursor:pointer;margin:5px;background:#d4af37;font-weight:bold;}
+.fawaid-list{margin-top:15px;max-height:200px;overflow:auto;}
+.fawaid-item{background:rgba(255,255,255,.05);padding:10px;border-radius:10px;margin-bottom:10px;}
 .comment-item{background:rgba(255,255,255,.04);padding:10px;border-radius:10px;margin-top:8px}
 .comment-reacts button{margin:2px}
 .highlight-post{border:2px solid #d4af37!important;box-shadow:0 0 20px rgba(212,175,55,.45)}
 .back-posts-btn{margin:10px auto;display:block;padding:10px 14px;border:none;border-radius:10px;background:#d4af37;font-weight:bold;cursor:pointer}
-
-
-/* ===== أدمن الفصول ===== */
-.admin-chapters-section{
-margin-top:20px;
-padding-top:15px;
-border-top:2px solid rgba(212,175,55,.2);
-}
-
-.admin-chapters-section h4{
-color:#f5e6b3;
-margin:10px 0;
-font-size:14px;
-}
-
-.admin-chapter-input{
-width:100%;
-padding:10px;
-margin:5px 0;
-border-radius:8px;
-border:1px solid rgba(255,255,255,.1);
-background:rgba(255,255,255,.05);
-color:#fff;
-font-family:Cairo,sans-serif;
-}
-
-.admin-chapter-input::placeholder{
-color:rgba(255,255,255,.4);
-}
-
-.admin-lessons-input{
-width:100%;
-padding:10px;
-margin:5px 0;
-border-radius:8px;
-border:1px solid rgba(255,255,255,.1);
-background:rgba(255,255,255,.05);
-color:#fff;
-font-family:Cairo,sans-serif;
-min-height:60px;
-resize:vertical;
-}
-
-.admin-progress-input{
-width:100%;
-padding:10px;
-margin:5px 0;
-border-radius:8px;
-border:1px solid rgba(255,255,255,.1);
-background:rgba(255,255,255,.05);
-color:#fff;
-font-family:Cairo,sans-serif;
-}
-
-.subject-selector{
-width:100%;
-padding:10px;
-margin:5px 0 15px;
-border-radius:8px;
-border:1px solid rgba(212,175,55,.3);
-background:rgba(0,0,0,.4);
-color:#f5e6b3;
-font-family:Cairo,sans-serif;
-font-weight:600;
-}
-
-.subject-selector option{
-background:#0b1725;
-color:#fff;
-}
-
-.chapter-admin-item{
-background:rgba(255,255,255,.04);
-padding:12px;
-border-radius:10px;
-margin-bottom:10px;
-border:1px solid rgba(255,255,255,.06);
-}
-
-.chapter-admin-title{
-font-weight:600;
-color:#f5e6b3;
-margin-bottom:5px;
-}
-
-.chapter-admin-lessons{
-font-size:12px;
-color:rgba(255,255,255,.6);
-margin-bottom:8px;
-}
-
-.admin-btn-small{
-padding:6px 12px;
-font-size:12px;
-border:none;
-border-radius:8px;
-cursor:pointer;
-margin:2px;
-font-family:Cairo,sans-serif;
-font-weight:600;
-}
-
-.btn-edit{
-background:rgba(212,175,55,.2);
-color:#d4af37;
-border:1px solid rgba(212,175,55,.3);
-}
-
-.btn-delete{
-background:rgba(211,47,47,.2);
-color:#ef5350;
-border:1px solid rgba(211,47,47,.3);
-}
-
-.btn-save{
-background:#d4af37;
-color:#0b1725;
-font-weight:bold;
-}
-
-
-
-/* ===== أدمن الفصول المحسّن ===== */
-.admin-chapter-card{
-background:rgba(255,255,255,.04);
-border:1px solid rgba(255,255,255,.08);
-border-radius:14px;
-padding:14px;
-margin-bottom:12px;
-transition:all .3s;
-}
-
-.admin-chapter-card:hover{
-border-color:rgba(212,175,55,.25);
-background:rgba(255,255,255,.06);
-}
-
-.admin-chapter-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:10px;
-padding-bottom:8px;
-border-bottom:1px solid rgba(255,255,255,.06);
-}
-
-.admin-chapter-name{
-font-weight:700;
-color:#f5e6b3;
-font-size:15px;
-}
-
-.admin-chapter-actions{
-display:flex;
-gap:6px;
-}
-
-.admin-lessons-list{
-padding-right:10px;
-}
-
-.admin-lesson-row{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:6px 10px;
-margin:4px 0;
-background:rgba(0,0,0,.2);
-border-radius:8px;
-font-size:13px;
-color:rgba(255,255,255,.8);
-transition:all .2s;
-}
-
-.admin-lesson-row:hover{
-background:rgba(212,175,55,.08);
-}
-
-.admin-lesson-name{
-flex:1;
-}
-
-.admin-lesson-actions{
-display:flex;
-gap:4px;
-}
-
-.admin-btn-tiny{
-padding:4px 10px;
-font-size:11px;
-border:none;
-border-radius:6px;
-cursor:pointer;
-font-family:Cairo,sans-serif;
-font-weight:600;
-transition:all .2s;
-}
-
-.admin-btn-tiny:hover{
-transform:scale(1.05);
-}
-
-/* ===== قسم المنشورات المحسّن ===== */
-.posts-section{
-width:92%;
-max-width:1100px;
-margin:25px auto;
-background:linear-gradient(145deg, rgba(5,15,30,.7), rgba(8,20,35,.7));
-border:1px solid rgba(255,255,255,.08);
-border-radius:20px;
-padding:0;
-overflow:hidden;
-box-shadow:0 10px 40px rgba(0,0,0,.3);
-}
-
-.posts-header{
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:18px 22px;
-background:rgba(0,0,0,.2);
-border-bottom:1px solid rgba(255,255,255,.06);
-}
-
-.posts-header h3{
-margin:0;
-color:#f5e6b3;
-font-size:18px;
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-.posts-header-badge{
-background:rgba(212,175,55,.2);
-color:#d4af37;
-padding:3px 10px;
-border-radius:20px;
-font-size:12px;
-font-weight:700;
-}
-
-.posts-body{
-padding:20px;
-max-height:600px;
-overflow-y:auto;
-}
-
-.post-item{
-background:rgba(255,255,255,.03);
-border:1px solid rgba(255,255,255,.06);
-border-radius:16px;
-margin-bottom:16px;
-overflow:hidden;
-transition:all .3s;
-}
-
-.post-item:hover{
-border-color:rgba(212,175,55,.15);
-background:rgba(255,255,255,.04);
-}
-
-.post-item.highlight-post{
-border:2px solid #d4af37;
-box-shadow:0 0 25px rgba(212,175,55,.25);
-animation:pulseHighlight 2s ease-in-out infinite;
-}
-
-@keyframes pulseHighlight{
-0%,100%{box-shadow:0 0 15px rgba(212,175,55,.2);}
-50%{box-shadow:0 0 30px rgba(212,175,55,.4);}
-}
-
-.post-media{
-width:100%;
-max-height:350px;
-object-fit:cover;
-display:block;
-}
-
-.post-content{
-padding:16px 18px;
-}
-
-.post-text{
-font-size:15px;
-line-height:1.7;
-color:rgba(255,255,255,.9);
-margin-bottom:12px;
-}
-
-.post-meta{
-display:flex;
-align-items:center;
-gap:12px;
-margin-bottom:14px;
-font-size:12px;
-color:rgba(255,255,255,.4);
-}
-
-.post-meta-dot{
-width:4px;
-height:4px;
-background:rgba(255,255,255,.3);
-border-radius:50%;
-}
-
-.post-reactions{
-display:flex;
-gap:8px;
-flex-wrap:wrap;
-margin-bottom:14px;
-padding-bottom:14px;
-border-bottom:1px solid rgba(255,255,255,.05);
-}
-
-.react-btn{
-padding:6px 14px;
-background:rgba(255,255,255,.05);
-border:1px solid rgba(255,255,255,.08);
-border-radius:20px;
-color:rgba(255,255,255,.7);
-font-size:13px;
-font-family:Cairo,sans-serif;
-cursor:pointer;
-transition:all .2s;
-display:flex;
-align-items:center;
-gap:6px;
-}
-
-.react-btn:hover{
-background:rgba(212,175,55,.1);
-border-color:rgba(212,175,55,.3);
-color:#f5e6b3;
-transform:translateY(-2px);
-}
-
-.react-btn:active{
-transform:scale(.95);
-}
-
-.post-share-btn{
-padding:6px 16px;
-background:rgba(212,175,55,.1);
-border:1px solid rgba(212,175,55,.25);
-border-radius:20px;
-color:#d4af37;
-font-size:13px;
-font-family:Cairo,sans-serif;
-cursor:pointer;
-transition:all .2s;
-}
-
-.post-share-btn:hover{
-background:rgba(212,175,55,.2);
-}
-
-.post-comments-section{
-background:rgba(0,0,0,.15);
-padding:14px 18px;
-border-top:1px solid rgba(255,255,255,.04);
-}
-
-.post-comment-input-row{
-display:flex;
-gap:8px;
-margin-bottom:12px;
-}
-
-.post-comment-input{
-flex:1;
-padding:10px 14px;
-background:rgba(255,255,255,.05);
-border:1px solid rgba(255,255,255,.1);
-border-radius:12px;
-color:#fff;
-font-family:Cairo,sans-serif;
-font-size:13px;
-outline:none;
-transition:all .2s;
-}
-
-.post-comment-input:focus{
-border-color:rgba(212,175,55,.4);
-background:rgba(255,255,255,.07);
-}
-
-.post-comment-input::placeholder{
-color:rgba(255,255,255,.3);
-}
-
-.post-comment-submit{
-padding:8px 18px;
-background:#d4af37;
-border:none;
-border-radius:10px;
-color:#0b1725;
-font-weight:700;
-font-family:Cairo,sans-serif;
-font-size:13px;
-cursor:pointer;
-transition:all .2s;
-}
-
-.post-comment-submit:hover{
-background:#f5e6b3;
-}
-
-.comment-card{
-background:rgba(255,255,255,.04);
-border-radius:12px;
-padding:12px 14px;
-margin-bottom:10px;
-border:1px solid rgba(255,255,255,.04);
-}
-
-.comment-text{
-font-size:14px;
-color:rgba(255,255,255,.85);
-margin-bottom:10px;
-line-height:1.6;
-}
-
-.comment-reactions{
-display:flex;
-gap:6px;
-flex-wrap:wrap;
-}
-
-.comment-react-btn{
-padding:4px 10px;
-background:rgba(255,255,255,.05);
-border:1px solid rgba(255,255,255,.06);
-border-radius:16px;
-color:rgba(255,255,255,.6);
-font-size:12px;
-font-family:Cairo,sans-serif;
-cursor:pointer;
-transition:all .2s;
-}
-
-.comment-react-btn:hover{
-background:rgba(212,175,55,.1);
-border-color:rgba(212,175,55,.2);
-color:#f5e6b3;
-}
-
-.posts-empty{
-text-align:center;
-padding:40px 20px;
-color:rgba(255,255,255,.3);
-font-size:14px;
-}
-
-.posts-empty-icon{
-font-size:40px;
-margin-bottom:10px;
-opacity:.5;
-}
-
-/* ===== نهاية CSS الجديد ===== */
+.admin-chapters-section{margin-top:20px;padding-top:15px;border-top:2px solid rgba(212,175,55,.2);}
+.admin-chapters-section h4{color:#f5e6b3;margin:10px 0;font-size:14px;}
+.admin-chapter-input{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font-family:Cairo,sans-serif;}
+.admin-chapter-input::placeholder{color:rgba(255,255,255,.4);}
+.admin-lessons-input{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font-family:Cairo,sans-serif;min-height:60px;resize:vertical;}
+.admin-progress-input{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font-family:Cairo,sans-serif;}
+.subject-selector{width:100%;padding:10px;margin:5px 0 15px;border-radius:8px;border:1px solid rgba(212,175,55,.3);background:rgba(0,0,0,.4);color:#f5e6b3;font-family:Cairo,sans-serif;font-weight:600;}
+.subject-selector option{background:#0b1725;color:#fff;}
+.chapter-admin-item{background:rgba(255,255,255,.04);padding:12px;border-radius:10px;margin-bottom:10px;border:1px solid rgba(255,255,255,.06);}
+.chapter-admin-title{font-weight:600;color:#f5e6b3;margin-bottom:5px;}
+.chapter-admin-lessons{font-size:12px;color:rgba(255,255,255,.6);margin-bottom:8px;}
+.admin-btn-small{padding:6px 12px;font-size:12px;border:none;border-radius:8px;cursor:pointer;margin:2px;font-family:Cairo,sans-serif;font-weight:600;}
+.btn-edit{background:rgba(212,175,55,.2);color:#d4af37;border:1px solid rgba(212,175,55,.3);}
+.btn-delete{background:rgba(211,47,47,.2);color:#ef5350;border:1px solid rgba(211,47,47,.3);}
+.btn-save{background:#d4af37;color:#0b1725;font-weight:bold;}
+.admin-chapter-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;margin-bottom:12px;transition:all .3s;}
+.admin-chapter-card:hover{border-color:rgba(212,175,55,.25);background:rgba(255,255,255,.06);}
+.admin-chapter-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.06);}
+.admin-chapter-name{font-weight:700;color:#f5e6b3;font-size:15px;}
+.admin-chapter-actions{display:flex;gap:6px;}
+.admin-lessons-list{padding-right:10px;}
+.admin-lesson-row{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;margin:4px 0;background:rgba(0,0,0,.2);border-radius:8px;font-size:13px;color:rgba(255,255,255,.8);transition:all .2s;}
+.admin-lesson-row:hover{background:rgba(212,175,55,.08);}
+.admin-lesson-name{flex:1;}
+.admin-lesson-actions{display:flex;gap:4px;}
+.admin-btn-tiny{padding:4px 10px;font-size:11px;border:none;border-radius:6px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:600;transition:all .2s;}
+.admin-btn-tiny:hover{transform:scale(1.05);}
+.posts-section{width:92%;max-width:1100px;margin:25px auto;background:linear-gradient(145deg, rgba(5,15,30,.7), rgba(8,20,35,.7));border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:0;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.3);}
+.posts-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;background:rgba(0,0,0,.2);border-bottom:1px solid rgba(255,255,255,.06);}
+.posts-header h3{margin:0;color:#f5e6b3;font-size:18px;display:flex;align-items:center;gap:10px;}
+.posts-header-badge{background:rgba(212,175,55,.2);color:#d4af37;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;}
+.posts-body{padding:20px;max-height:600px;overflow-y:auto;}
+.post-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;margin-bottom:16px;overflow:hidden;transition:all .3s;}
+.post-item:hover{border-color:rgba(212,175,55,.15);background:rgba(255,255,255,.04);}
+.post-item.highlight-post{border:2px solid #d4af37;box-shadow:0 0 25px rgba(212,175,55,.25);animation:pulseHighlight 2s ease-in-out infinite;}
+@keyframes pulseHighlight{0%,100%{box-shadow:0 0 15px rgba(212,175,55,.2);}50%{box-shadow:0 0 30px rgba(212,175,55,.4);}}
+.post-media{width:100%;max-height:350px;object-fit:cover;display:block;}
+.post-content{padding:16px 18px;}
+.post-text{font-size:15px;line-height:1.7;color:rgba(255,255,255,.9);margin-bottom:12px;}
+.post-meta{display:flex;align-items:center;gap:12px;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,.4);}
+.post-meta-dot{width:4px;height:4px;background:rgba(255,255,255,.3);border-radius:50%;}
+.post-reactions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.05);}
+.react-btn{padding:6px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:20px;color:rgba(255,255,255,.7);font-size:13px;font-family:Cairo,sans-serif;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.react-btn:hover{background:rgba(212,175,55,.1);border-color:rgba(212,175,55,.3);color:#f5e6b3;transform:translateY(-2px);}
+.react-btn:active{transform:scale(.95);}
+.post-share-btn{padding:6px 16px;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.25);border-radius:20px;color:#d4af37;font-size:13px;font-family:Cairo,sans-serif;cursor:pointer;transition:all .2s;}
+.post-share-btn:hover{background:rgba(212,175,55,.2);}
+.post-comments-section{background:rgba(0,0,0,.15);padding:14px 18px;border-top:1px solid rgba(255,255,255,.04);}
+.post-comment-input-row{display:flex;gap:8px;margin-bottom:12px;}
+.post-comment-input{flex:1;padding:10px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;font-family:Cairo,sans-serif;font-size:13px;outline:none;transition:all .2s;}
+.post-comment-input:focus{border-color:rgba(212,175,55,.4);background:rgba(255,255,255,.07);}
+.post-comment-input::placeholder{color:rgba(255,255,255,.3);}
+.post-comment-submit{padding:8px 18px;background:#d4af37;border:none;border-radius:10px;color:#0b1725;font-weight:700;font-family:Cairo,sans-serif;font-size:13px;cursor:pointer;transition:all .2s;}
+.post-comment-submit:hover{background:#f5e6b3;}
+.comment-card{background:rgba(255,255,255,.04);border-radius:12px;padding:12px 14px;margin-bottom:10px;border:1px solid rgba(255,255,255,.04);}
+.comment-text{font-size:14px;color:rgba(255,255,255,.85);margin-bottom:10px;line-height:1.6;}
+.comment-reactions{display:flex;gap:6px;flex-wrap:wrap;}
+.comment-react-btn{padding:4px 10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);border-radius:16px;color:rgba(255,255,255,.6);font-size:12px;font-family:Cairo,sans-serif;cursor:pointer;transition:all .2s;}
+.comment-react-btn:hover{background:rgba(212,175,55,.1);border-color:rgba(212,175,55,.2);color:#f5e6b3;}
+.posts-empty{text-align:center;padding:40px 20px;color:rgba(255,255,255,.3);font-size:14px;}
+.posts-empty-icon{font-size:40px;margin-bottom:10px;opacity:.5;}
+.admin-icons-section {margin-top:20px;padding-top:15px;border-top:2px solid rgba(212,175,55,.2);}
+.admin-icons-section h3 {color:#f5e6b3;margin:10px 0 15px;font-size:16px;display:flex;align-items:center;gap:8px;}
+.icon-type-selector {width:100%;padding:10px;margin:5px 0 15px;border-radius:8px;border:1px solid rgba(212,175,55,.3);background:rgba(0,0,0,.4);color:#f5e6b3;font-family:Cairo,sans-serif;font-weight:600;font-size:14px;}
+.icon-type-selector option {background:#0b1725;color:#fff;}
+.icon-admin-input {width:100%;padding:12px;margin:6px 0;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font-family:Cairo,sans-serif;font-size:14px;transition:all .3s;}
+.icon-admin-input:focus {border-color:rgba(212,175,55,.4);background:rgba(255,255,255,.08);outline:none;}
+.icon-admin-input::placeholder {color:rgba(255,255,255,.35);}
+.icon-admin-textarea {width:100%;padding:12px;margin:6px 0;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font-family:Cairo,sans-serif;font-size:14px;min-height:80px;resize:vertical;transition:all .3s;}
+.icon-admin-textarea:focus {border-color:rgba(212,175,55,.4);background:rgba(255,255,255,.08);outline:none;}
+.icon-admin-textarea::placeholder {color:rgba(255,255,255,.35);}
+.icon-admin-card {background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;margin-bottom:12px;transition:all .3s;}
+.icon-admin-card:hover {border-color:rgba(212,175,55,.2);background:rgba(255,255,255,.06);}
+.icon-admin-header {display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.06);}
+.icon-admin-title {font-weight:700;color:#f5e6b3;font-size:15px;display:flex;align-items:center;gap:8px;}
+.icon-admin-body {font-size:13px;color:rgba(255,255,255,.75);line-height:1.7;margin-bottom:10px;max-height:100px;overflow-y:auto;}
+.icon-admin-date {font-size:11px;color:rgba(212,175,55,.6);margin-bottom:10px;}
+.icon-admin-actions {display:flex;gap:6px;padding-top:8px;border-top:1px solid rgba(255,255,255,.05);}
 </style>
-
 </head>
-
 <body>
+<div class="menu-btn" onclick="toggleMenu()"><div></div><div></div><div></div></div>
+<div class="sidebar" id="sidebar">
+<button onclick="openAdmin()">لوحة الأدمن</button>
+<button onclick="openFawaidAdmin()">أدمن الفوائد</button>
+<button onclick="enableNotifications()">تفعيل الإشعارات</button>
+<button onclick="closeMenu()">إغلاق</button>
+</div>
+<div class="marquee"><span>طالبة علم شرعي سنة تانية — منصة الملخصات والكتب والفوائد العلمية</span></div>
+<a class="intro-box" href="https://www.facebook.com/share/1GfgZ1JQGy/" target="_blank"><h2>طالبة علم شرعي سنة تانية في المعهد الديني - سبها</h2></a>
+<div class="fawaid-box"><div class="fawaid-track" id="fawaidText">📖 مرحباً بكم في قسم الفوائد الفقهية</div></div>
 
-<div class="menu-btn"
-onclick="toggleMenu()">
-
-<div></div>
-<div></div>
-<div></div>
-
+<!-- ===== زر عائم للدائرة ===== -->
+<div class="circle-fab" id="circleFab" onclick="toggleCircleWidget()">
+  <span class="fab-icon" id="fabIcon">🔘</span>
 </div>
 
-<div class="sidebar"
-id="sidebar">
-
-<button onclick="openAdmin()">
-لوحة الأدمن
-</button>
-
-<button onclick="openFawaidAdmin()">
-أدمن الفوائد
-</button>
-
-<button onclick="enableNotifications()">
-تفعيل الإشعارات
-</button>
-
-<button onclick="closeMenu()">
-إغلاق
-</button>
-
+<!-- ===== طبقة الدائرة الموسعة ===== -->
+<div class="circle-widget-overlay" id="circleWidgetOverlay" onclick="closeCircleWidget(event)">
+  <div class="circle-widget-container" onclick="event.stopPropagation()">
+    <div class="circle-widget-bg"></div>
+    <div class="circle-close-btn" onclick="toggleCircleWidget()">✕</div>
+    <div class="circle-icon circle-icon-top" onclick="openCircleInfo('last_studied')" title="آخر ما تم دراسته">
+      <span class="icon-emoji">📖</span><span class="icon-label">آخر درس</span>
+    </div>
+    <div class="circle-icon circle-icon-right" onclick="openCircleInfo('benefits')" title="فوائد علمية">
+      <span class="icon-emoji">💡</span><span class="icon-label">فوائد</span>
+    </div>
+    <div class="circle-icon circle-icon-bottom" onclick="openCircleInfo('goals')" title="الأهداف الدراسية">
+      <span class="icon-emoji">🎯</span><span class="icon-label">أهداف</span>
+    </div>
+    <div class="circle-icon circle-icon-left" onclick="openCircleInfo('subjects')" title="نظرة على المواد">
+      <span class="icon-emoji">📚</span><span class="icon-label">مواد</span>
+    </div>
+    <div class="circle-widget-center" onclick="openCircleInfo('last_studied')">
+      <span class="center-icon" id="centerIcon">📖</span>
+      <span class="center-label" id="centerLabel">آخر ما تم دراسته</span>
+      <span class="center-value" id="centerValue">...</span>
+    </div>
+  </div>
 </div>
 
-<div class="marquee">
-
-<span>
-
-طالبة علم شرعي سنة تانية —
-منصة الملخصات والكتب والفوائد العلمية
-
-</span>
-
+<!-- نافذة معلومات الدائرة -->
+<div class="circle-info-modal" id="circleInfoModal" onclick="closeCircleInfo(event)">
+  <div class="circle-info-content" onclick="event.stopPropagation()">
+    <div class="circle-info-header">
+      <h3 id="circleInfoTitle">📖 المعلومات</h3>
+      <button class="circle-info-close" onclick="closeCircleInfo()">إغلاق ✕</button>
+    </div>
+    <div class="circle-info-body" id="circleInfoBody">جاري التحميل...</div>
+    <div class="circle-info-date" id="circleInfoDate"></div>
+  </div>
 </div>
-
-<a class="intro-box"
-
-href="https://www.facebook.com/share/1GfgZ1JQGy/"
-
-target="_blank">
-
-<h2>
-
-طالبة علم شرعي سنة تانية
-في المعهد الديني - سبها
-
-</h2>
-
-</a>
-
-<div class="fawaid-box">
-
-<div class="fawaid-track"
-id="fawaidText">
-
-📖 مرحباً بكم في قسم الفوائد الفقهية
-
-</div>
-
-</div>
+<!-- ===== نهاية الدائرة ===== -->
 
 <div class="grid" id="subjectsGrid">
-
-<a class="card"
-href="subject.html?id=aqida"><span class="subject-badge" id="badge-aqida">1</span>
-
-<h3>العقيدة</h3>
-
-<div class="summary">
-ملخصات العقيدة وأصول الإيمان
-</div>
-
-<!-- نسبة الإنجاز -->
-<div class="progress-container" id="progress-aqida">
-<div class="progress-label">
-<span>نسبة الإنجاز</span>
-<span id="percent-aqida">0%</span>
-</div>
-<div class="progress-bar-bg">
-<div class="progress-bar-fill" id="bar-aqida" style="height:0%"></div>
-</div>
-</div>
-
-<!-- زر الفصول المجتازة -->
-<button class="chapters-btn" onclick="openChaptersModal('aqida', 'العقيدة'); return false;">
-📋 الفصول المجتازة
-</button>
-
+<a class="card" href="subject.html?id=aqida"><span class="subject-badge" id="badge-aqida">1</span>
+<h3>العقيدة</h3><div class="summary">ملخصات العقيدة وأصول الإيمان</div>
+<div class="progress-container" id="progress-aqida"><div class="progress-label"><span>نسبة الإنجاز</span><span id="percent-aqida">0%</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" id="bar-aqida" style="height:0%"></div></div></div>
+<button class="chapters-btn" onclick="openChaptersModal('aqida', 'العقيدة'); return false;">📋 الفصول المجتازة</button>
 </a>
-
-<a class="card"
-href="subject.html?id=hadith"><span class="subject-badge" id="badge-hadith">1</span>
-
-<h3>الحديث</h3>
-
-<div class="summary">
-الأحاديث النبوية وشروحها
-</div>
-
-<div class="progress-container" id="progress-hadith">
-<div class="progress-label">
-<span>نسبة الإنجاز</span>
-<span id="percent-hadith">0%</span>
-</div>
-<div class="progress-bar-bg">
-<div class="progress-bar-fill" id="bar-hadith" style="height:0%"></div>
-</div>
-</div>
-
-<button class="chapters-btn" onclick="openChaptersModal('hadith', 'الحديث'); return false;">
-📋 الفصول المجتازة
-</button>
-
+<a class="card" href="subject.html?id=hadith"><span class="subject-badge" id="badge-hadith">1</span>
+<h3>الحديث</h3><div class="summary">الأحاديث النبوية وشروحها</div>
+<div class="progress-container" id="progress-hadith"><div class="progress-label"><span>نسبة الإنجاز</span><span id="percent-hadith">0%</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" id="bar-hadith" style="height:0%"></div></div></div>
+<button class="chapters-btn" onclick="openChaptersModal('hadith', 'الحديث'); return false;">📋 الفصول المجتازة</button>
 </a>
-
-<a class="card"
-href="subject.html?id=fiqh"><span class="subject-badge" id="badge-fiqh">1</span>
-
-<h3>الفقه</h3>
-
-<div class="summary">
-الأحكام الفقهية والعبادات
-</div>
-
-<div class="progress-container" id="progress-fiqh">
-<div class="progress-label">
-<span>نسبة الإنجاز</span>
-<span id="percent-fiqh">0%</span>
-</div>
-<div class="progress-bar-bg">
-<div class="progress-bar-fill" id="bar-fiqh" style="height:0%"></div>
-</div>
-</div>
-
-<button class="chapters-btn" onclick="openChaptersModal('fiqh', 'الفقه'); return false;">
-📋 الفصول المجتازة
-</button>
-
+<a class="card" href="subject.html?id=fiqh"><span class="subject-badge" id="badge-fiqh">1</span>
+<h3>الفقه</h3><div class="summary">الأحكام الفقهية والعبادات</div>
+<div class="progress-container" id="progress-fiqh"><div class="progress-label"><span>نسبة الإنجاز</span><span id="percent-fiqh">0%</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" id="bar-fiqh" style="height:0%"></div></div></div>
+<button class="chapters-btn" onclick="openChaptersModal('fiqh', 'الفقه'); return false;">📋 الفصول المجتازة</button>
 </a>
-
-<a class="card"
-href="subject.html?id=usul"><span class="subject-badge" id="badge-usul">1</span>
-
-<h3>أصول الفقه</h3>
-
-<div class="summary">
-القواعد والأدلة الشرعية
-</div>
-
-<div class="progress-container" id="progress-usul">
-<div class="progress-label">
-<span>نسبة الإنجاز</span>
-<span id="percent-usul">0%</span>
-</div>
-<div class="progress-bar-bg">
-<div class="progress-bar-fill" id="bar-usul" style="height:0%"></div>
-</div>
-</div>
-
-<button class="chapters-btn" onclick="openChaptersModal('usul', 'أصول الفقه'); return false;">
-📋 الفصول المجتازة
-</button>
-
+<a class="card" href="subject.html?id=usul"><span class="subject-badge" id="badge-usul">1</span>
+<h3>أصول الفقه</h3><div class="summary">القواعد والأدلة الشرعية</div>
+<div class="progress-container" id="progress-usul"><div class="progress-label"><span>نسبة الإنجاز</span><span id="percent-usul">0%</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" id="bar-usul" style="height:0%"></div></div></div>
+<button class="chapters-btn" onclick="openChaptersModal('usul', 'أصول الفقه'); return false;">📋 الفصول المجتازة</button>
 </a>
-
-<a class="card"
-href="subject.html?id=history"><span class="subject-badge" id="badge-history">1</span>
-
-<h3>تاريخ الخلفاء الراشدين</h3>
-
-<div class="summary">
-السيرة والأحداث التاريخية
-</div>
-
-<div class="progress-container" id="progress-history">
-<div class="progress-label">
-<span>نسبة الإنجاز</span>
-<span id="percent-history">0%</span>
-</div>
-<div class="progress-bar-bg">
-<div class="progress-bar-fill" id="bar-history" style="height:0%"></div>
-</div>
-</div>
-
-<button class="chapters-btn" onclick="openChaptersModal('history', 'تاريخ الخلفاء الراشدين'); return false;">
-📋 الفصول المجتازة
-</button>
-
+<a class="card" href="subject.html?id=history"><span class="subject-badge" id="badge-history">1</span>
+<h3>تاريخ الخلفاء الراشدين</h3><div class="summary">السيرة والأحداث التاريخية</div>
+<div class="progress-container" id="progress-history"><div class="progress-label"><span>نسبة الإنجاز</span><span id="percent-history">0%</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" id="bar-history" style="height:0%"></div></div></div>
+<button class="chapters-btn" onclick="openChaptersModal('history', 'تاريخ الخلفاء الراشدين'); return false;">📋 الفصول المجتازة</button>
 </a>
-
-<a class="card"
-href="subject.html?id=dawah"><span class="subject-badge" id="badge-dawah">1</span>
-
-<h3>منهج الدعوة</h3>
-
-<div class="summary">
-أساليب الدعوة وأصولها
-</div>
-
-<div class="progress-container" id="progress-dawah">
-<div class="progress-label">
-<span>نسبة الإنجاز</span>
-<span id="percent-dawah">0%</span>
-</div>
-<div class="progress-bar-bg">
-<div class="progress-bar-fill" id="bar-dawah" style="height:0%"></div>
-</div>
-</div>
-
-<button class="chapters-btn" onclick="openChaptersModal('dawah', 'منهج الدعوة'); return false;">
-📋 الفصول المجتازة
-</button>
-
+<a class="card" href="subject.html?id=dawah"><span class="subject-badge" id="badge-dawah">1</span>
+<h3>منهج الدعوة</h3><div class="summary">أساليب الدعوة وأصولها</div>
+<div class="progress-container" id="progress-dawah"><div class="progress-label"><span>نسبة الإنجاز</span><span id="percent-dawah">0%</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" id="bar-dawah" style="height:0%"></div></div></div>
+<button class="chapters-btn" onclick="openChaptersModal('dawah', 'منهج الدعوة'); return false;">📋 الفصول المجتازة</button>
 </a>
-
-<a class="card"
-href="subject.html?id=tajweed"><span class="subject-badge" id="badge-tajweed">1</span>
-
-<h3>أحكام وتجويد القرآن</h3>
-
-<div class="summary">
-أحكام التلاوة والتجويد
-</div>
-
-<div class="progress-container" id="progress-tajweed">
-<div class="progress-label">
-<span>نسبة الإنجاز</span>
-<span id="percent-tajweed">0%</span>
-</div>
-<div class="progress-bar-bg">
-<div class="progress-bar-fill" id="bar-tajweed" style="height:0%"></div>
-</div>
-</div>
-
-<button class="chapters-btn" onclick="openChaptersModal('tajweed', 'أحكام وتجويد القرآن'); return false;">
-📋 الفصول المجتازة
-</button>
-
+<a class="card" href="subject.html?id=tajweed"><span class="subject-badge" id="badge-tajweed">1</span>
+<h3>أحكام وتجويد القرآن</h3><div class="summary">أحكام التلاوة والتجويد</div>
+<div class="progress-container" id="progress-tajweed"><div class="progress-label"><span>نسبة الإنجاز</span><span id="percent-tajweed">0%</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" id="bar-tajweed" style="height:0%"></div></div></div>
+<button class="chapters-btn" onclick="openChaptersModal('tajweed', 'أحكام وتجويد القرآن'); return false;">📋 الفصول المجتازة</button>
 </a>
-
-<a class="card"
-href="subject.html?id=literature"><span class="subject-badge" id="badge-literature">1</span>
-
-<h3>الدراسات الأدبية</h3>
-
-<div class="summary">
-البلاغة والنصوص الأدبية
-</div>
-
-<div class="progress-container" id="progress-literature">
-<div class="progress-label">
-<span>نسبة الإنجاز</span>
-<span id="percent-literature">0%</span>
-</div>
-<div class="progress-bar-bg">
-<div class="progress-bar-fill" id="bar-literature" style="height:0%"></div>
-</div>
-</div>
-
-<button class="chapters-btn" onclick="openChaptersModal('literature', 'الدراسات الأدبية'); return false;">
-📋 الفصول المجتازة
-</button>
-
+<a class="card" href="subject.html?id=literature"><span class="subject-badge" id="badge-literature">1</span>
+<h3>الدراسات الأدبية</h3><div class="summary">البلاغة والنصوص الأدبية</div>
+<div class="progress-container" id="progress-literature"><div class="progress-label"><span>نسبة الإنجاز</span><span id="percent-literature">0%</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" id="bar-literature" style="height:0%"></div></div></div>
+<button class="chapters-btn" onclick="openChaptersModal('literature', 'الدراسات الأدبية'); return false;">📋 الفصول المجتازة</button>
 </a>
-
-<a class="card"
-href="subject.html?id=nahw"><span class="subject-badge" id="badge-nahw">1</span>
-
-<h3>النحو والصرف</h3>
-
-<div class="summary">
-قواعد اللغة العربية
-</div>
-
-<div class="progress-container" id="progress-nahw">
-<div class="progress-label">
-<span>نسبة الإنجاز</span>
-<span id="percent-nahw">0%</span>
-</div>
-<div class="progress-bar-bg">
-<div class="progress-bar-fill" id="bar-nahw" style="height:0%"></div>
-</div>
-</div>
-
-<button class="chapters-btn" onclick="openChaptersModal('nahw', 'النحو والصرف'); return false;">
-📋 الفصول المجتازة
-</button>
-
+<a class="card" href="subject.html?id=nahw"><span class="subject-badge" id="badge-nahw">1</span>
+<h3>النحو والصرف</h3><div class="summary">قواعد اللغة العربية</div>
+<div class="progress-container" id="progress-nahw"><div class="progress-label"><span>نسبة الإنجاز</span><span id="percent-nahw">0%</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" id="bar-nahw" style="height:0%"></div></div></div>
+<button class="chapters-btn" onclick="openChaptersModal('nahw', 'النحو والصرف'); return false;">📋 الفصول المجتازة</button>
 </a>
-
-<a class="card"
-href="subject.html?id=computer"><span class="subject-badge" id="badge-computer">1</span>
-
-<h3>الحاسوب</h3>
-
-<div class="summary">
-المهارات التقنية والحاسوبية
-</div>
-
-<div class="progress-container" id="progress-computer">
-<div class="progress-label">
-<span>نسبة الإنجاز</span>
-<span id="percent-computer">0%</span>
-</div>
-<div class="progress-bar-bg">
-<div class="progress-bar-fill" id="bar-computer" style="height:0%"></div>
-</div>
-</div>
-
-<button class="chapters-btn" onclick="openChaptersModal('computer', 'الحاسوب'); return false;">
-📋 الفصول المجتازة
-</button>
-
+<a class="card" href="subject.html?id=computer"><span class="subject-badge" id="badge-computer">1</span>
+<h3>الحاسوب</h3><div class="summary">المهارات التقنية والحاسوبية</div>
+<div class="progress-container" id="progress-computer"><div class="progress-label"><span>نسبة الإنجاز</span><span id="percent-computer">0%</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" id="bar-computer" style="height:0%"></div></div></div>
+<button class="chapters-btn" onclick="openChaptersModal('computer', 'الحاسوب'); return false;">📋 الفصول المجتازة</button>
 </a>
-
-<a class="card"
-href="subject.html?id=english"><span class="subject-badge" id="badge-english">1</span>
-
-<h3>الإنجليزي</h3>
-
-<div class="summary">
-القواعد والمفردات
-</div>
-
-<div class="progress-container" id="progress-english">
-<div class="progress-label">
-<span>نسبة الإنجاز</span>
-<span id="percent-english">0%</span>
-</div>
-<div class="progress-bar-bg">
-<div class="progress-bar-fill" id="bar-english" style="height:0%"></div>
-</div>
-</div>
-
-<button class="chapters-btn" onclick="openChaptersModal('english', 'الإنجليزي'); return false;">
-📋 الفصول المجتازة
-</button>
-
+<a class="card" href="subject.html?id=english"><span class="subject-badge" id="badge-english">1</span>
+<h3>الإنجليزي</h3><div class="summary">القواعد والمفردات</div>
+<div class="progress-container" id="progress-english"><div class="progress-label"><span>نسبة الإنجاز</span><span id="percent-english">0%</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" id="bar-english" style="height:0%"></div></div></div>
+<button class="chapters-btn" onclick="openChaptersModal('english', 'الإنجليزي'); return false;">📋 الفصول المجتازة</button>
 </a>
-
-<a class="card"
-href="subject.html?id=tafsir"><span class="subject-badge" id="badge-tafsir">1</span>
-
-<h3>التفسير</h3>
-
-<div class="summary">
-تفسير آيات القرآن الكريم
-</div>
-
-<div class="progress-container" id="progress-tafsir">
-<div class="progress-label">
-<span>نسبة الإنجاز</span>
-<span id="percent-tafsir">0%</span>
-</div>
-<div class="progress-bar-bg">
-<div class="progress-bar-fill" id="bar-tafsir" style="height:0%"></div>
-</div>
-</div>
-
-<button class="chapters-btn" onclick="openChaptersModal('tafsir', 'التفسير'); return false;">
-📋 الفصول المجتازة
-</button>
-
+<a class="card" href="subject.html?id=tafsir"><span class="subject-badge" id="badge-tafsir">1</span>
+<h3>التفسير</h3><div class="summary">تفسير آيات القرآن الكريم</div>
+<div class="progress-container" id="progress-tafsir"><div class="progress-label"><span>نسبة الإنجاز</span><span id="percent-tafsir">0%</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" id="bar-tafsir" style="height:0%"></div></div></div>
+<button class="chapters-btn" onclick="openChaptersModal('tafsir', 'التفسير'); return false;">📋 الفصول المجتازة</button>
 </a>
-
-<!-- زر المشاركة -->
-
-<a class="card share-card"
-
-href="#"
-
-onclick="shareSite();
-return false;">
-
-<div class="share-badge"
-id="shareCount">
-
-0
-
-</div>
-
-<h3>
-📤 مشاركة الملخصات
-</h3>
-
-<div class="summary">
-شارك الموقع مع زملائك بسهولة
-</div>
-
+<a class="card share-card" href="#" onclick="shareSite(); return false;">
+<div class="share-badge" id="shareCount">0</div>
+<h3>📤 مشاركة الملخصات</h3>
+<div class="summary">شارك الموقع مع زملائك بسهولة</div>
 </a>
-
 </div>
-
 
 <div class="posts-section">
-<div class="posts-header">
-<h3>📢 المنشورات والتنبيهات</h3>
-<span class="posts-header-badge" id="postsCountBadge">0</span>
-</div>
+<div class="posts-header"><h3>📢 المنشورات والتنبيهات</h3><span class="posts-header-badge" id="postsCountBadge">0</span></div>
 <div class="posts-body" id="postsContainer">
-<div class="posts-empty">
-<div class="posts-empty-icon">📭</div>
-لا توجد منشورات حالياً
-</div>
+<div class="posts-empty"><div class="posts-empty-icon">📭</div>لا توجد منشورات حالياً</div>
 </div>
 </div>
 
-<!-- نافذة الفصول المجتازة -->
 <div class="chapters-modal" id="chaptersModal" onclick="closeChaptersModal(event)">
 <div class="chapters-content" onclick="event.stopPropagation()">
-<div class="chapters-header">
-<h3 id="chaptersModalTitle">📋 الفصول المجتازة</h3>
-<button class="chapters-close" onclick="closeChaptersModal()">إغلاق ✕</button>
-</div>
+<div class="chapters-header"><h3 id="chaptersModalTitle">📋 الفصول المجتازة</h3><button class="chapters-close" onclick="closeChaptersModal()">إغلاق ✕</button></div>
 <div id="chaptersModalBody"></div>
 </div>
 </div>
 
-<div class="fawaid-panel"
-id="fawaidPanel">
-
+<div class="fawaid-panel" id="fawaidPanel">
 <div class="fawaid-content">
-
-<h3 style="color:#f5e6b3;">
-إدارة الفوائد الفقهية
-</h3>
-
-<textarea
-
-id="fawaidInput"
-
-placeholder="اكتب الفائدة هنا...">
-
-</textarea>
-
-<button onclick="addFawaid()">
-إضافة
-</button>
-
-<button onclick="closeFawaidPanel()">
-إغلاق
-</button>
-
+<h3 style="color:#f5e6b3;">إدارة الفوائد الفقهية</h3>
+<textarea id="fawaidInput" placeholder="اكتب الفائدة هنا..."></textarea>
+<button onclick="addFawaid()">إضافة</button>
+<button onclick="closeFawaidPanel()">إغلاق</button>
 <div class="fawaid-list" id="fawaidList"></div>
-
 <hr style="margin:15px 0;border-color:rgba(255,255,255,.1)">
-
 <h3 style="color:#f5e6b3;">📢 إدارة المنشورات</h3>
-
 <textarea id="postInput" placeholder="اكتب المنشور هنا..."></textarea>
-
 <input id="postImage" placeholder="رابط صورة (اختياري)" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;">
 <input id="postAudio" placeholder="رابط صوت (اختياري)" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;">
 <input id="postVideo" placeholder="رابط فيديو (اختياري)" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;">
-
-
 <button onclick="addPost()">إضافة منشور</button>
+<div class="fawaid-list" id="postsAdminList" style="max-height:300px;overflow:auto;"></div>
+<h3 style="color:#f5e6b3">📬 إدارة الردود</h3>
+<div class="fawaid-list" id="commentsAdminList"></div>
 
-<div class="fawaid-list" id="postsAdminList" style="max-height:300px;overflow:auto;"></div><h3 style="color:#f5e6b3">📬 إدارة الردود</h3><div class="fawaid-list" id="commentsAdminList"></div>
-
-<!-- ===== إدارة الفصول والنسب ===== -->
 <div class="admin-chapters-section">
 <h3 style="color:#f5e6b3;">📊 إدارة نسب الإنجاز والفصول</h3>
-
 <select class="subject-selector" id="adminSubjectSelect" onchange="loadAdminSubjectData()">
 <option value="">اختر المادة...</option>
 <option value="aqida">العقيدة</option>
@@ -1648,293 +643,123 @@ placeholder="اكتب الفائدة هنا...">
 <option value="english">الإنجليزي</option>
 <option value="tafsir">التفسير</option>
 </select>
-
 <h4>📈 نسبة الإنجاز</h4>
 <input type="number" class="admin-progress-input" id="adminProgressInput" placeholder="أدخل النسبة (0-100)" min="0" max="100">
 <button class="admin-btn-small btn-save" onclick="saveProgress()">حفظ النسبة</button>
-
 <h4>📖 إضافة فصل جديد</h4>
 <input type="text" class="admin-chapter-input" id="adminChapterTitle" placeholder="عنوان الفصل">
 <textarea class="admin-lessons-input" id="adminChapterLessons" placeholder="الدروس (افصل بين كل درس بسطر جديد)"></textarea>
 <button class="admin-btn-small btn-save" onclick="addAdminChapter()">إضافة فصل</button>
-
 <h4>📋 الفصول المضافة</h4>
 <div id="adminChaptersList"></div>
 </div>
-<!-- ===== نهاية إدارة الفصول ===== -->
 
+<div class="admin-icons-section">
+<h3>🔘 إدارة أيقونات الدائرة</h3>
+<select class="icon-type-selector" id="adminIconTypeSelect">
+<option value="">اختر نوع الأيقونة...</option>
+<option value="last_studied">📖 آخر ما تم دراسته</option>
+<option value="benefits">💡 فوائد علمية</option>
+<option value="goals">🎯 أهداف دراسية</option>
+<option value="subjects">📚 نظرة على المواد</option>
+</select>
+<input type="text" class="icon-admin-input" id="adminIconTitle" placeholder="عنوان المعلومة (مثال: درس النحو - المضاف والمضاف إليه)">
+<textarea class="icon-admin-textarea" id="adminIconContent" placeholder="محتوى المعلومة التفصيلي..."></textarea>
+<input type="text" class="icon-admin-input" id="adminIconDate" placeholder="التاريخ (اختياري - مثال: 25 يونيو 2026)">
+<button class="admin-btn-small btn-save" onclick="saveCircleIcon()">حفظ المعلومة</button>
+<button class="admin-btn-small btn-edit" onclick="clearIconForm()">تفريغ الحقول</button>
+<h4 style="color:#f5e6b3; margin-top:20px; margin-bottom:10px; font-size:14px;">📋 المعلومات المحفوظة</h4>
+<div id="adminIconsList"></div>
 </div>
 
+</div>
 </div>
 
 <script>
-
-function toggleMenu(){
-
-document.getElementById("sidebar")
-.classList.toggle("active");
-
-}
-
-function closeMenu(){
-
-document.getElementById("sidebar")
-.classList.remove("active");
-
-}
-
-function openAdmin(){
-
-const pass =
-prompt("أدخل كلمة مرور الأدمن");
-
-if(pass === "1997"){
-
-window.location.href="admin.html";
-
-}else{
-
-alert("كلمة المرور غير صحيحة");
-
-}
-
-}
-
-let count =
-localStorage.getItem("shareCount")
-|| 0;
-
-document.getElementById("shareCount")
-.innerText = count;
-
+function toggleMenu(){document.getElementById("sidebar").classList.toggle("active");}
+function closeMenu(){document.getElementById("sidebar").classList.remove("active");}
+function openAdmin(){const pass=prompt("أدخل كلمة مرور الأدمن");if(pass==="1997"){window.location.href="admin.html";}else{alert("كلمة المرور غير صحيحة");}}
+let count=localStorage.getItem("shareCount")||0;
+document.getElementById("shareCount").innerText=count;
 function shareSite(){
+const data={title:"طالبة علم شرعي سنة تانية",text:"ادخل هذا الموقع وشاهد الملخصات 👇",url:"https://pkingll.github.io/3333/"};
+if(navigator.share){navigator.share(data);}else{navigator.clipboard.writeText(data.url);alert("تم نسخ الرابط 📋");}
+count++;localStorage.setItem("shareCount",count);document.getElementById("shareCount").innerText=count;
+}
 
-const data = {
+/* ===== التحكم في الدائرة العائمة ===== */
+let circleOpen = false;
 
-title:"طالبة علم شرعي سنة تانية",
+window.toggleCircleWidget = function() {
+  const fab = document.getElementById('circleFab');
+  const overlay = document.getElementById('circleWidgetOverlay');
 
-text:"ادخل هذا الموقع وشاهد الملخصات 👇",
-
-url:"https://pkingll.github.io/3333/"
-
+  if (!circleOpen) {
+    // فتح الدائرة
+    fab.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    circleOpen = true;
+  } else {
+    // إغلاق الدائرة
+    fab.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    circleOpen = false;
+  }
 };
 
-if(navigator.share){
+window.closeCircleWidget = function(e) {
+  if (e && e.target !== document.getElementById('circleWidgetOverlay')) return;
+  toggleCircleWidget();
+};
 
-navigator.share(data);
-
-}else{
-
-navigator.clipboard.writeText(data.url);
-
-alert("تم نسخ الرابط 📋");
-
-}
-
-count++;
-
-localStorage.setItem(
-"shareCount",
-count
-);
-
-document.getElementById("shareCount")
-.innerText = count;
-
-}
-
-
+// إغلاق الدائرة عند الضغط على Escape
+ document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && circleOpen) {
+    toggleCircleWidget();
+  }
+});
 </script>
-
-
-<!-- Firebase Notifications -->
-
 <script type="module">
-
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-
-import {
-getMessaging,
-getToken,
-onMessage
-}
-from "https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging.js";
-
-import {
-getFirestore,
-doc,
-setDoc,
-getDoc,
-collection,
-addDoc,
-getDocs,
-deleteDoc,
-updateDoc,
-query,
-where
-}
-from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 const firebaseConfig = {
-
-apiKey:
-"AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",
-
-authDomain:
-"p-726bc.firebaseapp.com",
-
-projectId:
-"p-726bc",
-
-storageBucket:
-"p-726bc.firebasestorage.app",
-
-messagingSenderId:
-"752913389065",
-
-appId:
-"1:752913389065:web:20cf8c03fe4ace03650ad8"
-
+apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",
+authDomain: "p-726bc.firebaseapp.com",
+projectId: "p-726bc",
+storageBucket: "p-726bc.firebasestorage.app",
+messagingSenderId: "752913389065",
+appId: "1:752913389065:web:20cf8c03fe4ace03650ad8"
 };
 
-const app =
-initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
+const db = getFirestore(app);
 
-const messaging =
-getMessaging(app);
-
-const db =
-getFirestore(app);
-
-window.enableNotifications =
-async function(){
-
+window.enableNotifications = async function(){
 try{
-
-if(!('serviceWorker' in navigator)){
-
-alert("المتصفح لا يدعم الإشعارات ❌");
-
-return;
-
-}
-
-/* إذا الإشعارات مفعلة مسبقاً */
-
+if(!('serviceWorker' in navigator)){alert("المتصفح لا يدعم الإشعارات ❌");return;}
 if(Notification.permission === "granted"){
-
-const savedToken =
-localStorage.getItem("firebaseToken");
-
-if(savedToken){
-
-alert("الإشعارات مفعلة بالفعل ✅");
-
-return;
-
+const savedToken=localStorage.getItem("firebaseToken");
+if(savedToken){alert("الإشعارات مفعلة بالفعل ✅");return;}
 }
-
-}
-
-/* إذا المستخدم حظر الإشعارات */
-
-if(Notification.permission === "denied"){
-
-alert(
-"لقد قمت بحظر الإشعارات من المتصفح ❌"
-);
-
-return;
-
-}
-
-/* تسجيل service worker */
-
-const registration =
-await navigator.serviceWorker.register(
-'./firebase-messaging-sw.js'
-);
-
-/* طلب الإذن */
-
-const permission =
-await Notification.requestPermission();
-
-if(permission !== "granted"){
-
-alert("تم رفض الإشعارات ❌");
-
-return;
-
-}
-
-/* إنشاء التوكن */
-
-const currentToken =
-await getToken(messaging,{
-
-vapidKey:
-"BC1mnmEtPonum_POxdZ-1cFOAlr803s3YkOOlfz17cg-uwB3XdPF7jxepKWcBtoeppUJUcM22FhQYAFmEyMVDJw",
-
-serviceWorkerRegistration:
-registration
-
-});
-
+if(Notification.permission === "denied"){alert("لقد قمت بحظر الإشعارات من المتصفح ❌");return;}
+const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+const permission = await Notification.requestPermission();
+if(permission !== "granted"){alert("تم رفض الإشعارات ❌");return;}
+const currentToken = await getToken(messaging, {vapidKey: "BC1mnmEtPonum_POxdZ-1cFOAlr803s3YkOOlfz17cg-uwB3XdPF7jxepKWcBtoeppUJUcM22FhQYAFmEyMVDJw", serviceWorkerRegistration: registration});
 if(currentToken){
-
-/* تحقق هل التوكن موجود مسبقاً */
-
-const tokenRef =
-doc(db,"tokens",currentToken);
-
-const tokenSnap =
-await getDoc(tokenRef);
-
-if(!tokenSnap.exists()){
-
-await setDoc(tokenRef,{
-token: currentToken,
-createdAt: Date.now()
-});
-
-}
-
-/* حفظ محلي */
-
-localStorage.setItem(
-"firebaseToken",
-currentToken
-);
-
-alert(
-"تم تفعيل الإشعارات بنجاح ✅"
-);
-
-}else{
-
-alert(
-"فشل إنشاء TOKEN ❌"
-);
-
-}
-
-}catch(error){
-
-console.log(
-"FCM ERROR:",
-error
-);
-
-alert(
-"حدث خطأ أثناء التفعيل ❌"
-);
-
-}
-
+const tokenRef = doc(db,"tokens",currentToken);
+const tokenSnap = await getDoc(tokenRef);
+if(!tokenSnap.exists()){await setDoc(tokenRef,{token: currentToken, createdAt: Date.now()});}
+localStorage.setItem("firebaseToken", currentToken);
+alert("تم تفعيل الإشعارات بنجاح ✅");
+}else{alert("فشل إنشاء TOKEN ❌");}
+}catch(error){console.log("FCM ERROR:", error);alert("حدث خطأ أثناء التفعيل ❌");}
 };
-
 
 /* ===== فوائد Firestore ===== */
 let fawaid = [];
@@ -1946,35 +771,24 @@ window.openFawaidAdmin = async function(){
    document.getElementById("fawaidPanel").style.display="flex";
    await loadFawaid();
    await loadAdminChapters();
+   await loadAdminIconsList();
  }else{
    alert("كلمة المرور غير صحيحة");
  }
 };
 
-window.closeFawaidPanel=function(){
- document.getElementById("fawaidPanel").style.display="none";
-};
+window.closeFawaidPanel=function(){document.getElementById("fawaidPanel").style.display="none";document.body.style.overflow="";clearIconForm();};
 
 async function loadFawaid(){
  const snap = await getDocs(collection(db,"fawaid"));
  fawaid=[];
  snap.forEach(d=>fawaid.push({id:d.id,text:d.data().text||""}));
-
  const box=document.getElementById("fawaidList");
  box.innerHTML="";
-
  fawaid.forEach(item=>{
-   box.innerHTML += `
-   <div class="fawaid-item" id="fawaid-${item.id}">
-     <div style="margin-bottom:10px;">${item.text}</div>
-     <button onclick="editFawaid('${item.id}')">تعديل</button>
-     <button onclick="deleteFawaid('${item.id}')">حذف</button>
-   </div>`;
+   box.innerHTML += `<div class="fawaid-item" id="fawaid-${item.id}"><div style="margin-bottom:10px;">${item.text}</div><button onclick="editFawaid('${item.id}')">تعديل</button><button onclick="deleteFawaid('${item.id}')">حذف</button></div>`;
  });
-
- if(fawaid.length){
-   document.getElementById("fawaidText").innerText="📖 "+fawaid[0].text;
- }
+ if(fawaid.length){document.getElementById("fawaidText").innerText="📖 "+fawaid[0].text;}
 }
 
 window.addFawaid = async function(){
@@ -2005,7 +819,6 @@ setInterval(()=>{
  document.getElementById("fawaidText").innerText="📖 "+fawaid[currentFaidah].text;
 },60000);
 
-
 loadFawaid();
 
 /* ===== إشعارات المواد ===== */
@@ -2013,38 +826,20 @@ async function updateSubjectBadges(){
 try{
 const lessons = await getDocs(collection(db,"lessons"));
 const latest = {};
-
 lessons.forEach(docu=>{
  const data = docu.data();
  if(!data.subject) return;
-
  const t = data.time || 0;
-
- if(!latest[data.subject] || t > latest[data.subject]){
-   latest[data.subject] = t;
- }
+ if(!latest[data.subject] || t > latest[data.subject]){latest[data.subject] = t;}
 });
-
 Object.keys(latest).forEach(subject=>{
  const seen = parseInt(localStorage.getItem("seenTime_"+subject) || "0");
  const badge = document.getElementById("badge-"+subject);
-
- if(badge && latest[subject] > seen){
-   badge.style.display = "flex";
- }
+ if(badge && latest[subject] > seen){badge.style.display = "flex";}
 });
-}catch(err){
-console.log(err);
+}catch(err){console.log(err);}
 }
-}
-
 updateSubjectBadges();
-/* ===== نهاية إشعارات المواد ===== */
-
-/* ===== نهاية فوائد Firestore ===== */
-
-
-
 
 /* ===== المنشورات المحسّنة ===== */
 async function loadPosts(){
@@ -2052,47 +847,26 @@ async function loadPosts(){
  let arr=[];
  snap.forEach(d=>arr.push({id:d.id,...d.data()}));
  arr.sort((a,b)=>(b.time||0)-(a.time||0));
-
  const box=document.getElementById("postsContainer");
  const admin=document.getElementById("postsAdminList");
-
- // Update posts count badge
  const badge = document.getElementById('postsCountBadge');
  if(badge) badge.innerText = arr.length;
-
  if(box){
  if(arr.length === 0){
-   box.innerHTML = `
-   <div class="posts-empty">
-     <div class="posts-empty-icon">📭</div>
-     لا توجد منشورات حالياً
-   </div>`;
+   box.innerHTML = `<div class="posts-empty"><div class="posts-empty-icon">📭</div>لا توجد منشورات حالياً</div>`;
    return;
  }
-
  let postsHtml='';
  for(const p of arr){
  const comments=await loadCommentsForPost(p.id);
  const dateStr = p.time ? new Date(p.time).toLocaleDateString('ar-LY', {year:'numeric', month:'short', day:'numeric'}) : '';
-
- postsHtml+=`
- <div class="post-item" id="post-${p.id}">
-
+ postsHtml+=`<div class="post-item" id="post-${p.id}">
    ${p.image ? `<img src="${p.image}" class="post-media" alt="صورة المنشور">` : ""}
-
    ${p.video ? `<video controls class="post-media" style="max-height:350px;"><source src="${p.video}"></video>` : ""}
-
    ${p.audio ? `<audio controls style="width:100%;margin:0;padding:16px 18px 0;background:transparent;"><source src="${p.audio}"></audio>` : ""}
-
    <div class="post-content">
      <div class="post-text">${p.text||""}</div>
-
-     <div class="post-meta">
-       <span>📅 ${dateStr}</span>
-       <span class="post-meta-dot"></span>
-       <span>💬 ${comments.length} رد${comments.length !== 1 ? 'ود' : ''}</span>
-     </div>
-
+     <div class="post-meta"><span>📅 ${dateStr}</span><span class="post-meta-dot"></span><span>💬 ${comments.length} رد${comments.length !== 1 ? 'ود' : ''}</span></div>
      <div class="post-reactions">
        <button class="react-btn" onclick="reactPost('${p.id}','leaf')">🍂 <span>${p.leaf||0}</span></button>
        <button class="react-btn" onclick="reactPost('${p.id}','rose')">🌹 <span>${p.rose||0}</span></button>
@@ -2102,36 +876,17 @@ async function loadPosts(){
        <button class="post-share-btn" onclick="sharePost('${p.id}')">📤 مشاركة</button>
      </div>
    </div>
-
    <div class="post-comments-section">
      <div class="post-comment-input-row">
        <input type="text" class="post-comment-input" id="comment_${p.id}" placeholder="اكتب رداً على هذا المنشور...">
        <button class="post-comment-submit" onclick="addComment('${p.id}')">إرسال</button>
      </div>
-
-     ${comments.length > 0 ? `
-     <div class="comments-list">
-     ${comments.map(c=>`
-     <div class="comment-card" id="comment-${c.id}">
-       <div class="comment-text">${c.text}</div>
-       <div class="comment-reactions">
-         <button class="comment-react-btn" onclick="reactComment('${c.id}','like')">👍🏻 ${c.like||0}</button>
-         <button class="comment-react-btn" onclick="reactComment('${c.id}','rose')">🌹 ${c.rose||0}</button>
-         <button class="comment-react-btn" onclick="reactComment('${c.id}','heart')">🫀 ${c.heart||0}</button>
-         <button class="comment-react-btn" onclick="reactComment('${c.id}','book')">📚 ${c.book||0}</button>
-         <button class="comment-react-btn" onclick="reactComment('${c.id}','leaf')">🍂 ${c.leaf||0}</button>
-       </div>
-     </div>
-     `).join('')}
-     </div>
-     ` : ''}
+     ${comments.length > 0 ? `<div class="comments-list">${comments.map(c=>`<div class="comment-card" id="comment-${c.id}"><div class="comment-text">${c.text}</div><div class="comment-reactions"><button class="comment-react-btn" onclick="reactComment('${c.id}','like')">👍🏻 ${c.like||0}</button><button class="comment-react-btn" onclick="reactComment('${c.id}','rose')">🌹 ${c.rose||0}</button><button class="comment-react-btn" onclick="reactComment('${c.id}','heart')">🫀 ${c.heart||0}</button><button class="comment-react-btn" onclick="reactComment('${c.id}','book')">📚 ${c.book||0}</button><button class="comment-react-btn" onclick="reactComment('${c.id}','leaf')">🍂 ${c.leaf||0}</button></div></div>`).join('')}</div>` : ''}
    </div>
  </div>`;
  }
  box.innerHTML=postsHtml;
  }
-
-
 const commentsAdmin=document.getElementById("commentsAdminList");
 if(commentsAdmin){
  const cs=await getDocs(collection(db,"comments"));
@@ -2139,40 +894,23 @@ if(commentsAdmin){
  commentsAdmin.innerHTML=ca.map(c=>`<div class="fawaid-item" id="comment-${c.id}">${c.text}<br><button onclick="deleteCommentItem('${c.id}')">حذف الرد</button></div>`).join('');
 }
 if(admin){
- admin.innerHTML=arr.map(p=>`
- <div class="fawaid-item" id="post-${p.id}">
-   <div>${p.text||""}</div>
-   <button onclick="editPost('${p.id}')">تعديل</button>
-   <button onclick="deletePostItem('${p.id}')">حذف</button>
- </div>`).join("");
+ admin.innerHTML=arr.map(p=>`<div class="fawaid-item" id="post-${p.id}"><div>${p.text||""}</div><button onclick="editPost('${p.id}')">تعديل</button><button onclick="deletePostItem('${p.id}')">حذف</button></div>`).join("");
  }
 }
 
 window.addPost = async function(){
-
  const text=document.getElementById("postInput").value.trim();
  if(!text) return;
-
  const image=document.getElementById("postImage").value.trim();
  const audio=document.getElementById("postAudio").value.trim();
  const video=document.getElementById("postVideo").value.trim();
-
- await addDoc(collection(db,"posts"),{
-  text,
-  image,
-  audio,
-  video,
-  time:Date.now(),
-  leaf:0,rose:0,book:0,like:0,heart:0
- });
-
+ await addDoc(collection(db,"posts"),{text,image,audio,video,time:Date.now(),leaf:0,rose:0,book:0,like:0,heart:0});
  document.getElementById("postInput").value="";
  document.getElementById("postImage").value="";
  document.getElementById("postAudio").value="";
  document.getElementById("postVideo").value="";
-
  loadPosts();
-setTimeout(focusSharedPost,1500);
+ setTimeout(focusSharedPost,1500);
 };
 
 window.editPost = async function(id){
@@ -2185,15 +923,8 @@ window.editPost = async function(id){
 };
 
 window.deletePostItem = async function(id){
-
- const commentsSnap = await getDocs(
- query(collection(db,"comments"),where("postId","==",id))
- );
-
- for(const c of commentsSnap.docs){
-   await deleteDoc(doc(db,"comments",c.id));
- }
-
+ const commentsSnap = await getDocs(query(collection(db,"comments"),where("postId","==",id)));
+ for(const c of commentsSnap.docs){await deleteDoc(doc(db,"comments",c.id));}
  await deleteDoc(doc(db,"posts",id));
  loadPosts();
 };
@@ -2202,9 +933,7 @@ window.reactPost = async function(id,type){
  const s=await getDoc(doc(db,"posts",id));
  if(!s.exists()) return;
  const d=s.data();
- await updateDoc(doc(db,"posts",id),{
-   [type]:(d[type]||0)+1
- });
+ await updateDoc(doc(db,"posts",id),{[type]:(d[type]||0)+1});
  loadPosts();
 };
 
@@ -2221,12 +950,7 @@ async function loadCommentsForPost(postId){
 window.addComment=async function(postId){
  const el=document.getElementById("comment_"+postId);
  if(!el || !el.value.trim()) return;
- await addDoc(collection(db,"comments"),{
-   postId:postId,
-   text:el.value.trim(),
-   time:Date.now(),
-   like:0,rose:0,heart:0,book:0,leaf:0
- });
+ await addDoc(collection(db,"comments"),{postId:postId,text:el.value.trim(),time:Date.now(),like:0,rose:0,heart:0,book:0,leaf:0});
  el.value="";
  loadPosts();
 };
@@ -2244,52 +968,26 @@ window.deleteCommentItem=async function(id){
  loadPosts();
 };
 
-
 window.sharePost=function(postId){
  const url=location.origin+location.pathname+'?post='+postId;
- if(navigator.share){
-   navigator.share({title:'منشور',url:url});
- }else{
-   navigator.clipboard.writeText(url);
-   alert('تم نسخ رابط المنشور');
- }
+ if(navigator.share){navigator.share({title:'منشور',url:url});}else{navigator.clipboard.writeText(url);alert('تم نسخ رابط المنشور');}
 };
 
 function focusSharedPost(){
-
  const postId=new URLSearchParams(location.search).get('post');
  if(!postId) return;
-
  let tries=0;
-
  const timer=setInterval(()=>{
-
    const el=document.getElementById('post-'+postId);
-
    tries++;
-
-   if(el){
-      clearInterval(timer);
-      el.classList.add('highlight-post');
-      setTimeout(()=>{
-        el.scrollIntoView({behavior:'smooth',block:'center'});
-      },500);
-   }
-
+   if(el){clearInterval(timer);el.classList.add('highlight-post');setTimeout(()=>{el.scrollIntoView({behavior:'smooth',block:'center'});},500);}
    if(tries>30) clearInterval(timer);
-
  },300);
-
 }
 
-/* ===== نهاية المنشورات ===== */
-
-
 /* ===== نسب الإنجاز والفصول ===== */
-
 const subjects = ['aqida','hadith','fiqh','usul','history','dawah','tajweed','literature','nahw','computer','english','tafsir'];
 
-// تحميل نسب الإنجاز
 async function loadProgress(){
   try{
     const snap = await getDocs(collection(db, "progress"));
@@ -2299,62 +997,35 @@ async function loadProgress(){
       if(data.percent !== undefined){
         const bar = document.getElementById('bar-' + subj);
         const pct = document.getElementById('percent-' + subj);
-        if(bar){
-          bar.style.height = data.percent + '%';
-        }
-        if(pct){
-          pct.innerText = data.percent + '%';
-        }
+        if(bar){bar.style.height = data.percent + '%';}
+        if(pct){pct.innerText = data.percent + '%';}
       }
     });
-    
-    // ===== ترتيب المواد حسب نسبة الإنجاز (الأعلى أولاً) =====
     sortSubjectsByProgress();
-    
-  }catch(e){
-    console.log('progress load error:', e);
-  }
+  }catch(e){console.log('progress load error:', e);}
 }
 
-// ترتيب المواد حسب نسبة الإنجاز (الأعلى أولاً)
 function sortSubjectsByProgress(){
   const grid = document.getElementById('subjectsGrid');
   if(!grid) return;
-  
   const allCards = Array.from(grid.children);
   const subjectCards = allCards.filter(c => !c.classList.contains('share-card'));
   const shareCard = allCards.find(c => c.classList.contains('share-card'));
-  
   if(!shareCard) return;
-  
-  // Get progress for each subject card
   const cardsWithProgress = subjectCards.map(card => {
-    // Extract subject id from href
     const href = card.getAttribute('href') || '';
     const match = href.match(/id=([a-z]+)/);
     const subjectId = match ? match[1] : '';
-    
-    // Get progress value from the percentage text
     const percentEl = card.querySelector('[id^="percent-"]');
     const progressText = percentEl ? percentEl.innerText : '0%';
     const progress = parseInt(progressText.replace('%', '')) || 0;
-    
     return { card, progress, subjectId };
   });
-  
-  // Sort descending by progress (highest first)
   cardsWithProgress.sort((a, b) => b.progress - a.progress);
-  
-  // Re-append cards in new order
-  cardsWithProgress.forEach(item => {
-    grid.appendChild(item.card);
-  });
-  
-  // Keep share card at the end
+  cardsWithProgress.forEach(item => {grid.appendChild(item.card);});
   grid.appendChild(shareCard);
 }
 
-// نافذة الفصول
 let currentModalSubject = '';
 
 window.openChaptersModal = async function(subjectId, subjectName){
@@ -2375,50 +1046,25 @@ window.closeChaptersModal = function(e){
 async function renderChaptersModal(subjectId){
   const body = document.getElementById('chaptersModalBody');
   body.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.5);padding:20px;">جاري التحميل...</div>';
-
   try{
     const snap = await getDocs(collection(db, "chapters", subjectId, "items"));
     let chapters = [];
     snap.forEach(d => chapters.push({id: d.id, ...d.data()}));
     chapters.sort((a,b) => (a.order || 0) - (b.order || 0));
-
-    if(chapters.length === 0){
-      body.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.5);padding:30px;">لا توجد فصول مضافة بعد</div>';
-      return;
-    }
-
+    if(chapters.length === 0){body.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.5);padding:30px;">لا توجد فصول مضافة بعد</div>';return;}
     let html = '';
     for(const ch of chapters){
       const isCompleted = ch.completed === true;
       const lessons = ch.lessons || [];
-
-      html += `
-      <div class="chapter-item ${isCompleted ? 'completed' : ''}" id="chapter-${ch.id}">
-        <div class="chapter-item-header">
-          <div class="chapter-checkbox ${isCompleted ? 'checked' : ''}" onclick="toggleChapterComplete('${subjectId}','${ch.id}')"></div>
-          <h4 class="chapter-title">${ch.title || 'فصل بدون عنوان'}</h4>
-        </div>
-        <div class="chapter-lessons">
-      `;
-
+      html += `<div class="chapter-item ${isCompleted ? 'completed' : ''}" id="chapter-${ch.id}"><div class="chapter-item-header"><div class="chapter-checkbox ${isCompleted ? 'checked' : ''}" onclick="toggleChapterComplete('${subjectId}','${ch.id}')"></div><h4 class="chapter-title">${ch.title || 'فصل بدون عنوان'}</h4></div><div class="chapter-lessons">`;
       for(const lesson of lessons){
         const lessonCompleted = lesson.completed === true;
-        html += `
-        <div class="lesson-item ${lessonCompleted ? 'completed' : ''}">
-          <div class="lesson-checkbox ${lessonCompleted ? 'checked' : ''}" onclick="toggleLessonComplete('${subjectId}','${ch.id}','${lesson.id || lesson.name}')"></div>
-          <span>${lesson.name || lesson}</span>
-        </div>
-        `;
+        html += `<div class="lesson-item ${lessonCompleted ? 'completed' : ''}"><div class="lesson-checkbox ${lessonCompleted ? 'checked' : ''}" onclick="toggleLessonComplete('${subjectId}','${ch.id}','${lesson.id || lesson.name}')"></div><span>${lesson.name || lesson}</span></div>`;
       }
-
       html += '</div></div>';
     }
-
     body.innerHTML = html;
-  }catch(e){
-    console.log(e);
-    body.innerHTML = '<div style="text-align:center;color:#ef5350;padding:20px;">حدث خطأ في التحميل</div>';
-  }
+  }catch(e){console.log(e);body.innerHTML = '<div style="text-align:center;color:#ef5350;padding:20px;">حدث خطأ في التحميل</div>';}
 }
 
 window.toggleChapterComplete = async function(subjectId, chapterId){
@@ -2429,10 +1075,8 @@ window.toggleChapterComplete = async function(subjectId, chapterId){
     const current = snap.data().completed === true;
     await updateDoc(ref, {completed: !current});
     await renderChaptersModal(subjectId);
-    await loadProgress(); // تحديث النسبة
-  }catch(e){
-    console.log(e);
-  }
+    await loadProgress();
+  }catch(e){console.log(e);}
 };
 
 window.toggleLessonComplete = async function(subjectId, chapterId, lessonId){
@@ -2442,25 +1086,18 @@ window.toggleLessonComplete = async function(subjectId, chapterId, lessonId){
     if(!snap.exists()) return;
     const data = snap.data();
     let lessons = data.lessons || [];
-
-    // Find lesson by id or name
     const idx = lessons.findIndex(l => (l.id || l.name) === lessonId);
     if(idx === -1) return;
-
     lessons[idx].completed = !lessons[idx].completed;
     await updateDoc(ref, {lessons: lessons});
     await renderChaptersModal(subjectId);
-    await loadProgress(); // تحديث النسبة
-  }catch(e){
-    console.log(e);
-  }
+    await loadProgress();
+  }catch(e){console.log(e);}
 };
 
-// تحميل نسب الإنجاز عند بدء الصفحة
 loadProgress();
 
 /* ===== أدمن الفصول والنسب المحسّن ===== */
-
 let adminChaptersData = {};
 let editingChapterId = null;
 let editingLessonId = null;
@@ -2468,270 +1105,144 @@ let editingLessonId = null;
 window.loadAdminSubjectData = async function(){
   const subject = document.getElementById('adminSubjectSelect').value;
   if(!subject) return;
-
-  // Load progress
   try{
     const progSnap = await getDoc(doc(db, "progress", subject));
-    if(progSnap.exists()){
-      document.getElementById('adminProgressInput').value = progSnap.data().percent || 0;
-    }else{
-      document.getElementById('adminProgressInput').value = '';
-    }
+    if(progSnap.exists()){document.getElementById('adminProgressInput').value = progSnap.data().percent || 0;}
+    else{document.getElementById('adminProgressInput').value = '';}
   }catch(e){}
-
-  // Load chapters
   await loadAdminChaptersList(subject);
 };
 
 window.saveProgress = async function(){
   const subject = document.getElementById('adminSubjectSelect').value;
   const percent = parseInt(document.getElementById('adminProgressInput').value);
-
-  if(!subject || isNaN(percent) || percent < 0 || percent > 100){
-    alert('يرجى اختيار المادة وإدخال نسبة صحيحة (0-100)');
-    return;
-  }
-
+  if(!subject || isNaN(percent) || percent < 0 || percent > 100){alert('يرجى اختيار المادة وإدخال نسبة صحيحة (0-100)');return;}
   try{
     await setDoc(doc(db, "progress", subject), {percent: percent, updatedAt: Date.now()});
     alert('تم حفظ النسبة بنجاح ✅');
     await loadProgress();
-  }catch(e){
-    alert('حدث خطأ أثناء الحفظ ❌');
-    console.log(e);
-  }
+  }catch(e){alert('حدث خطأ أثناء الحفظ ❌');console.log(e);}
 };
 
-// Add or update chapter
 window.addAdminChapter = async function(){
   const subject = document.getElementById('adminSubjectSelect').value;
   const title = document.getElementById('adminChapterTitle').value.trim();
   const lessonsText = document.getElementById('adminChapterLessons').value.trim();
-
-  if(!subject){
-    alert('يرجى اختيار المادة أولاً');
-    return;
-  }
-  if(!title){
-    alert('يرجى إدخال عنوان الفصل');
-    return;
-  }
-
-  const lessons = lessonsText ? lessonsText.split('\n').map((l,i) => ({
-    id: 'lesson_' + Date.now() + '_' + i,
-    name: l.trim(),
-    completed: false
-  })).filter(l => l.name) : [];
-
+  if(!subject){alert('يرجى اختيار المادة أولاً');return;}
+  if(!title){alert('يرجى إدخال عنوان الفصل');return;}
+  const lessons = lessonsText ? lessonsText.split('\n').map((l,i) => ({id: 'lesson_' + Date.now() + '_' + i, name: l.trim(), completed: false})).filter(l => l.name) : [];
   try{
     if(editingChapterId){
-      // Update existing chapter
-      await updateDoc(doc(db, "chapters", subject, "items", editingChapterId), {
-        title: title,
-        lessons: lessons,
-        updatedAt: Date.now()
-      });
+      await updateDoc(doc(db, "chapters", subject, "items", editingChapterId), {title: title, lessons: lessons, updatedAt: Date.now()});
       alert('تم تعديل الفصل بنجاح ✅');
       editingChapterId = null;
       document.querySelector('button[onclick="addAdminChapter()"]').innerText = 'إضافة فصل';
     }else{
-      // Add new chapter
       const existing = await getDocs(collection(db, "chapters", subject, "items"));
       const order = existing.size;
-
-      await addDoc(collection(db, "chapters", subject, "items"), {
-        title: title,
-        lessons: lessons,
-        completed: false,
-        order: order,
-        createdAt: Date.now()
-      });
+      await addDoc(collection(db, "chapters", subject, "items"), {title: title, lessons: lessons, completed: false, order: order, createdAt: Date.now()});
       alert('تم إضافة الفصل بنجاح ✅');
     }
-
     document.getElementById('adminChapterTitle').value = '';
     document.getElementById('adminChapterLessons').value = '';
     await loadAdminChaptersList(subject);
-  }catch(e){
-    alert('حدث خطأ ❌');
-    console.log(e);
-  }
+  }catch(e){alert('حدث خطأ ❌');console.log(e);}
 };
 
-// Load admin chapters list with full edit/delete for lessons
 async function loadAdminChaptersList(subject){
   const container = document.getElementById('adminChaptersList');
-  if(!subject){
-    container.innerHTML = '<div style="color:rgba(255,255,255,.4);text-align:center;padding:20px;">اختر مادة لعرض الفصول</div>';
-    return;
-  }
-
+  if(!subject){container.innerHTML = '<div style="color:rgba(255,255,255,.4);text-align:center;padding:20px;">اختر مادة لعرض الفصول</div>';return;}
   try{
     const snap = await getDocs(collection(db, "chapters", subject, "items"));
     let chapters = [];
     snap.forEach(d => chapters.push({id: d.id, ...d.data()}));
     chapters.sort((a,b) => (a.order || 0) - (b.order || 0));
-
-    if(chapters.length === 0){
-      container.innerHTML = '<div style="color:rgba(255,255,255,.4);text-align:center;padding:20px;">لا توجد فصول مضافة</div>';
-      return;
-    }
-
+    if(chapters.length === 0){container.innerHTML = '<div style="color:rgba(255,255,255,.4);text-align:center;padding:20px;">لا توجد فصول مضافة</div>';return;}
     container.innerHTML = chapters.map(ch => {
       const lessons = ch.lessons || [];
-      const lessonsHtml = lessons.map((lesson, idx) => `
-        <div class="admin-lesson-row">
-          <span class="admin-lesson-name">${lesson.name || lesson}</span>
-          <div class="admin-lesson-actions">
-            <button class="admin-btn-tiny btn-edit" onclick="editAdminLesson('${subject}','${ch.id}','${idx}')">تعديل</button>
-            <button class="admin-btn-tiny btn-delete" onclick="deleteAdminLesson('${subject}','${ch.id}','${idx}')">حذف</button>
-          </div>
-        </div>
-      `).join('');
-
-      return `
-      <div class="admin-chapter-card" id="admin-chapter-${ch.id}">
-        <div class="admin-chapter-header">
-          <span class="admin-chapter-name">${ch.title}</span>
-          <div class="admin-chapter-actions">
-            <button class="admin-btn-tiny btn-edit" onclick="editAdminChapter('${subject}','${ch.id}')">تعديل الفصل</button>
-            <button class="admin-btn-tiny btn-delete" onclick="deleteAdminChapter('${subject}','${ch.id}')">حذف الفصل</button>
-          </div>
-        </div>
-        <div class="admin-lessons-list">
-          ${lessons.length > 0 ? lessonsHtml : '<div style="color:rgba(255,255,255,.3);font-size:12px;padding:5px;">لا توجد دروس</div>'}
-        </div>
-        <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.05);">
-          <button class="admin-btn-tiny btn-edit" onclick="addAdminLesson('${subject}','${ch.id}')">+ إضافة درس</button>
-        </div>
-      </div>
-      `;
+      const lessonsHtml = lessons.map((lesson, idx) => `<div class="admin-lesson-row"><span class="admin-lesson-name">${lesson.name || lesson}</span><div class="admin-lesson-actions"><button class="admin-btn-tiny btn-edit" onclick="editAdminLesson('${subject}','${ch.id}','${idx}')">تعديل</button><button class="admin-btn-tiny btn-delete" onclick="deleteAdminLesson('${subject}','${ch.id}','${idx}')">حذف</button></div></div>`).join('');
+      return `<div class="admin-chapter-card" id="admin-chapter-${ch.id}"><div class="admin-chapter-header"><span class="admin-chapter-name">${ch.title}</span><div class="admin-chapter-actions"><button class="admin-btn-tiny btn-edit" onclick="editAdminChapter('${subject}','${ch.id}')">تعديل الفصل</button><button class="admin-btn-tiny btn-delete" onclick="deleteAdminChapter('${subject}','${ch.id}')">حذف الفصل</button></div></div><div class="admin-lessons-list">${lessons.length > 0 ? lessonsHtml : '<div style="color:rgba(255,255,255,.3);font-size:12px;padding:5px;">لا توجد دروس</div>'}</div><div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.05);"><button class="admin-btn-tiny btn-edit" onclick="addAdminLesson('${subject}','${ch.id}')">+ إضافة درس</button></div></div>`;
     }).join('');
-  }catch(e){
-    container.innerHTML = '<div style="color:#ef5350;text-align:center;padding:20px;">خطأ في التحميل</div>';
-    console.log(e);
-  }
+  }catch(e){container.innerHTML = '<div style="color:#ef5350;text-align:center;padding:20px;">خطأ في التحميل</div>';console.log(e);}
 }
 
-// Edit chapter - fill form with chapter data
 window.editAdminChapter = async function(subject, chapterId){
   try{
     const snap = await getDoc(doc(db, "chapters", subject, "items", chapterId));
     if(!snap.exists()) return;
     const data = snap.data();
-
-    // Fill form
     document.getElementById('adminChapterTitle').value = data.title || '';
     const lessonsText = (data.lessons || []).map(l => l.name || l).join('\n');
     document.getElementById('adminChapterLessons').value = lessonsText;
-
-    // Set editing mode
     editingChapterId = chapterId;
     document.querySelector('button[onclick="addAdminChapter()"]').innerText = 'تحديث الفصل';
-
-    // Scroll to form
     document.getElementById('adminChapterTitle').scrollIntoView({behavior:'smooth'});
-  }catch(e){
-    alert('حدث خطأ ❌');
-    console.log(e);
-  }
+  }catch(e){alert('حدث خطأ ❌');console.log(e);}
 };
 
-// Delete chapter
 window.deleteAdminChapter = async function(subject, chapterId){
   if(!confirm('هل أنت متأكد من حذف هذا الفصل وجميع دروسه؟')) return;
   try{
     await deleteDoc(doc(db, "chapters", subject, "items", chapterId));
-
-    // Reset form if editing this chapter
     if(editingChapterId === chapterId){
       editingChapterId = null;
       document.getElementById('adminChapterTitle').value = '';
       document.getElementById('adminChapterLessons').value = '';
       document.querySelector('button[onclick="addAdminChapter()"]').innerText = 'إضافة فصل';
     }
-
     alert('تم الحذف ✅');
     await loadAdminChaptersList(subject);
-  }catch(e){
-    alert('حدث خطأ ❌');
-    console.log(e);
-  }
+  }catch(e){alert('حدث خطأ ❌');console.log(e);}
 };
 
-// Add lesson to existing chapter
 window.addAdminLesson = async function(subject, chapterId){
   const lessonName = prompt('اسم الدرس الجديد:');
   if(!lessonName || !lessonName.trim()) return;
-
   try{
     const ref = doc(db, "chapters", subject, "items", chapterId);
     const snap = await getDoc(ref);
     if(!snap.exists()) return;
-
     const data = snap.data();
     let lessons = data.lessons || [];
-    lessons.push({
-      id: 'lesson_' + Date.now(),
-      name: lessonName.trim(),
-      completed: false
-    });
-
+    lessons.push({id: 'lesson_' + Date.now(), name: lessonName.trim(), completed: false});
     await updateDoc(ref, {lessons: lessons});
     alert('تم إضافة الدرس ✅');
     await loadAdminChaptersList(subject);
-  }catch(e){
-    alert('حدث خطأ ❌');
-    console.log(e);
-  }
+  }catch(e){alert('حدث خطأ ❌');console.log(e);}
 };
 
-// Edit lesson
 window.editAdminLesson = async function(subject, chapterId, lessonIndex){
   try{
     const ref = doc(db, "chapters", subject, "items", chapterId);
     const snap = await getDoc(ref);
     if(!snap.exists()) return;
-
     const data = snap.data();
     let lessons = data.lessons || [];
     if(lessonIndex < 0 || lessonIndex >= lessons.length) return;
-
     const currentName = lessons[lessonIndex].name || lessons[lessonIndex];
     const newName = prompt('تعديل اسم الدرس:', currentName);
     if(newName === null) return;
-
     lessons[lessonIndex].name = newName.trim();
     await updateDoc(ref, {lessons: lessons});
     alert('تم التعديل ✅');
     await loadAdminChaptersList(subject);
-  }catch(e){
-    alert('حدث خطأ ❌');
-    console.log(e);
-  }
+  }catch(e){alert('حدث خطأ ❌');console.log(e);}
 };
 
-// Delete lesson
 window.deleteAdminLesson = async function(subject, chapterId, lessonIndex){
   if(!confirm('هل أنت متأكد من حذف هذا الدرس؟')) return;
-
   try{
     const ref = doc(db, "chapters", subject, "items", chapterId);
     const snap = await getDoc(ref);
     if(!snap.exists()) return;
-
     const data = snap.data();
     let lessons = data.lessons || [];
     if(lessonIndex < 0 || lessonIndex >= lessons.length) return;
-
     lessons.splice(lessonIndex, 1);
     await updateDoc(ref, {lessons: lessons});
     alert('تم الحذف ✅');
     await loadAdminChaptersList(subject);
-  }catch(e){
-    alert('حدث خطأ ❌');
-    console.log(e);
-  }
+  }catch(e){alert('حدث خطأ ❌');console.log(e);}
 };
 
 window.loadAdminChapters = async function(){
@@ -2745,17 +1256,186 @@ window.loadAdminChapters = async function(){
   document.getElementById('adminChaptersList').innerHTML = '<div style="color:rgba(255,255,255,.4);text-align:center;padding:20px;">اختر مادة لعرض الفصول</div>';
 };
 
-/* ===== نهاية أدمن الفصول ===== */
+/* ===== إدارة أيقونات الدائرة ===== */
+const iconConfig = {
+  last_studied: { emoji: '📖', label: 'آخر ما تم دراسته', title: '📖 آخر ما تم دراسته' },
+  benefits: { emoji: '💡', label: 'فوائد علمية', title: '💡 فوائد علمية' },
+  goals: { emoji: '🎯', label: 'أهداف دراسية', title: '🎯 الأهداف الدراسية' },
+  subjects: { emoji: '📚', label: 'نظرة على المواد', title: '📚 نظرة على المواد' }
+};
 
+let editingIconId = null;
 
-/* استقبال الإشعارات داخل الموقع */
+async function loadCircleWidget() {
+  try {
+    const snap = await getDocs(collection(db, "circle_icons"));
+    let icons = [];
+    snap.forEach(d => icons.push({id: d.id, ...d.data()}));
+    const latestByType = {};
+    icons.forEach(icon => {
+      if (!latestByType[icon.type] || (icon.createdAt || 0) > (latestByType[icon.type].createdAt || 0)) {
+        latestByType[icon.type] = icon;
+      }
+    });
+    if (latestByType['last_studied']) {
+      const data = latestByType['last_studied'];
+      document.getElementById('centerIcon').innerText = iconConfig.last_studied.emoji;
+      document.getElementById('centerLabel').innerText = iconConfig.last_studied.label;
+      document.getElementById('centerValue').innerText = data.title || '...';
+    }
+    window._circleIconsData = latestByType;
+  } catch(e) { console.log('circle widget load error:', e); }
+}
 
-onMessage(messaging,(payload)=>{
-console.log("Message received:", payload);
-});
+window.openCircleInfo = async function(type) {
+  const config = iconConfig[type];
+  if (!config) return;
+  document.getElementById('circleInfoTitle').innerText = config.title;
+  document.getElementById('circleInfoBody').innerHTML = 'جاري التحميل...';
+  document.getElementById('circleInfoDate').innerText = '';
+  document.getElementById('circleInfoModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  try {
+    const snap = await getDocs(collection(db, "circle_icons"));
+    let icons = [];
+    snap.forEach(d => icons.push({id: d.id, ...d.data()}));
+    icons = icons.filter(i => i.type === type);
+    icons.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    if (icons.length === 0) {
+      document.getElementById('circleInfoBody').innerHTML = '<div class="empty">لا توجد معلومات محفوظة لهذا القسم بعد.<br>يمكن إضافتها من لوحة الأدمن.</div>';
+      return;
+    }
+    const data = icons[0];
+    let html = '';
+    if (data.title) {
+      html += `<div style="font-weight:700;color:#f5e6b3;margin-bottom:10px;font-size:16px;">${data.title}</div>`;
+    }
+    if (data.content) {
+      const content = data.content.replace(/\n/g, '<br>');
+      html += `<div>${content}</div>`;
+    }
+    document.getElementById('circleInfoBody').innerHTML = html;
+    if (data.date) {
+      document.getElementById('circleInfoDate').innerText = '📅 ' + data.date;
+    } else if (data.createdAt) {
+      const d = new Date(data.createdAt).toLocaleDateString('ar-LY', {year:'numeric', month:'short', day:'numeric'});
+      document.getElementById('circleInfoDate').innerText = '📅 ' + d;
+    }
+  } catch(e) {
+    console.log(e);
+    document.getElementById('circleInfoBody').innerHTML = '<div style="color:#ef5350;">حدث خطأ في التحميل</div>';
+  }
+};
 
+window.closeCircleInfo = function(e) {
+  if(e && e.target !== document.getElementById('circleInfoModal')) return;
+  document.getElementById('circleInfoModal').classList.remove('active');
+  if (!circleOpen) document.body.style.overflow = '';
+};
+
+window.saveCircleIcon = async function() {
+  const type = document.getElementById('adminIconTypeSelect').value;
+  const title = document.getElementById('adminIconTitle').value.trim();
+  const content = document.getElementById('adminIconContent').value.trim();
+  const date = document.getElementById('adminIconDate').value.trim();
+  if (!type) { alert('يرجى اختيار نوع الأيقونة'); return; }
+  if (!title && !content) { alert('يرجى إدخال عنوان أو محتوى على الأقل'); return; }
+  try {
+    if (editingIconId) {
+      await updateDoc(doc(db, "circle_icons", editingIconId), {type, title, content, date, updatedAt: Date.now()});
+      alert('تم تعديل المعلومة بنجاح ✅');
+      editingIconId = null;
+      document.querySelector('button[onclick="saveCircleIcon()"]').innerText = 'حفظ المعلومة';
+    } else {
+      await addDoc(collection(db, "circle_icons"), {type, title, content, date, createdAt: Date.now()});
+      alert('تم حفظ المعلومة بنجاح ✅');
+    }
+    clearIconForm();
+    await loadAdminIconsList();
+    await loadCircleWidget();
+  } catch(e) {
+    alert('حدث خطأ أثناء الحفظ ❌');
+    console.log(e);
+  }
+};
+
+async function loadAdminIconsList() {
+  const container = document.getElementById('adminIconsList');
+  if (!container) return;
+  try {
+    const snap = await getDocs(collection(db, "circle_icons"));
+    let icons = [];
+    snap.forEach(d => icons.push({id: d.id, ...d.data()}));
+    icons.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    if (icons.length === 0) {
+      container.innerHTML = '<div style="color:rgba(255,255,255,.4);text-align:center;padding:20px;">لا توجد معلومات محفوظة</div>';
+      return;
+    }
+    container.innerHTML = icons.map(icon => {
+      const cfg = iconConfig[icon.type] || { emoji: '🔘', label: icon.type };
+      const dateStr = icon.date || (icon.createdAt ? new Date(icon.createdAt).toLocaleDateString('ar-LY') : '');
+      return `<div class="icon-admin-card" id="icon-admin-${icon.id}">
+        <div class="icon-admin-header">
+          <span class="icon-admin-title">${cfg.emoji} ${cfg.label}</span>
+          <div class="admin-chapter-actions">
+            <button class="admin-btn-tiny btn-edit" onclick="editCircleIcon('${icon.id}')">تعديل</button>
+            <button class="admin-btn-tiny btn-delete" onclick="deleteCircleIcon('${icon.id}')">حذف</button>
+          </div>
+        </div>
+        ${icon.title ? `<div style="font-weight:600;color:#fff;margin-bottom:6px;">${icon.title}</div>` : ''}
+        ${icon.content ? `<div class="icon-admin-body">${icon.content.replace(/\n/g, '<br>')}</div>` : ''}
+        ${dateStr ? `<div class="icon-admin-date">📅 ${dateStr}</div>` : ''}
+      </div>`;
+    }).join('');
+  } catch(e) {
+    container.innerHTML = '<div style="color:#ef5350;text-align:center;padding:20px;">خطأ في التحميل</div>';
+    console.log(e);
+  }
+}
+
+window.editCircleIcon = async function(id) {
+  try {
+    const snap = await getDoc(doc(db, "circle_icons", id));
+    if (!snap.exists()) return;
+    const data = snap.data();
+    document.getElementById('adminIconTypeSelect').value = data.type || '';
+    document.getElementById('adminIconTitle').value = data.title || '';
+    document.getElementById('adminIconContent').value = data.content || '';
+    document.getElementById('adminIconDate').value = data.date || '';
+    editingIconId = id;
+    document.querySelector('button[onclick="saveCircleIcon()"]').innerText = 'تحديث المعلومة';
+    document.getElementById('adminIconTypeSelect').scrollIntoView({behavior:'smooth'});
+  } catch(e) { alert('حدث خطأ ❌'); console.log(e); }
+};
+
+window.deleteCircleIcon = async function(id) {
+  if (!confirm('هل أنت متأكد من حذف هذه المعلومة؟')) return;
+  try {
+    await deleteDoc(doc(db, "circle_icons", id));
+    if (editingIconId === id) {
+      editingIconId = null;
+      clearIconForm();
+      document.querySelector('button[onclick="saveCircleIcon()"]').innerText = 'حفظ المعلومة';
+    }
+    alert('تم الحذف ✅');
+    await loadAdminIconsList();
+    await loadCircleWidget();
+  } catch(e) { alert('حدث خطأ ❌'); console.log(e); }
+};
+
+window.clearIconForm = function() {
+  document.getElementById('adminIconTypeSelect').value = '';
+  document.getElementById('adminIconTitle').value = '';
+  document.getElementById('adminIconContent').value = '';
+  document.getElementById('adminIconDate').value = '';
+  editingIconId = null;
+  const btn = document.querySelector('button[onclick="saveCircleIcon()"]');
+  if(btn) btn.innerText = 'حفظ المعلومة';
+};
+
+loadCircleWidget();
+
+onMessage(messaging,(payload)=>{console.log("Message received:", payload);});
 </script>
-
-
 </body>
 </html>
