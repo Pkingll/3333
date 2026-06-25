@@ -136,12 +136,30 @@ padding:15px;
 .itemBtn{
 padding:12px 14px;
 font-size:16px;
-
 margin:8px 0;
-background:#0d2033;
-border-radius:10px;
+background:rgba(13,32,51,.85);
+border-radius:12px;
 cursor:pointer;
 color:#f5e6b3;
+display:flex;
+justify-content:space-between;
+align-items:center;
+border:1px solid rgba(255,255,255,.08);
+transition:.3s;
+}
+
+.itemBtn:hover{
+background:rgba(26,58,92,.9);
+}
+
+.chapter-arrow{
+font-size:18px;
+color:rgba(245,230,179,.7);
+transition:.3s;
+}
+
+.itemBtn.open .chapter-arrow{
+transform:rotate(180deg);
 }
 
 .lessonBtn{
@@ -1168,8 +1186,9 @@ arr.forEach(data=>{
 const chapterId = data.id;
 chaptersList.innerHTML += `
 <div>
-<div class="itemBtn" onclick="openChapter('${chapterId}')">
-📂 ${data.title}
+<div class="itemBtn" id="chapterBtn-${chapterId}" onclick="openChapter('${chapterId}')">
+<span>📂 ${data.title}</span>
+<span class="chapter-arrow">⌄</span>
 </div>
 <div class="chapter-lessons" id="lessons-${chapterId}"></div>
 </div>`;
@@ -1185,7 +1204,13 @@ el.style.display='none';
 el.innerHTML='';
 });
 
-if(isOpen) return;
+if(isOpen){
+document.getElementById('chapterBtn-'+chapterId)?.classList.remove('open');
+return;
+}
+
+document.querySelectorAll('.itemBtn').forEach(btn=>btn.classList.remove('open'));
+document.getElementById('chapterBtn-'+chapterId)?.classList.add('open');
 
 const q = query(collection(db,'lessons'),where('chapterId','==',chapterId));
 const snap = await getDocs(q);
