@@ -92,9 +92,10 @@ text-decoration:none;
 
 .back{
 position:fixed;
-left:15px;
-bottom:15px;
-padding:14px 20px;
+left:10px;
+bottom:10px;
+padding:8px 12px;
+font-size:13px;
 border:none;
 border-radius:14px;
 background:#d4af37;
@@ -133,7 +134,9 @@ padding:15px;
 }
 
 .itemBtn{
-padding:10px;
+padding:12px 14px;
+font-size:16px;
+
 margin:8px 0;
 background:#0d2033;
 border-radius:10px;
@@ -147,6 +150,13 @@ margin:8px 0;
 background:#112233;
 border-radius:10px;
 cursor:pointer;
+}
+
+
+.chapter-lessons{
+display:none;
+margin-top:8px;
+margin-right:15px;
 }
 
 .search-box{
@@ -1157,28 +1167,40 @@ arr.sort((a,b)=>(a.order||0)-(b.order||0));
 arr.forEach(data=>{
 const chapterId = data.id;
 chaptersList.innerHTML += `
+<div>
 <div class="itemBtn" onclick="openChapter('${chapterId}')">
 📂 ${data.title}
+</div>
+<div class="chapter-lessons" id="lessons-${chapterId}"></div>
 </div>`;
 });
 }
 
 window.openChapter = async (chapterId)=>{
-document.getElementById("lessonsBox").style.display="block";
-const q = query(collection(db,"lessons"),where("chapterId","==",chapterId));
-const snap = await getDocs(q);
-lessonsList.innerHTML = "";
-let arr=[];
-snap.forEach(docu=>{
-arr.push(docu.data());
+const container=document.getElementById('lessons-'+chapterId);
+const isOpen=container.style.display==='block';
+
+document.querySelectorAll('.chapter-lessons').forEach(el=>{
+el.style.display='none';
+el.innerHTML='';
 });
+
+if(isOpen) return;
+
+const q = query(collection(db,'lessons'),where('chapterId','==',chapterId));
+const snap = await getDocs(q);
+let arr=[];
+snap.forEach(docu=>arr.push(docu.data()));
 arr.sort((a,b)=>(a.order||0)-(b.order||0));
+
+container.innerHTML='';
 arr.forEach(data=>{
-lessonsList.innerHTML += `
+container.innerHTML += `
 <div class="lessonBtn" onclick='openLesson(${JSON.stringify(data)})'>
 📖 ${data.title}
 </div>`;
 });
+container.style.display='block';
 };
 
 window.openLesson = (d)=>{
