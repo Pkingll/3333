@@ -904,6 +904,18 @@ flex-direction:column;
 align-items:flex-start;
 }
 }
+
+.lesson-content{
+display:none;
+background:#0b1b2b;
+margin:6px 0 12px 0;
+padding:15px;
+border-radius:10px;
+border:1px solid rgba(255,255,255,.08);
+line-height:1.9;
+}
+.lesson-content img{max-width:100%;border-radius:10px;margin:10px 0;}
+
 </style>
 
 </head>
@@ -1220,26 +1232,39 @@ arr.sort((a,b)=>(a.order||0)-(b.order||0));
 
 container.innerHTML='';
 arr.forEach(data=>{
+const encoded = encodeURIComponent(JSON.stringify(data));
 container.innerHTML += `
-<div class="lessonBtn" onclick='openLesson(${JSON.stringify(data)})'>
+<div class="lessonBtn" onclick="openLessonInline(this,'${encoded}')">
 📖 ${data.title}
-</div>`;
+</div>
+<div class="lesson-content"></div>`;
 });
 container.style.display='block';
 };
 
-window.openLesson = (d)=>{
-content.innerHTML = `
-<h2 style="color:#f5e6b3">${d.title}</h2>
+window.openLessonInline = (btn, encoded)=>{
+const d = JSON.parse(decodeURIComponent(encoded));
+const box = btn.nextElementSibling;
+
+if(box.style.display === 'block'){
+box.style.display='none';
+box.innerHTML='';
+return;
+}
+
+document.querySelectorAll('.lesson-content').forEach(el=>{
+el.style.display='none';
+el.innerHTML='';
+});
+
+box.innerHTML = `
+<h3 style="color:#f5e6b3">${d.title}</h3>
 <p>${d.text || ""}</p>
 ${d.image ? `<img src="${d.image}">` : ""}
-${d.audio ? `
-<div class="audio-box">
-<div class="audio-title">🎧 ${d.title}</div>
-<audio controls src="${d.audio}"></audio>
-</div>` : ""}
-${d.link ? `<a href="${d.link}" target="_blank">🔗 ${d.link}</a>` : ""}
+${d.audio ? `<div class="audio-box"><div class="audio-title">🎧 ${d.title}</div><audio controls src="${d.audio}"></audio></div>` : ""}
+${d.link ? `<a href="${d.link}" target="_blank">🔗 فتح الرابط</a>` : ""}
 `;
+box.style.display='block';
 };
 
 window.performSearch = function() {
