@@ -936,7 +936,7 @@ align-items:center;
 justify-content:center;
 cursor:pointer;
 box-shadow:0 4px 20px rgba(212,175,55,0.35),0 0 0 3px rgba(212,175,55,0.15);
-z-index:999;
+z-index:3000;
 transition:all .3s ease;
 border:none;
 font-size:22px;
@@ -993,7 +993,7 @@ left:65px;
 position:fixed;
 inset:0;
 background:rgba(6,19,31,.97);
-z-index:1001;
+z-index:3001;
 display:none;
 flex-direction:column;
 align-items:center;
@@ -1020,7 +1020,7 @@ align-items:center;
 background:rgba(6,19,31,.9);
 backdrop-filter:blur(15px);
 border-bottom:1px solid rgba(212,175,55,.15);
-z-index:1002;
+z-index:3002;
 }
 
 .gallery-header h3{
@@ -1119,7 +1119,7 @@ transform:translateY(0);
 position:fixed;
 inset:0;
 background:rgba(0,0,0,.95);
-z-index:1003;
+z-index:3003;
 display:none;
 align-items:center;
 justify-content:center;
@@ -2567,60 +2567,96 @@ setTimeout(() => toast.classList.remove('show'), 3000);
 
 loadChapters();
 
+</script>
+
+
+<!-- ════════════════════════════════════════
+     معرض صور المادة
+     ════════════════════════════════════════ -->
+
+<!-- زر المعرض العائم -->
+<button class="float-gallery-btn" id="galleryBtn" title="معرض صور المادة">
+🖼️
+<span class="badge" id="galleryBadge">0</span>
+<span class="tooltip">معرض صور المادة</span>
+</button>
+
+<!-- نافذة المعرض -->
+<div class="gallery-overlay" id="galleryOverlay">
+<div class="gallery-header">
+<h3>🖼️ معرض صور المادة <span class="count" id="galleryCount"></span></h3>
+<button class="gallery-close" id="galleryCloseBtn">✕</button>
+</div>
+<div class="gallery-grid" id="galleryGrid"></div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox-overlay" id="lightboxOverlay">
+<button class="lightbox-close" id="lightboxCloseBtn">✕</button>
+<img class="lightbox-img" id="lightboxImg" src="" alt="">
+<div class="lightbox-nav">
+<button id="lightboxPrev">◀ السابق</button>
+<span class="lightbox-counter" id="lightboxCounter">1 / 5</span>
+<button id="lightboxNext">التالي ▶</button>
+</div>
+</div>
 
 
 
+<script>
 // ════════════════════════════════════════
 // معرض صور المادة - يجمع تلقائياً
 // ════════════════════════════════════════
 
 (function(){
-const galleryBtn = document.getElementById('galleryBtn');
-const galleryBadge = document.getElementById('galleryBadge');
-const galleryOverlay = document.getElementById('galleryOverlay');
-const galleryCloseBtn = document.getElementById('galleryCloseBtn');
-const galleryGrid = document.getElementById('galleryGrid');
-const galleryCount = document.getElementById('galleryCount');
-const lightboxOverlay = document.getElementById('lightboxOverlay');
-const lightboxImg = document.getElementById('lightboxImg');
-const lightboxCloseBtn = document.getElementById('lightboxCloseBtn');
-const lightboxPrev = document.getElementById('lightboxPrev');
-const lightboxNext = document.getElementById('lightboxNext');
-const lightboxCounter = document.getElementById('lightboxCounter');
 
-let allImages = [];
-let currentLightboxIndex = 0;
+function initGallery(){
+var galleryBtn = document.getElementById('galleryBtn');
+var galleryBadge = document.getElementById('galleryBadge');
+var galleryOverlay = document.getElementById('galleryOverlay');
+var galleryCloseBtn = document.getElementById('galleryCloseBtn');
+var galleryGrid = document.getElementById('galleryGrid');
+var galleryCount = document.getElementById('galleryCount');
+var lightboxOverlay = document.getElementById('lightboxOverlay');
+var lightboxImg = document.getElementById('lightboxImg');
+var lightboxCloseBtn = document.getElementById('lightboxCloseBtn');
+var lightboxPrev = document.getElementById('lightboxPrev');
+var lightboxNext = document.getElementById('lightboxNext');
+var lightboxCounter = document.getElementById('lightboxCounter');
+
+var allImages = [];
+var currentLightboxIndex = 0;
 
 // جمع الصور من صفحة المادة
 function collectImages(){
-const images = [];
+var images = [];
+var seen = {};
 
 // من المحتوى الرئيسي
-const contentImgs = document.querySelectorAll('#content img');
-contentImgs.forEach((img, i) => {
-if(img.src && !img.src.includes('data:')){
+var contentImgs = document.querySelectorAll('#content img');
+for(var i = 0; i < contentImgs.length; i++){
+var img = contentImgs[i];
+if(img.src && img.src.indexOf('data:') === -1 && !seen[img.src]){
+seen[img.src] = true;
 images.push({
 src: img.src,
-alt: img.alt || 'صورة ' + (images.length + 1),
-source: 'المحتوى'
+alt: img.alt || 'صورة ' + (images.length + 1)
 });
 }
-});
+}
 
 // من الدروس المفتوحة
-const lessonImgs = document.querySelectorAll('.lesson-content img');
-lessonImgs.forEach((img, i) => {
-if(img.src && !img.src.includes('data:')){
-const exists = images.some(existing => existing.src === img.src);
-if(!exists){
+var lessonImgs = document.querySelectorAll('.lesson-content img');
+for(var j = 0; j < lessonImgs.length; j++){
+var limg = lessonImgs[j];
+if(limg.src && limg.src.indexOf('data:') === -1 && !seen[limg.src]){
+seen[limg.src] = true;
 images.push({
-src: img.src,
-alt: img.alt || 'صورة ' + (images.length + 1),
-source: 'الدروس'
+src: limg.src,
+alt: limg.alt || 'صورة ' + (images.length + 1)
 });
 }
 }
-});
 
 return images;
 }
@@ -2642,28 +2678,24 @@ allImages = collectImages();
 galleryGrid.innerHTML = '';
 
 if(allImages.length === 0){
-galleryGrid.innerHTML = `
-<div class="gallery-empty">
-<span class="icon">📭</span>
-<p>لا توجد صور في هذه المادة حالياً</p>
-</div>`;
+galleryGrid.innerHTML = '<div class="gallery-empty"><span class="icon">📭</span><p>لا توجد صور في هذه المادة حالياً</p></div>';
 galleryCount.textContent = '';
 return;
 }
 
 galleryCount.textContent = '(' + allImages.length + ' صورة)';
 
-allImages.forEach((img, index) => {
-const item = document.createElement('div');
+for(var k = 0; k < allImages.length; k++){
+(function(idx){
+var img = allImages[idx];
+var item = document.createElement('div');
 item.className = 'gallery-item';
-item.style.animationDelay = (index * 0.05) + 's';
-item.innerHTML = `
-<img src="${img.src}" alt="${img.alt}" loading="lazy">
-<div class="img-label">${img.alt}</div>
-`;
-item.addEventListener('click', () => openLightbox(index));
+item.style.animationDelay = (idx * 0.05) + 's';
+item.innerHTML = '<img src="' + img.src + '" alt="' + img.alt + '" loading="lazy"><div class="img-label">' + img.alt + '</div>';
+item.addEventListener('click', function(){ openLightbox(idx); });
 galleryGrid.appendChild(item);
-});
+})(k);
+}
 }
 
 // فتح المعرض
@@ -2710,19 +2742,19 @@ lightboxCounter.textContent = (currentLightboxIndex + 1) + ' / ' + allImages.len
 // Events
 galleryBtn.addEventListener('click', openGallery);
 galleryCloseBtn.addEventListener('click', closeGallery);
-galleryOverlay.addEventListener('click', (e) => {
+galleryOverlay.addEventListener('click', function(e){
 if(e.target === galleryOverlay) closeGallery();
 });
 
 lightboxCloseBtn.addEventListener('click', closeLightbox);
-lightboxOverlay.addEventListener('click', (e) => {
+lightboxOverlay.addEventListener('click', function(e){
 if(e.target === lightboxOverlay) closeLightbox();
 });
-lightboxPrev.addEventListener('click', (e) => { e.stopPropagation(); showPrev(); });
-lightboxNext.addEventListener('click', (e) => { e.stopPropagation(); showNext(); });
+lightboxPrev.addEventListener('click', function(e){ e.stopPropagation(); showPrev(); });
+lightboxNext.addEventListener('click', function(e){ e.stopPropagation(); showNext(); });
 
 // Keyboard
-document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', function(e){
 if(lightboxOverlay.classList.contains('show')){
 if(e.key === 'Escape') closeLightbox();
 if(e.key === 'ArrowLeft') showNext();
@@ -2732,21 +2764,21 @@ if(e.key === 'Escape') closeGallery();
 }
 });
 
-// تحديث عند فتح دروس
-const originalOpenLesson = window.openLessonInline;
-if(originalOpenLesson){
-window.openLessonInline = function(btn, encoded){
-originalOpenLesson(btn, encoded);
-setTimeout(updateBadge, 500);
-};
+// تحديث أولي
+updateBadge();
+
+// تحديث دوري (للدروس المفتوحة لاحقاً)
+setInterval(updateBadge, 2000);
 }
 
-// تحديث أولي
-setTimeout(updateBadge, 1000);
+// تشغيل بعد تحميل الصفحة
+if(document.readyState === 'loading'){
+document.addEventListener('DOMContentLoaded', initGallery);
+} else {
+initGallery();
+}
 
 })();
-
-
 </script>
 
 </body>
