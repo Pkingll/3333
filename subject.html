@@ -1571,6 +1571,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+/* ===== تطبيق خلفية المنصة المشتركة دون تغيير تنسيق الصفحة ===== */
+try{
+ const backgroundSnap = await getDoc(doc(db,"settings","platform"));
+ const backgroundUrl = backgroundSnap.exists() ? backgroundSnap.data().backgroundUrl : "";
+ if(backgroundUrl){
+   const sharedStyle = document.createElement("style");
+   sharedStyle.id = "sharedPlatformBackgroundStyle";
+   sharedStyle.textContent = `body:before{background-image:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),url("${backgroundUrl}");}`;
+   document.head.appendChild(sharedStyle);
+ }
+}catch(backgroundError){
+ console.log("تعذر تحميل خلفية المنصة المشتركة:",backgroundError);
+}
+
+
 // Expose for gallery
 window._db = db;
 try{
