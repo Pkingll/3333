@@ -477,9 +477,10 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-grad
 <hr style="margin:15px 0;border-color:rgba(255,255,255,.1)">
 <h3 style="color:#f5e6b3;">📢 إدارة المنشورات</h3>
 <textarea id="postInput" placeholder="اكتب المنشور هنا..."></textarea>
-<input id="postImage" placeholder="رابط صورة (اختياري)" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;">
-<input id="postAudio" placeholder="رابط صوت (اختياري)" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;">
-<input id="postVideo" placeholder="رابط فيديو (اختياري)" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;">
+<input id="postImageFile" type="file" accept="image/*" aria-label="اختيار صورة من الجهاز" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;color:white;">
+<input id="postAudioFile" type="file" accept="audio/*" aria-label="اختيار صوت من الجهاز" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;color:white;">
+<input id="postVideoFile" type="file" accept="video/*" aria-label="اختيار فيديو من الجهاز" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;color:white;">
+<div id="postUploadStatus" style="color:#f5e6b3;font-size:12px;margin:6px 0;"></div>
 <button onclick="addPost()">إضافة منشور</button>
 <div class="fawaid-list" id="postsAdminList" style="max-height:300px;overflow:auto;"></div>
 <h3 style="color:#f5e6b3">📬 إدارة الردود</h3>
@@ -757,19 +758,67 @@ if(admin){
  }
 }
 
+/* رفع ملفات المنشور المختارة من الجهاز إلى ImageKit */
+async function uploadPostMediaFile(file){
+ if(!file) return "";
+ const workerUrl = "https://talibat-images.alfzhm9.workers.dev/";
+ const publicKey = "public_NrPNz9r5yR8M+rvPnJnY0adp4po=";
+ const authResponse = await fetch(workerUrl,{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({fileName:file.name})
+ });
+ if(!authResponse.ok) throw new Error("تعذر الاتصال بخدمة تجهيز الرفع. تأكدي من نشر كود Cloudflare Worker.");
+ const auth = await authResponse.json();
+ if(!auth.token || !auth.signature || !auth.expire) throw new Error("لم تصل بيانات التحقق من خدمة الرفع.");
+ const form = new FormData();
+ form.append("file",file);
+ form.append("fileName",file.name);
+ form.append("publicKey",publicKey);
+ form.append("token",auth.token);
+ form.append("expire",String(auth.expire));
+ form.append("signature",auth.signature);
+ form.append("folder","/posts");
+ form.append("useUniqueFileName","true");
+ const response = await fetch("https://upload.imagekit.io/api/v1/files/upload",{method:"POST",body:form});
+ const result = await response.json();
+ if(!response.ok || !result.url) throw new Error(result.message || "فشل رفع أحد الملفات.");
+ return result.url;
+}
+
 window.addPost = async function(){
  const text=document.getElementById("postInput").value.trim();
- if(!text) return;
- const image=document.getElementById("postImage").value.trim();
- const audio=document.getElementById("postAudio").value.trim();
- const video=document.getElementById("postVideo").value.trim();
- await addDoc(collection(db,"posts"),{text,image,audio,video,time:Date.now(),leaf:0,rose:0,book:0,like:0,heart:0});
- document.getElementById("postInput").value="";
- document.getElementById("postImage").value="";
- document.getElementById("postAudio").value="";
- document.getElementById("postVideo").value="";
- loadPosts();
- setTimeout(focusSharedPost,1500);
+ const imageFile=document.getElementById("postImageFile").files[0];
+ const audioFile=document.getElementById("postAudioFile").files[0];
+ const videoFile=document.getElementById("postVideoFile").files[0];
+ const status=document.getElementById("postUploadStatus");
+ if(!text && !imageFile && !audioFile && !videoFile){
+   alert("اكتبي نص المنشور أو اختاري صورة أو صوتاً أو فيديو من الجهاز.");
+   return;
+ }
+ const button=document.querySelector('button[onclick="addPost()"]');
+ if(button) button.disabled=true;
+ try{
+   let image="",audio="",video="";
+   if(status) status.innerText="جاري تجهيز المنشور ورفع الملفات...";
+   if(imageFile){if(status) status.innerText="جاري رفع الصورة...";image=await uploadPostMediaFile(imageFile);}
+   if(audioFile){if(status) status.innerText="جاري رفع الملف الصوتي...";audio=await uploadPostMediaFile(audioFile);}
+   if(videoFile){if(status) status.innerText="جاري رفع الفيديو...";video=await uploadPostMediaFile(videoFile);}
+   await addDoc(collection(db,"posts"),{text,image,audio,video,time:Date.now(),leaf:0,rose:0,book:0,like:0,heart:0});
+   document.getElementById("postInput").value="";
+   document.getElementById("postImageFile").value="";
+   document.getElementById("postAudioFile").value="";
+   document.getElementById("postVideoFile").value="";
+   if(status) status.innerText="تم نشر المنشور بنجاح ✅";
+   await loadPosts();
+   setTimeout(focusSharedPost,1500);
+ }catch(error){
+   console.error("POST MEDIA UPLOAD ERROR:",error);
+   if(status) status.innerText="تعذر النشر: "+(error.message || "تحققي من اتصال الإنترنت وإعداد خدمة الرفع.");
+   alert("لم يتم نشر المنشور. "+(error.message || "حدث خطأ أثناء رفع الملفات."));
+ }finally{
+   if(button) button.disabled=false;
+ }
 };
 
 window.editPost = async function(id){
