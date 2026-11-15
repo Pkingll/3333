@@ -354,6 +354,21 @@ projectId: "p-726bc"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+/* ===== تطبيق خلفية المنصة المشتركة على لوحة التحكم ===== */
+try{
+ const backgroundSnap = await getDoc(doc(db,"settings","platform"));
+ const backgroundUrl = backgroundSnap.exists() ? backgroundSnap.data().backgroundUrl : "";
+ if(backgroundUrl){
+   const sharedStyle = document.createElement("style");
+   sharedStyle.id = "sharedPlatformBackgroundStyle";
+   sharedStyle.textContent = `body:before{background-image:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),url("${backgroundUrl}");}`;
+   document.head.appendChild(sharedStyle);
+ }
+}catch(backgroundError){
+ console.log("تعذر تحميل خلفية المنصة المشتركة:",backgroundError);
+}
+
+
 /* ================= إعداد ImageKit ================= */
 
 const IMAGEKIT_PUBLIC_KEY = "public_NrPNz9r5yR8M+rvPnJnY0adp4po=";
