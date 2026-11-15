@@ -470,6 +470,13 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-grad
 <div class="fawaid-panel" id="fawaidPanel">
 <div class="fawaid-content">
 <h3 style="color:#f5e6b3;">إدارة الفوائد الفقهية</h3>
+<div id="platformBackgroundAdmin" style="margin:12px 0;padding:12px;border:1px solid rgba(212,175,55,.3);border-radius:12px;background:rgba(255,255,255,.03);">
+ <h4 style="color:#f5e6b3;margin:0 0 8px;">🎨 تغيير خلفية المنصة</h4>
+ <input type="file" id="platformBackgroundFile" accept="image/*" style="width:100%;padding:8px;margin:5px 0;color:white;">
+ <div id="platformBackgroundStatus" style="font-size:12px;color:#f5e6b3;margin:6px 0;">اختاري صورة من جهازك لتكون خلفية جميع صفحات المنصة.</div>
+ <button type="button" onclick="savePlatformBackground()">💾 اعتماد الخلفية للجميع</button>
+ <button type="button" onclick="resetPlatformBackground()">↩️ استعادة الخلفية الأصلية</button>
+</div>
 <textarea id="fawaidInput" placeholder="اكتب الفائدة هنا..."></textarea>
 <button onclick="addFawaid()">إضافة</button>
 <button onclick="closeFawaidPanel()">إغلاق</button>
@@ -598,6 +605,95 @@ appId: "1:752913389065:web:20cf8c03fe4ace03650ad8"
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 const db = getFirestore(app);
+
+/* ===== خلفية موحدة لجميع صفحات المنصة ===== */
+const PLATFORM_BACKGROUND_DOC = doc(db,"settings","platform");
+const PLATFORM_DEFAULT_BACKGROUND = "https://a.top4top.io/p_38068co2c0.jpg";
+
+function applyPlatformBackground(url){
+ const image = url || PLATFORM_DEFAULT_BACKGROUND;
+ let style = document.getElementById("sharedPlatformBackgroundStyle");
+ if(!style){
+   style = document.createElement("style");
+   style.id = "sharedPlatformBackgroundStyle";
+   document.head.appendChild(style);
+ }
+ style.textContent = `body::before{background-image:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),url("${image}");}`;
+}
+
+async function loadPlatformBackground(){
+ try{
+   const snap = await getDoc(PLATFORM_BACKGROUND_DOC);
+   applyPlatformBackground(snap.exists() ? snap.data().backgroundUrl : "");
+ }catch(error){
+   console.log("تعذر تحميل خلفية المنصة:",error);
+ }
+}
+loadPlatformBackground();
+
+async function uploadPlatformBackgroundFile(file){
+ const workerUrl = "https://talibatt-image.alfzhm9.workers.dev/";
+ const publicKey = "public_NrPNz9r5yR8M+rvPnJnY0adp4po=";
+ const authResponse = await fetch(workerUrl,{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({fileName:file.name})
+ });
+ if(!authResponse.ok) throw new Error("تعذر الاتصال بخدمة تجهيز الرفع في Cloudflare.");
+ const auth = await authResponse.json();
+ if(!auth.token || !auth.signature || !auth.expire) throw new Error("بيانات التوثيق غير مكتملة.");
+ const form = new FormData();
+ form.append("file",file);
+ form.append("fileName",file.name);
+ form.append("publicKey",publicKey);
+ form.append("token",auth.token);
+ form.append("expire",String(auth.expire));
+ form.append("signature",auth.signature);
+ form.append("folder","/backgrounds");
+ form.append("useUniqueFileName","true");
+ const response = await fetch("https://upload.imagekit.io/api/v1/files/upload",{method:"POST",body:form});
+ const result = await response.json();
+ if(!response.ok || !result.url) throw new Error(result.message || "فشل رفع صورة الخلفية.");
+ return result.url;
+}
+
+window.savePlatformBackground = async function(){
+ const input = document.getElementById("platformBackgroundFile");
+ const status = document.getElementById("platformBackgroundStatus");
+ const file = input && input.files ? input.files[0] : null;
+ if(!file){alert("اختاري صورة الخلفية من جهازك أولاً.");return;}
+ if(!file.type.startsWith("image/")){alert("يرجى اختيار ملف صورة.");return;}
+ try{
+   status.textContent = "جاري رفع الخلفية وحفظها...";
+   const url = await uploadPlatformBackgroundFile(file);
+   await setDoc(PLATFORM_BACKGROUND_DOC,{backgroundUrl:url,updatedAt:Date.now()},{merge:true});
+   applyPlatformBackground(url);
+   status.textContent = "تم اعتماد الخلفية لجميع صفحات المنصة بنجاح ✅";
+   input.value = "";
+   alert("تم حفظ الخلفية الجديدة. ستظهر لجميع الزوار وفي صفحات المواد ولوحة التحكم.");
+ }catch(error){
+   console.error("PLATFORM BACKGROUND ERROR:",error);
+   status.textContent = "تعذر حفظ الخلفية: " + (error.message || "تحققي من الاتصال وإعدادات الرفع.");
+   alert("لم يتم تغيير الخلفية: " + (error.message || "حدث خطأ أثناء الرفع."));
+ }
+};
+
+window.resetPlatformBackground = async function(){
+ if(!confirm("هل تريدين استعادة الخلفية الأصلية لجميع صفحات المنصة؟")) return;
+ try{
+   await setDoc(PLATFORM_BACKGROUND_DOC,{backgroundUrl:"",updatedAt:Date.now()},{merge:true});
+   applyPlatformBackground("");
+   const input = document.getElementById("platformBackgroundFile");
+   const status = document.getElementById("platformBackgroundStatus");
+   if(input) input.value = "";
+   if(status) status.textContent = "تمت استعادة الخلفية الأصلية.";
+   alert("تمت استعادة الخلفية الأصلية لجميع الصفحات.");
+ }catch(error){
+   console.error(error);
+   alert("تعذر استعادة الخلفية. تحققي من اتصال الإنترنت.");
+ }
+};
+
 
 window.enableNotifications = async function(){
 try{
