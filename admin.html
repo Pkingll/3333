@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -225,6 +226,7 @@ margin-bottom:15px;
 <button onclick="addBook()">كتاب</button>
 <button onclick="addLink()">رابط</button>
 <button onclick="addAudio()">صوت</button>
+<button onclick="addVideo()">فيديو</button>
 
 <div id="preview"></div>
 
@@ -248,8 +250,16 @@ margin-bottom:15px;
 
 <input id="lessonTitle" placeholder="عنوان الدرس">
 <textarea id="lessonText" placeholder="نص الدرس"></textarea>
+
 <input id="lessonImage" placeholder="رابط صورة">
+<button onclick="selectLessonImage()">📷 رفع صورة من الجهاز</button>
+
 <input id="lessonAudio" placeholder="رابط صوت">
+<button onclick="selectLessonAudio()">🎵 رفع صوت من الجهاز</button>
+
+<input id="lessonVideo" placeholder="رابط فيديو">
+<button onclick="selectLessonVideo()">🎬 رفع فيديو من الجهاز</button>
+
 <input id="lessonLink" placeholder="رابط">
 
 <button onclick="addLesson()">➕ إضافة درس</button>
@@ -259,6 +269,19 @@ margin-bottom:15px;
 </div>
 
 </div>
+
+<!-- ملفات الرفع المخفية -->
+<input type="file" id="oldImageFile" accept="image/*" hidden>
+<input type="file" id="oldAudioFile" accept="audio/*" hidden>
+<input type="file" id="oldVideoFile" accept="video/*" hidden>
+
+<input type="file" id="lessonImageFile" accept="image/*" hidden>
+<input type="file" id="lessonAudioFile" accept="audio/*" hidden>
+<input type="file" id="lessonVideoFile" accept="video/*" hidden>
+
+<input type="file" id="editImageFile" accept="image/*" hidden>
+<input type="file" id="editAudioFile" accept="audio/*" hidden>
+<input type="file" id="editVideoFile" accept="video/*" hidden>
 
 <!-- ===== نافذة تعديل الدرس ===== -->
 <div class="modal-overlay" id="editModal">
@@ -273,9 +296,15 @@ margin-bottom:15px;
 
 <label>رابط الصورة:</label>
 <input id="editImage" type="text">
+<button onclick="selectEditImage()">📷 رفع صورة</button>
 
 <label>رابط الصوت:</label>
 <input id="editAudio" type="text">
+<button onclick="selectEditAudio()">🎵 رفع صوت</button>
+
+<label>رابط الفيديو:</label>
+<input id="editVideo" type="text">
+<button onclick="selectEditVideo()">🎬 رفع فيديو</button>
 
 <label>الرابط:</label>
 <input id="editLink" type="text">
@@ -301,6 +330,7 @@ margin-bottom:15px;
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
 import {
 getFirestore,
 collection,
@@ -316,7 +346,7 @@ getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",
+apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM5_ww",
 authDomain: "p-726bc.firebaseapp.com",
 projectId: "p-726bc"
 };
@@ -324,8 +354,98 @@ projectId: "p-726bc"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+/* ================= إعداد ImageKit ================= */
+
+const IMAGEKIT_PUBLIC_KEY = "public_NrPNz9r5yR8M+rvPnJnY0adp4po=";
+
+const IMAGEKIT_AUTH_URL =
+"https://talibatt-image.alfzhm9.workers.dev";
+
+async function uploadToImageKit(file){
+
+if(!file){
+throw new Error("لم يتم اختيار ملف");
+}
+
+const authResponse = await fetch(IMAGEKIT_AUTH_URL,{
+method:"POST"
+});
+
+if(!authResponse.ok){
+throw new Error("تعذر الاتصال بخدمة التوثيق. تحققي من إعدادات Cloudflare.");
+}
+
+const auth = await authResponse.json();
+
+if(!auth.token || !auth.signature || !auth.expire){
+throw new Error("بيانات التوثيق غير مكتملة");
+}
+
+const formData = new FormData();
+
+formData.append("file",file);
+formData.append("fileName",file.name);
+formData.append("publicKey",IMAGEKIT_PUBLIC_KEY);
+formData.append("signature",auth.signature);
+formData.append("token",auth.token);
+formData.append("expire",auth.expire);
+formData.append("useUniqueFileName","true");
+
+const response = await fetch(
+"https://upload.imagekit.io/api/v1/files/upload",
+{
+method:"POST",
+body:formData
+}
+);
+
+const result = await response.json();
+
+if(!response.ok || !result.url){
+throw new Error(result.message || "فشل رفع الملف إلى ImageKit");
+}
+
+return result.url;
+}
+
+function chooseFile(inputId,callback){
+
+const input = document.getElementById(inputId);
+
+input.value = "";
+
+input.onchange = async ()=>{
+
+const file = input.files[0];
+
+if(!file) return;
+
+try{
+
+alert("بدأ رفع الملف، يرجى الانتظار...");
+
+const url = await uploadToImageKit(file);
+
+await callback(url,file);
+
+alert("تم رفع الملف بنجاح");
+
+}catch(error){
+
+console.error(error);
+
+alert("حدث خطأ أثناء الرفع: " + error.message);
+
+}
+};
+
+input.click();
+}
+
 /* ================= النظام القديم ================= */
+
 let items = [];
+
 let subject = document.getElementById("subject").value;
 
 document.getElementById("subject").onchange = ()=>{
@@ -333,15 +453,101 @@ subject = document.getElementById("subject").value;
 loadOld();
 };
 
-window.addTitle = ()=>{items.push({type:"title",text:prompt("عنوان")});render();autoSave();}
-window.addText = ()=>{items.push({type:"text",text:prompt("نص")});render();autoSave();}
-window.addImage = ()=>{items.push({type:"image",url:prompt("رابط")});render();autoSave();}
-window.addBook = ()=>{items.push({type:"book",name:prompt("اسم"),url:prompt("رابط")});render();autoSave();}
-window.addLink = ()=>{items.push({type:"link",name:prompt("اسم"),url:prompt("رابط")});render();autoSave();}
-window.addAudio = ()=>{items.push({type:"audio",name:prompt("اسم"),url:prompt("رابط")});render();autoSave();}
+window.addTitle = ()=>{
+items.push({type:"title",text:prompt("عنوان")});
+render();
+autoSave();
+};
+
+window.addText = ()=>{
+items.push({type:"text",text:prompt("نص")});
+render();
+autoSave();
+};
+
+window.addImage = ()=>{
+chooseFile("oldImageFile",async url=>{
+
+items.push({
+type:"image",
+url:url
+});
+
+render();
+await autoSave();
+
+});
+};
+
+window.addBook = ()=>{
+items.push({
+type:"book",
+name:prompt("اسم"),
+url:prompt("رابط")
+});
+render();
+autoSave();
+};
+
+window.addLink = ()=>{
+items.push({
+type:"link",
+name:prompt("اسم"),
+url:prompt("رابط")
+});
+render();
+autoSave();
+};
+
+window.addAudio = ()=>{
+
+let name = prompt("اسم الصوت");
+
+if(!name) return;
+
+chooseFile("oldAudioFile",async url=>{
+
+items.push({
+type:"audio",
+name:name,
+url:url
+});
+
+render();
+await autoSave();
+
+});
+
+};
+
+window.addVideo = ()=>{
+
+let name = prompt("اسم الفيديو");
+
+if(!name) return;
+
+chooseFile("oldVideoFile",async url=>{
+
+items.push({
+type:"video",
+name:name,
+url:url
+});
+
+render();
+await autoSave();
+
+});
+
+};
 
 window.editItem = (i)=>{
-let v = prompt("تعديل", items[i].text || items[i].name || items[i].url);
+
+let v = prompt(
+"تعديل",
+items[i].text || items[i].name || items[i].url
+);
+
 if(!v) return;
 
 if(items[i].text) items[i].text=v;
@@ -359,30 +565,39 @@ autoSave();
 };
 
 function render(){
+
 preview.innerHTML = items.map((i,k)=>`
 <div class="item">
-${i.text || i.name || i.url}
+${i.text || i.name || i.url || ""}
 <div class="actions">
 <button class="edit" onclick="editItem(${k})">تعديل</button>
 <button class="delete" onclick="deleteItem(${k})">حذف</button>
 </div>
 </div>
 `).join("");
+
 }
 
 async function loadOld(){
+
 let d = await getDoc(doc(db,"subjects",subject));
+
 items = d.exists() ? d.data().items || [] : [];
+
 render();
+
 }
 
 async function autoSave(){
+
 await setDoc(doc(db,"subjects",subject),{items});
+
 }
 
 window.saveOld = autoSave;
 
 /* ================= الفصول ================= */
+
 let subject2="aqida";
 
 subject2 = document.getElementById("subject").value;
@@ -397,6 +612,7 @@ loadChapters();
 };
 
 window.addChapter = async ()=>{
+
 if(!chapterTitle.value) return;
 
 await addDoc(collection(db,"chapters"),{
@@ -406,22 +622,31 @@ order:Date.now()
 });
 
 chapterTitle.value="";
+
 loadChapters();
+
 };
 
 async function loadChapters(){
 
-let q = query(collection(db,"chapters"),where("subject","==",subject2));
+let q = query(
+collection(db,"chapters"),
+where("subject","==",subject2)
+);
+
 let snap = await getDocs(q);
 
 chaptersList.innerHTML="";
 chapterSelect.innerHTML="";
 
 let arr=[];
+
 snap.forEach(d=>arr.push({id:d.id,...d.data()}));
+
 arr.sort((a,b)=>(a.order||0)-(b.order||0));
 
 arr.forEach(data=>{
+
 let id=data.id;
 
 chaptersList.innerHTML+=`
@@ -436,46 +661,87 @@ chaptersList.innerHTML+=`
 </div>`;
 
 chapterSelect.innerHTML+=`<option value="${id}">${data.title}</option>`;
+
 });
 
 loadLessons();
+
 }
 
 window.editChapter = async (id,title)=>{
+
 let t=prompt("تعديل",title);
+
 if(!t) return;
+
 await updateDoc(doc(db,"chapters",id),{title:t});
+
 loadChapters();
+
 };
 
 window.deleteChapter = async (id)=>{
+
 await deleteDoc(doc(db,"chapters",id));
+
 loadChapters();
+
+};
+
+/* ================= رفع ملفات الدروس ================= */
+
+window.selectLessonImage = ()=>{
+chooseFile("lessonImageFile",url=>{
+document.getElementById("lessonImage").value=url;
+});
+};
+
+window.selectLessonAudio = ()=>{
+chooseFile("lessonAudioFile",url=>{
+document.getElementById("lessonAudio").value=url;
+});
+};
+
+window.selectLessonVideo = ()=>{
+chooseFile("lessonVideoFile",url=>{
+document.getElementById("lessonVideo").value=url;
+});
 };
 
 /* ================= الدروس ================= */
 
 window.addLesson = async ()=>{
+
 await addDoc(collection(db,"lessons"),{
+
 subject:subject2,
 chapterId:chapterSelect.value,
 title:lessonTitle.value,
 text:lessonText.value,
 image:lessonImage.value,
 audio:lessonAudio.value,
+video:lessonVideo.value,
 link:lessonLink.value,
 time:Date.now(),
 order:Date.now()
+
 });
 
 loadLessons();
+
 };
+
+/* ================= تحميل الدروس ================= */
 
 async function loadLessons(){
 
 if(!chapterSelect.value) return;
 
-let q=query(collection(db,"lessons"),where("chapterId","==",chapterSelect.value));
+let q=query(
+collection(db,"lessons"),
+where("chapterId","==",chapterSelect.value)
+);
+
 let snap=await getDocs(q);
 
 lessonsList.innerHTML="";
@@ -483,10 +749,12 @@ lessonsList.innerHTML="";
 let arr=[];
 
 snap.forEach(d=>{
+
 arr.push({
 id:d.id,
 ...d.data()
 });
+
 });
 
 arr.sort((a,b)=>(a.order||0)-(b.order||0));
@@ -514,74 +782,141 @@ lessonsList.innerHTML+=`
 
 </div>
 </div>`;
+
 });
+
 }
 
 /* ================= عرض الدرس ================= */
+
 window.viewLesson = (dataStr)=>{
+
 let data = JSON.parse(decodeURIComponent(dataStr));
-document.getElementById("viewTitle").textContent = data.title || "بدون عنوان";
-document.getElementById("viewContent").textContent = data.text || "لا يوجد نص";
+
+document.getElementById("viewTitle").textContent =
+data.title || "بدون عنوان";
+
+document.getElementById("viewContent").textContent =
+data.text || "لا يوجد نص";
+
 document.getElementById("viewModal").style.display = "flex";
+
 };
 
 window.closeViewModal = ()=>{
+
 document.getElementById("viewModal").style.display = "none";
+
+};
+
+/* ================= رفع ملفات التعديل ================= */
+
+window.selectEditImage = ()=>{
+chooseFile("editImageFile",url=>{
+document.getElementById("editImage").value=url;
+});
+};
+
+window.selectEditAudio = ()=>{
+chooseFile("editAudioFile",url=>{
+document.getElementById("editAudio").value=url;
+});
+};
+
+window.selectEditVideo = ()=>{
+chooseFile("editVideoFile",url=>{
+document.getElementById("editVideo").value=url;
+});
 };
 
 /* ================= تعديل الدرس ================= */
+
 let currentEditId = null;
 
 window.editLesson = (id, dataStr)=>{
+
 let data = JSON.parse(decodeURIComponent(dataStr));
+
 currentEditId = id;
 
 document.getElementById("editTitle").value = data.title || "";
+
 document.getElementById("editText").value = data.text || "";
+
 document.getElementById("editImage").value = data.image || "";
+
 document.getElementById("editAudio").value = data.audio || "";
+
+document.getElementById("editVideo").value = data.video || "";
+
 document.getElementById("editLink").value = data.link || "";
 
 document.getElementById("editModal").style.display = "flex";
+
 };
 
 window.closeEditModal = ()=>{
+
 document.getElementById("editModal").style.display = "none";
+
 currentEditId = null;
+
 };
 
 window.saveEditLesson = async ()=>{
+
 if(!currentEditId) return;
 
 await updateDoc(doc(db,"lessons",currentEditId),{
+
 title: document.getElementById("editTitle").value,
+
 text: document.getElementById("editText").value,
+
 image: document.getElementById("editImage").value,
+
 audio: document.getElementById("editAudio").value,
+
+video: document.getElementById("editVideo").value,
+
 link: document.getElementById("editLink").value
+
 });
 
 closeEditModal();
+
 loadLessons();
+
 };
 
 window.deleteLesson = async (id)=>{
+
 await deleteDoc(doc(db,"lessons",id));
+
 loadLessons();
+
 };
+
+/* ================= تحريك الدروس ================= */
 
 async function swapLesson(id,direction){
 
-let q=query(collection(db,"lessons"),where("chapterId","==",chapterSelect.value));
+let q=query(
+collection(db,"lessons"),
+where("chapterId","==",chapterSelect.value)
+);
+
 let snap=await getDocs(q);
 
 let arr=[];
 
 snap.forEach(d=>{
+
 arr.push({
 id:d.id,
 ...d.data()
 });
+
 });
 
 arr.sort((a,b)=>(a.order||0)-(b.order||0));
@@ -595,9 +930,11 @@ let target = direction==="up" ? index-1 : index+1;
 if(target<0 || target>=arr.length) return;
 
 let current=arr[index];
+
 let other=arr[target];
 
 let currentOrder=current.order || index;
+
 let otherOrder=other.order || target;
 
 await updateDoc(doc(db,"lessons",current.id),{
@@ -609,43 +946,62 @@ order:currentOrder
 });
 
 loadLessons();
+
 }
 
 window.moveLessonUp=(id)=>swapLesson(id,"up");
+
 window.moveLessonDown=(id)=>swapLesson(id,"down");
 
-
+/* ================= تحريك الفصول ================= */
 
 async function swapChapter(id,direction){
 
-let q=query(collection(db,"chapters"),where("subject","==",subject2));
+let q=query(
+collection(db,"chapters"),
+where("subject","==",subject2)
+);
+
 let snap=await getDocs(q);
 
 let arr=[];
+
 snap.forEach(d=>arr.push({id:d.id,...d.data()}));
+
 arr.sort((a,b)=>(a.order||0)-(b.order||0));
 
 let index=arr.findIndex(x=>x.id===id);
+
 if(index===-1) return;
 
 let target=direction==="up"?index-1:index+1;
+
 if(target<0||target>=arr.length) return;
 
 let current=arr[index];
+
 let other=arr[target];
 
-await updateDoc(doc(db,"chapters",current.id),{order:other.order||target});
-await updateDoc(doc(db,"chapters",other.id),{order:current.order||index});
+await updateDoc(doc(db,"chapters",current.id),{
+order:other.order||target
+});
+
+await updateDoc(doc(db,"chapters",other.id),{
+order:current.order||index
+});
 
 loadChapters();
+
 }
 
 window.moveChapterUp=(id)=>swapChapter(id,"up");
+
 window.moveChapterDown=(id)=>swapChapter(id,"down");
 
 chapterSelect.onchange=loadLessons;
 
 loadOld();
+
 loadChapters();
 
 </script>
