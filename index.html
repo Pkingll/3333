@@ -1536,6 +1536,9 @@ body::before {
         <span id="challengeTotalVotes" class="tabular-nums" style="font-size:12px;color:var(--text-muted);">0 مشاركة</span>
       </div>
       <h3 id="challengeQuestionDisplay" class="challenge-question"></h3>
+      <div id="challengeFollowGateBanner" style="display:none;margin-bottom:12px;padding:9px 12px;border-radius:10px;background:rgba(212,175,55,0.12);border:1px dashed rgba(212,175,55,0.55);font-size:12.5px;color:#f5e6b3;line-height:1.6;">
+        🔒 <strong>مخصّص لمتابعي المنصة:</strong> اختاري إجابتكِ بالأسفل، وسيُطلب منكِ الضغط على <strong>«متابعة المنصة»</strong> لإظهار النتيجة والشرح فوراً!
+      </div>
       <div id="challengeOptionsBox" class="challenge-options"></div>
       <div id="challengeFeedbackBox" class="challenge-explanation" style="display:none;"></div>
       <div class="challenge-actions">
@@ -1760,6 +1763,27 @@ body::before {
         إلغاء متابعة المنصة
       </button>
     </div>
+  </div>
+</div>
+
+<div class="chapters-modal" id="challengeFollowGateModal" onclick="if(event.target===this)closeChallengeFollowGate()">
+  <div class="chapters-content" onclick="event.stopPropagation()" style="max-width:410px;text-align:center;">
+    <div class="chapters-header">
+      <h3>🔒 متابعة المنصة لإظهار النتيجة</h3>
+      <button class="chapters-close" onclick="closeChallengeFollowGate()">إغلاق ✕</button>
+    </div>
+    <img src="./pwa-192x192.png" alt="شعار المنصة" style="width:60px;height:60px;border-radius:50%;border:2px solid #d4af37;object-fit:cover;margin-bottom:8px;">
+    <div id="gateChosenOptionText" style="font-size:13px;font-weight:700;color:#f5e6b3;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);border-radius:10px;padding:8px 12px;margin-bottom:10px;"></div>
+    <p style="font-size:13.5px;color:#e5dfd3;line-height:1.75;margin:0 0 14px;">
+      المشاركة في <strong>تحدي اليوم التفاعلي</strong> متاحة لمتابعي منصة <strong>طالبة علم شرعي -سنة الثانية</strong>.<br>
+      تابعي المنصة الآن بضغطة واحدة لتظهر لكِ النتيجة والشرح العلمي فوراً!
+    </p>
+    <button type="button" onclick="confirmFollowAndSubmitChallenge()" style="width:100%;padding:12px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#25d366,#169c49);color:#041a0d;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:8px;">
+      🔔 متابعة المنصة وإظهار النتيجة فوراً
+    </button>
+    <button type="button" onclick="closeChallengeFollowGate()" style="width:100%;padding:8px;border:none;background:transparent;color:#9c9689;font-family:inherit;font-size:12px;cursor:pointer;">
+      إلغاء
+    </button>
   </div>
 </div>
 
@@ -3998,6 +4022,9 @@ function updateFollowButtonsUI(){
   if(heroCount) heroCount.textContent = currentFollowersCount;
   if(statCount) statCount.textContent = `${currentFollowersCount} متابع`;
   if(modalCount) modalCount.textContent = currentFollowersCount;
+  if(typeof activeDailyChallenge !== "undefined" && activeDailyChallenge){
+    renderDailyChallengeBox(activeDailyChallenge);
+  }
 }
 
 onSnapshot(PLATFORM_STATS_DOC, (snap) => {
@@ -4211,6 +4238,12 @@ function renderDailyChallengeBox(data){
     }).join("");
   }
 
+  const isFollowing = localStorage.getItem("talibat_is_following") === "1";
+  const gateBanner = document.getElementById("challengeFollowGateBanner");
+  if(gateBanner){
+    gateBanner.style.display = (!isFollowing && !hasVoted) ? "block" : "none";
+  }
+
   if(fb){
     if(hasVoted){
       const isRight = myChoice === Number(data.correctIndex);
@@ -4232,10 +4265,50 @@ onSnapshot(DAILY_CHALLENGE_DOC, (snap) => {
   }
 });
 
+let pendingChallengeVoteIdx = null;
+
+window.closeChallengeFollowGate = function(){
+  pendingChallengeVoteIdx = null;
+  const m = document.getElementById("challengeFollowGateModal");
+  if(m) m.classList.remove("active");
+};
+
+window.confirmFollowAndSubmitChallenge = async function(){
+  const idxToSubmit = pendingChallengeVoteIdx;
+  const already = localStorage.getItem("talibat_is_following") === "1";
+  if(!already){
+    localStorage.setItem("talibat_is_following", "1");
+    currentFollowersCount = currentFollowersCount + 1;
+    updateFollowButtonsUI();
+    try{
+      await setDoc(PLATFORM_STATS_DOC, { followersCount: increment(1), updatedAt: Date.now() }, { merge: true });
+    }catch(e){ console.log("follow gate err:", e); }
+  }
+  const m = document.getElementById("challengeFollowGateModal");
+  if(m) m.classList.remove("active");
+  pendingChallengeVoteIdx = null;
+  if(idxToSubmit !== null && idxToSubmit !== undefined){
+    await window.voteDailyChallenge(idxToSubmit);
+  }
+};
+
 window.voteDailyChallenge = async function(idx){
   if(!activeDailyChallenge) return;
   const challengeKey = "talibat_challenge_vote_" + String(activeDailyChallenge.updatedAt || "1");
   if(localStorage.getItem(challengeKey) !== null) return;
+
+  // إلزام الزائر بمتابعة المنصة إذا لم يتابعها بعد قبل احتساب الإجابة وإظهار النتيجة
+  const isFollowing = localStorage.getItem("talibat_is_following") === "1";
+  if(!isFollowing){
+    pendingChallengeVoteIdx = idx;
+    const chosenText = (activeDailyChallenge.options && activeDailyChallenge.options[idx]) ? activeDailyChallenge.options[idx] : "";
+    const chosenEl = document.getElementById("gateChosenOptionText");
+    if(chosenEl) chosenEl.textContent = chosenText ? `إجابتكِ المختارة: «${chosenText}»` : "تم اختيار إجابتكِ";
+    const m = document.getElementById("challengeFollowGateModal");
+    if(m) m.classList.add("active");
+    return;
+  }
+
   localStorage.setItem(challengeKey, String(idx));
 
   // تحديث فوري على الشاشة قبل وصول السيرفر
