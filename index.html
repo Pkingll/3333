@@ -1516,29 +1516,47 @@ body::before {
 </div>
 
 <div class="chapters-modal" id="shareQuoteModal" onclick="if(event.target===this)closeShareQuoteModal()">
-  <div class="chapters-content" onclick="event.stopPropagation()" style="max-width:430px;">
+  <div class="chapters-content" onclick="event.stopPropagation()" style="max-width:440px;">
     <div class="chapters-header">
-      <h3>🖼️ بطاقة مشاركة المنشور المقتبس</h3>
+      <h3 id="shareModalHeading">📤 مشاركة المنشور كاملاً</h3>
       <button class="chapters-close" onclick="closeShareQuoteModal()">إغلاق ✕</button>
     </div>
-    <div style="text-align:center;margin-bottom:12px;">
-      <canvas id="shareQuoteCanvas" width="1080" height="1080" style="width:100%;max-width:340px;height:auto;border-radius:14px;border:1px solid rgba(212,175,55,0.5);box-shadow:0 12px 30px rgba(0,0,0,0.45);background:#06111c;"></canvas>
+
+    <div id="shareCanvasWrap" style="text-align:center;margin-bottom:12px;">
+      <canvas id="shareQuoteCanvas" width="1080" height="1080" style="width:100%;max-width:340px;max-height:380px;object-fit:contain;border-radius:14px;border:1px solid rgba(212,175,55,0.5);box-shadow:0 12px 30px rgba(0,0,0,0.45);background:#06111c;"></canvas>
     </div>
-    <div id="shareQuoteStatus" style="font-size:12px;color:#f5e6b3;text-align:center;margin-bottom:10px;min-height:18px;">جاهزة للمشاركة في واتساب وفيسبوك كمنشور مقتبس من المنصة</div>
+
+    <div id="shareMediaWrap" style="display:none;margin-bottom:12px;border-radius:14px;overflow:hidden;border:1px solid rgba(212,175,55,0.45);background:#071525;">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(212,175,55,0.28);background:linear-gradient(135deg,rgba(212,175,55,0.16),rgba(10,27,44,0.95));">
+        <img src="./pwa-192x192.png" alt="شعار المنصة" style="width:34px;height:34px;border-radius:50%;border:1.5px solid #d4af37;object-fit:cover;flex-shrink:0;">
+        <div style="line-height:1.35;">
+          <div style="font-size:11px;font-weight:700;color:#d4af37;">🔁 معاد مشاركتها من منصة</div>
+          <div style="font-size:13px;font-weight:800;color:#f5e6b3;">طالبة علم شرعي -سنة الثانية</div>
+        </div>
+      </div>
+      <div id="shareMediaPlayerBox" style="padding:10px;"></div>
+      <div id="shareMediaTextPreview" style="display:none;padding:0 12px 12px;font-size:13px;color:#f4f1ea;line-height:1.7;white-space:pre-line;"></div>
+    </div>
+
+    <div id="shareQuoteStatus" style="font-size:12px;color:#f5e6b3;text-align:center;margin-bottom:10px;min-height:18px;">جاهز للمشاركة في واتساب والحالة وفيسبوك</div>
+
     <div style="display:flex;flex-direction:column;gap:8px;">
-      <button type="button" onclick="shareQuoteCardImage()" style="width:100%;padding:11px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#d4af37,#b89020);color:#06111c;font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;">
-        📤 مشاركة البطاقة المصورة (واتساب / فيسبوك)
+      <button type="button" id="sharePrimaryBtn" onclick="shareFullPostMedia()" style="width:100%;padding:11px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#d4af37,#b89020);color:#06111c;font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;">
+        📤 مشاركة المنشور كاملاً (واتساب / الحالة / فيسبوك)
       </button>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <button type="button" onclick="shareQuoteTextWhatsApp()" style="padding:9px 10px;border:1px solid rgba(37,211,102,0.45);border-radius:10px;background:rgba(37,211,102,0.14);color:#b9f6ca;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;">
-          💬 اقتباس نصي (واتساب)
+          💬 مشاركة نصية (واتساب)
         </button>
         <button type="button" onclick="copyQuoteText()" style="padding:9px 10px;border:1px solid rgba(212,175,55,0.4);border-radius:10px;background:rgba(212,175,55,0.12);color:#f5e6b3;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;">
-          📋 نسخ الاقتباس لفيسبوك
+          📋 نسخ الوصف لفيسبوك
         </button>
       </div>
-      <button type="button" onclick="downloadQuoteCardImage()" style="width:100%;padding:9px 12px;border:1px solid rgba(255,255,255,0.16);border-radius:10px;background:rgba(255,255,255,0.06);color:#e5dfd3;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;">
-        ⬇️ حفظ البطاقة في الهاتف (PNG)
+      <button type="button" id="shareDownloadBtn" onclick="downloadFullPostMedia()" style="width:100%;padding:9px 12px;border:1px solid rgba(255,255,255,0.16);border-radius:10px;background:rgba(255,255,255,0.06);color:#e5dfd3;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;">
+        ⬇️ حفظ في الهاتف
+      </button>
+      <button type="button" id="shareSwitchQuoteCardBtn" onclick="switchToQuoteCardPreview()" style="display:none;width:100%;padding:8px 12px;border:1px dashed rgba(212,175,55,0.4);border-radius:10px;background:transparent;color:#f5e6b3;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;">
+        🖼️ إنشاء بطاقة صورة لهذا المنشور (لحالة واتساب)
       </button>
     </div>
   </div>
@@ -2590,17 +2608,18 @@ window.deleteCommentItem=async function(id){
 };
 
 let currentShareQuoteData = null;
+let currentShareMode = 'card'; // 'video' | 'audio' | 'image-card' | 'card'
 
 function buildQuotedPostCaption(post){
   const url = location.origin + location.pathname + '?post=' + post.id;
   const rawText = (post.text || '').trim();
-  const cleanText = rawText || 'منشور علمي جديد على منصة طالبة علم شرعي';
+  const cleanText = rawText || (post.video ? 'فيديو علمي منشور على منصة طالبة علم شرعي' : (post.audio ? 'مقطع صوتي علمي منشور على منصة طالبة علم شرعي' : 'منشور علمي على منصة طالبة علم شرعي'));
   return [
-    '📖 مقتبس من منصة: طالبة علم شرعي -سنة الثانية',
+    '🔁 معاد مشاركتها من منصة: طالبة علم شرعي -سنة الثانية',
     '────────────────',
     `❝ ${cleanText} ❞`,
     '────────────────',
-    '🔗 لمتابعة المنشور والردود في المنصة:',
+    '🔗 لمتابعة المنشور كاملاً في المنصة:',
     url
   ].join('\n');
 }
@@ -2640,7 +2659,7 @@ function loadSafeCanvasImage(src){
   });
 }
 
-async function renderShareQuoteCard(post){
+async function renderShareQuoteCard(post, forceTextCard){
   const canvas = document.getElementById('shareQuoteCanvas');
   if(!canvas) return;
   try{
@@ -2648,11 +2667,113 @@ async function renderShareQuoteCard(post){
       await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 700))]);
     }
   }catch(e){}
+
+  // إذا كان المنشور يحتوي على صورة: نضع شريط "معاد مشاركتها من منصة" في الأعلى والصورة الأصلية كاملة تحتها
+  if(post.image && !forceTextCard){
+    const postImg = await loadSafeCanvasImage(post.image);
+    if(postImg && postImg.width && postImg.height){
+      const W = 1080;
+      const headerH = 154;
+      const padX = 28;
+      const maxImgW = W - padX * 2;
+      const ratio = postImg.height / postImg.width;
+      const drawH = Math.min(1100, Math.max(360, Math.round(maxImgW * ratio)));
+      const drawW = Math.min(maxImgW, Math.round(drawH / ratio));
+      const imgX = Math.round((W - drawW) / 2);
+
+      const tempCtx = canvas.getContext('2d');
+      const rawText = (post.text || '').trim();
+      let textLines = [];
+      const lineHeight = 46;
+      if(rawText){
+        tempCtx.font = '600 30px Cairo, Arial, sans-serif';
+        textLines = wrapCanvasArabicText(tempCtx, rawText, W - 110).slice(0, 7);
+      }
+      const textBlockH = textLines.length > 0 ? (textLines.length * lineHeight + 48) : 16;
+      const footerH = 74;
+      const H = headerH + drawH + 24 + textBlockH + footerH;
+
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      const bg = ctx.createLinearGradient(0, 0, W, H);
+      bg.addColorStop(0, '#050e18');
+      bg.addColorStop(1, '#091b2e');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      // شريط الترويسة في الأعلى
+      ctx.fillStyle = 'rgba(212, 175, 55, 0.14)';
+      ctx.fillRect(0, 0, W, headerH);
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.55)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, headerH);
+      ctx.lineTo(W, headerH);
+      ctx.stroke();
+
+      const logoImg = await loadSafeCanvasImage('./pwa-192x192.png');
+      if(logoImg){
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(W - 92, headerH / 2, 44, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(logoImg, W - 136, headerH / 2 - 44, 88, 88);
+        ctx.restore();
+        ctx.beginPath();
+        ctx.arc(W - 92, headerH / 2, 46, 0, Math.PI * 2);
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+
+      ctx.direction = 'rtl';
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#d4af37';
+      ctx.font = 'bold 26px Cairo, Arial, sans-serif';
+      ctx.fillText('🔁 معاد مشاركتها من منصة', W - 160, 62);
+
+      ctx.fillStyle = '#f5e6b3';
+      ctx.font = 'bold 34px Amiri, Cairo, serif';
+      ctx.fillText('طالبة علم شرعي -سنة الثانية', W - 160, 112);
+
+      // الصورة الأصلية كاملة دون اقتصاص
+      const imgY = headerH + 22;
+      ctx.drawImage(postImg, imgX, imgY, drawW, drawH);
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.35)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(imgX, imgY, drawW, drawH);
+
+      // النص أسفل الصورة إن وجد
+      if(textLines.length > 0){
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#f4f1ea';
+        ctx.font = '600 30px Cairo, Arial, sans-serif';
+        let ty = imgY + drawH + 54;
+        for(const ln of textLines){
+          ctx.fillText(ln, W / 2, ty);
+          ty += lineHeight;
+        }
+      }
+
+      // التذييل
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#d4af37';
+      ctx.font = 'bold 23px Cairo, Arial, sans-serif';
+      ctx.fillText('المعهد الديني - سبها · pkingll.github.io/3333', W / 2, H - 28);
+      return;
+    }
+  }
+
+  // بطاقة الاقتباس النصية (للمنشورات النصية أو عند تحويل الصوت لبطاقة حالة)
+  canvas.width = 1080;
+  canvas.height = 1080;
   const ctx = canvas.getContext('2d');
   const W = canvas.width;
   const H = canvas.height;
 
-  // 1) خلفية كحلية فاخرة متدرجة
   const bg = ctx.createLinearGradient(0, 0, W, H);
   bg.addColorStop(0, '#050e18');
   bg.addColorStop(0.5, '#0b1e33');
@@ -2660,14 +2781,12 @@ async function renderShareQuoteCard(post){
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
-  // إضاءة ذهبية خفيفة في الأعلى والأسفل
   const glow = ctx.createRadialGradient(W / 2, H * 0.42, 40, W / 2, H * 0.42, W * 0.62);
   glow.addColorStop(0, 'rgba(212, 175, 55, 0.14)');
   glow.addColorStop(1, 'rgba(6, 17, 28, 0)');
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, W, H);
 
-  // 2) إطار ذهبي مزدوج
   ctx.strokeStyle = 'rgba(212, 175, 55, 0.72)';
   ctx.lineWidth = 4;
   ctx.strokeRect(38, 38, W - 76, H - 76);
@@ -2675,7 +2794,6 @@ async function renderShareQuoteCard(post){
   ctx.lineWidth = 1.5;
   ctx.strokeRect(54, 54, W - 108, H - 108);
 
-  // زوايا هندسية ذهبية
   const cLen = 38;
   ctx.strokeStyle = '#f5e6b3';
   ctx.lineWidth = 4;
@@ -2687,7 +2805,6 @@ async function renderShareQuoteCard(post){
     ctx.stroke();
   });
 
-  // 3) الترويسة: أيقونة المنصة + مصدر الاقتباس
   const logoImg = await loadSafeCanvasImage('./pwa-192x192.png');
   if(logoImg){
     ctx.save();
@@ -2708,13 +2825,12 @@ async function renderShareQuoteCard(post){
   ctx.textAlign = 'center';
   ctx.fillStyle = '#d4af37';
   ctx.font = 'bold 28px Cairo, Arial, sans-serif';
-  ctx.fillText('📖 مقتبس من منصة', W / 2, 215);
+  ctx.fillText('🔁 معاد مشاركتها من منصة', W / 2, 215);
 
   ctx.fillStyle = '#f5e6b3';
   ctx.font = 'bold 36px Amiri, Cairo, serif';
   ctx.fillText('طالبة علم شرعي -سنة الثانية', W / 2, 265);
 
-  // خط فاصل ذهبي تحت الترويسة
   const lineGrad = ctx.createLinearGradient(180, 0, W - 180, 0);
   lineGrad.addColorStop(0, 'rgba(212,175,55,0)');
   lineGrad.addColorStop(0.5, 'rgba(212,175,55,0.85)');
@@ -2726,7 +2842,6 @@ async function renderShareQuoteCard(post){
   ctx.lineTo(W - 180, 294);
   ctx.stroke();
 
-  // 4) جسم الاقتباس (إطار داخلي دافئ للنص)
   const boxX = 95, boxY = 328, boxW = W - 190, boxH = 540;
   ctx.fillStyle = 'rgba(10, 27, 44, 0.84)';
   ctx.beginPath();
@@ -2740,14 +2855,12 @@ async function renderShareQuoteCard(post){
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // علامتا الاقتباس
   ctx.fillStyle = 'rgba(212, 175, 55, 0.55)';
   ctx.font = 'bold 64px serif';
   ctx.fillText('❝', W - 142, boxY + 66);
   ctx.fillText('❞', 142, boxY + boxH - 22);
 
-  // نص المنشور مع ضبط تلقائي لحجم الخط
-  const bodyText = (post.text || '').trim() || 'منشور علمي جديد عبر منصة طالبة علم شرعي — تصفحي المواد والملخصات والفوائد.';
+  const bodyText = (post.text || '').trim() || (post.audio ? '🎧 مقطع صوتي علمي منشور على منصة طالبة علم شرعي' : (post.video ? '🎬 فيديو علمي منشور على منصة طالبة علم شرعي' : 'منشور علمي جديد عبر منصة طالبة علم شرعي'));
   let fontSize = 40;
   let lines = [];
   const maxTextW = boxW - 100;
@@ -2777,7 +2890,6 @@ async function renderShareQuoteCard(post){
     startY += lineHeight;
   }
 
-  // 5) التذييل: التاريخ + المصدر والرابط
   const dateStr = post.time ? new Date(post.time).toLocaleDateString('ar-LY', {year:'numeric', month:'long', day:'numeric'}) : '';
   if(dateStr){
     ctx.fillStyle = '#b9b3a6';
@@ -2797,6 +2909,8 @@ async function renderShareQuoteCard(post){
 window.closeShareQuoteModal = function(){
   const modal = document.getElementById('shareQuoteModal');
   if(modal) modal.classList.remove('active');
+  const box = document.getElementById('shareMediaPlayerBox');
+  if(box) box.innerHTML = '';
 };
 
 window.sharePost = async function(postId){
@@ -2806,12 +2920,77 @@ window.sharePost = async function(postId){
     post = { id: postId, text: textEl ? textEl.innerText : '', time: Date.now() };
   }
   currentShareQuoteData = post;
-  const statusEl = document.getElementById('shareQuoteStatus');
-  if(statusEl) statusEl.innerText = 'جاري تجهيز بطاقة الاقتباس...';
+
   const modal = document.getElementById('shareQuoteModal');
+  const heading = document.getElementById('shareModalHeading');
+  const canvasWrap = document.getElementById('shareCanvasWrap');
+  const mediaWrap = document.getElementById('shareMediaWrap');
+  const playerBox = document.getElementById('shareMediaPlayerBox');
+  const mediaTextEl = document.getElementById('shareMediaTextPreview');
+  const primaryBtn = document.getElementById('sharePrimaryBtn');
+  const downloadBtn = document.getElementById('shareDownloadBtn');
+  const switchBtn = document.getElementById('shareSwitchQuoteCardBtn');
+  const statusEl = document.getElementById('shareQuoteStatus');
+
   if(modal) modal.classList.add('active');
-  await renderShareQuoteCard(post);
-  if(statusEl) statusEl.innerText = 'جاهزة للمشاركة في واتساب وفيسبوك كمنشور مقتبس من المنصة ✅';
+  if(playerBox) playerBox.innerHTML = '';
+
+  if(post.video){
+    currentShareMode = 'video';
+    if(heading) heading.innerText = '🎬 مشاركة الفيديو كاملاً من المنصة';
+    if(canvasWrap) canvasWrap.style.display = 'none';
+    if(mediaWrap) mediaWrap.style.display = 'block';
+    if(playerBox) playerBox.innerHTML = `<video controls playsinline style="width:100%;max-height:240px;border-radius:10px;background:#000;"><source src="${post.video}"></video>`;
+    if(mediaTextEl){
+      mediaTextEl.style.display = post.text ? 'block' : 'none';
+      mediaTextEl.innerText = post.text || '';
+    }
+    if(primaryBtn) primaryBtn.innerText = '🎬 مشاركة الفيديو كاملاً (واتساب / الحالة / فيسبوك)';
+    if(downloadBtn) downloadBtn.innerText = '⬇️ حفظ ملف الفيديو في الهاتف (MP4)';
+    if(switchBtn) switchBtn.style.display = 'none';
+    if(statusEl) statusEl.innerText = 'سيتم إرسال ملف الفيديو نفسه كاملاً مع عبارة «معاد مشاركتها من المنصة» ✅';
+    return;
+  }
+
+  if(post.audio){
+    currentShareMode = 'audio';
+    if(heading) heading.innerText = '🎧 مشاركة الصوت كاملاً من المنصة';
+    if(canvasWrap) canvasWrap.style.display = 'none';
+    if(mediaWrap) mediaWrap.style.display = 'block';
+    if(playerBox) playerBox.innerHTML = `<audio controls style="width:100%;"><source src="${post.audio}"></audio>`;
+    if(mediaTextEl){
+      mediaTextEl.style.display = post.text ? 'block' : 'none';
+      mediaTextEl.innerText = post.text || '';
+    }
+    if(primaryBtn) primaryBtn.innerText = '🎧 مشاركة الصوت كاملاً (واتساب / تليجرام)';
+    if(downloadBtn) downloadBtn.innerText = '⬇️ حفظ الملف الصوتي في الهاتف';
+    if(switchBtn) switchBtn.style.display = 'block';
+    if(statusEl) statusEl.innerText = 'سيتم إرسال الملف الصوتي نفسه كاملاً مع عبارة «معاد مشاركتها من المنصة» ✅';
+    return;
+  }
+
+  currentShareMode = post.image ? 'image-card' : 'card';
+  if(mediaWrap) mediaWrap.style.display = 'none';
+  if(canvasWrap) canvasWrap.style.display = 'block';
+  if(switchBtn) switchBtn.style.display = 'none';
+  if(heading) heading.innerText = post.image ? '🖼️ مشاركة الصورة بشعار المنصة' : '📖 مشاركة المنشور المقتبس';
+  if(primaryBtn) primaryBtn.innerText = post.image ? '🖼️ مشاركة الصورة مع شعار المنصة (واتساب / الحالة / فيسبوك)' : '📤 مشاركة البطاقة المصورة (واتساب / الحالة / فيسبوك)';
+  if(downloadBtn) downloadBtn.innerText = '⬇️ حفظ الصورة في الهاتف (PNG)';
+  if(statusEl) statusEl.innerText = 'جاري تجهيز البطاقة...';
+  await renderShareQuoteCard(post, false);
+  if(statusEl) statusEl.innerText = 'جاهز للمشاركة كمنشور معاد مشاركته من المنصة ✅';
+};
+
+window.switchToQuoteCardPreview = async function(){
+  if(!currentShareQuoteData) return;
+  currentShareMode = 'card';
+  document.getElementById('shareMediaWrap').style.display = 'none';
+  document.getElementById('shareCanvasWrap').style.display = 'block';
+  document.getElementById('shareSwitchQuoteCardBtn').style.display = 'none';
+  document.getElementById('sharePrimaryBtn').innerText = '📤 مشاركة البطاقة المصورة (لحالة واتساب / فيسبوك)';
+  document.getElementById('shareDownloadBtn').innerText = '⬇️ حفظ البطاقة في الهاتف (PNG)';
+  await renderShareQuoteCard(currentShareQuoteData, true);
+  document.getElementById('shareQuoteStatus').innerText = 'تم تجهيز بطاقة الصورة المقتبسة ✅';
 };
 
 function getShareCanvasBlob(){
@@ -2822,53 +3001,130 @@ function getShareCanvasBlob(){
   });
 }
 
-window.shareQuoteCardImage = async function(){
+async function fetchMediaAsFile(mediaUrl, defaultName, defaultMime){
+  const res = await fetch(mediaUrl, { mode: 'cors' });
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  const blob = await res.blob();
+  const mime = blob.type || defaultMime;
+  const ext = (mime.split('/')[1] || defaultName.split('.').pop() || 'bin').replace('mpeg', 'mp3').replace(/[^a-z0-9]/gi, '');
+  const base = defaultName.replace(/\.[^.]+$/, '');
+  return new File([blob], `${base}.${ext}`, { type: mime });
+}
+
+window.shareFullPostMedia = async function(){
   if(!currentShareQuoteData) return;
   const caption = buildQuotedPostCaption(currentShareQuoteData);
   const statusEl = document.getElementById('shareQuoteStatus');
+  const primaryBtn = document.getElementById('sharePrimaryBtn');
   try{ if(navigator.clipboard) await navigator.clipboard.writeText(caption); }catch(e){}
 
-  const blob = await getShareCanvasBlob();
-  if(!blob){
-    alert('تعذر تجهيز صورة البطاقة.');
-    return;
-  }
-  const file = new File([blob], `talibat-quote-${currentShareQuoteData.id}.png`, { type: 'image/png' });
+  if(primaryBtn) primaryBtn.disabled = true;
+  try{
+    let file = null;
 
-  if(navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))){
-    try{
-      await navigator.share({
-        files: [file],
-        title: 'مقتبس من منصة طالبة علم شرعي -سنة الثانية',
-        text: caption
-      });
-      if(statusEl) statusEl.innerText = 'تمت مشاركة البطاقة بنجاح ✅';
-      return;
-    }catch(err){
-      if(err && err.name === 'AbortError') return;
+    if(currentShareMode === 'video' && currentShareQuoteData.video){
+      if(statusEl) statusEl.innerText = 'جاري جلب ملف الفيديو كاملاً للمشاركة... ⏳';
+      try{
+        file = await fetchMediaAsFile(currentShareQuoteData.video, `talibat-video-${currentShareQuoteData.id}.mp4`, 'video/mp4');
+      }catch(err){
+        console.log('Video fetch fallback:', err);
+      }
+    }else if(currentShareMode === 'audio' && currentShareQuoteData.audio){
+      if(statusEl) statusEl.innerText = 'جاري جلب الملف الصوتي كاملاً للمشاركة... ⏳';
+      try{
+        file = await fetchMediaAsFile(currentShareQuoteData.audio, `talibat-audio-${currentShareQuoteData.id}.mp3`, 'audio/mpeg');
+      }catch(err){
+        console.log('Audio fetch fallback:', err);
+      }
+    }else{
+      const blob = await getShareCanvasBlob();
+      if(blob){
+        file = new File([blob], `talibat-repost-${currentShareQuoteData.id}.png`, { type: 'image/png' });
+      }else if(currentShareQuoteData.image){
+        try{
+          file = await fetchMediaAsFile(currentShareQuoteData.image, `talibat-image-${currentShareQuoteData.id}.jpg`, 'image/jpeg');
+        }catch(e){}
+      }
     }
-  }
 
-  // بديل تلقائي إذا لم يدعم المتصفح مشاركة الصور مباشرة
-  await downloadQuoteCardImage();
-  if(statusEl) statusEl.innerText = 'تم حفظ البطاقة ونسخ الاقتباس ✅ أرفقيها الآن في فيسبوك أو واتساب';
-  alert('تم حفظ بطاقة الصورة في جهازك ونسخ نص الاقتباس ✅ يمكنك الآن نشرها في فيسبوك أو واتساب مباشرة.');
+    if(file && navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))){
+      try{
+        await navigator.share({
+          files: [file],
+          title: 'معاد مشاركتها من منصة طالبة علم شرعي -سنة الثانية',
+          text: caption
+        });
+        if(statusEl) statusEl.innerText = 'تمت المشاركة بنجاح ✅';
+        return;
+      }catch(err){
+        if(err && err.name === 'AbortError'){
+          if(statusEl) statusEl.innerText = 'تم إلغاء المشاركة.';
+          return;
+        }
+      }
+    }
+
+    // بديل تلقائي إذا منع المتصفح مشاركة الملف مباشرة
+    await downloadFullPostMedia();
+    if(navigator.share){
+      try{
+        await navigator.share({ title: 'معاد مشاركتها من منصة طالبة علم شرعي', text: caption });
+        return;
+      }catch(e){}
+    }
+    if(statusEl) statusEl.innerText = 'تم حفظ الملف في جهازك ونسخ النص ✅ ارفعيه الآن في واتساب أو فيسبوك';
+    alert('تم حفظ الملف في الهاتف ونسخ عبارة «معاد مشاركتها من المنصة» ✅ يمكنك رفعه الآن مباشرة في حالة واتساب أو فيسبوك.');
+  }finally{
+    if(primaryBtn) primaryBtn.disabled = false;
+  }
 };
 
-window.downloadQuoteCardImage = async function(){
+window.downloadFullPostMedia = async function(){
   if(!currentShareQuoteData) return;
+  const statusEl = document.getElementById('shareQuoteStatus');
+  if(currentShareMode === 'video' && currentShareQuoteData.video){
+    try{
+      if(statusEl) statusEl.innerText = 'جاري تنزيل الفيديو على الهاتف...';
+      const file = await fetchMediaAsFile(currentShareQuoteData.video, `talibat-video-${currentShareQuoteData.id}.mp4`, 'video/mp4');
+      const url = URL.createObjectURL(file);
+      const a = document.createElement('a');
+      a.href = url; a.download = file.name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      if(statusEl) statusEl.innerText = 'تم حفظ الفيديو في الهاتف ✅';
+      return;
+    }catch(e){
+      window.open(currentShareQuoteData.video, '_blank', 'noopener,noreferrer');
+      return;
+    }
+  }
+  if(currentShareMode === 'audio' && currentShareQuoteData.audio){
+    try{
+      if(statusEl) statusEl.innerText = 'جاري تنزيل الصوت على الهاتف...';
+      const file = await fetchMediaAsFile(currentShareQuoteData.audio, `talibat-audio-${currentShareQuoteData.id}.mp3`, 'audio/mpeg');
+      const url = URL.createObjectURL(file);
+      const a = document.createElement('a');
+      a.href = url; a.download = file.name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      if(statusEl) statusEl.innerText = 'تم حفظ الملف الصوتي في الهاتف ✅';
+      return;
+    }catch(e){
+      window.open(currentShareQuoteData.audio, '_blank', 'noopener,noreferrer');
+      return;
+    }
+  }
   const blob = await getShareCanvasBlob();
   if(!blob) return;
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `talibat-quote-${currentShareQuoteData.id}.png`;
+  a.download = `talibat-repost-${currentShareQuoteData.id}.png`;
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 4000);
-  const statusEl = document.getElementById('shareQuoteStatus');
-  if(statusEl) statusEl.innerText = 'تم حفظ صورة البطاقة في الهاتف ✅';
+  if(statusEl) statusEl.innerText = 'تم حفظ الصورة في الهاتف ✅';
 };
 
 window.shareQuoteTextWhatsApp = function(){
@@ -2883,8 +3139,8 @@ window.copyQuoteText = async function(){
   const statusEl = document.getElementById('shareQuoteStatus');
   try{
     await navigator.clipboard.writeText(caption);
-    if(statusEl) statusEl.innerText = 'تم نسخ الاقتباس النصي ✅ الصقيه مباشرة في فيسبوك أو واتساب';
-    alert('تم نسخ المنشور المقتبس ✅ الصقيه الآن في فيسبوك أو واتساب.');
+    if(statusEl) statusEl.innerText = 'تم نسخ النص مع عبارة «معاد مشاركتها من المنصة» ✅ الصقيه في فيسبوك أو واتساب';
+    alert('تم نسخ المنشور ✅ الصقيه الآن في فيسبوك أو واتساب.');
   }catch(e){
     alert(caption);
   }
