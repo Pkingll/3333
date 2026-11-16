@@ -9,6 +9,14 @@
 <meta property="og:image" content="https://a.top4top.io/p_38068co2c0.jpg" />
 <meta property="og:url" content="https://pkingll.github.io/3333/" />
 <meta property="og:type" content="website" />
+<meta name="theme-color" content="#06111c" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="علم شرعي" />
+<link rel="manifest" href="./manifest.json" />
+<link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+<link rel="icon" type="image/svg+xml" href="./icon.svg" />
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;500;600;700;800&display=swap');
 
@@ -779,6 +787,31 @@ body::before {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+.posts-unread-badge {
+  background: var(--danger);
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.posts-mark-read-btn {
+  background: rgba(212, 175, 55, 0.14);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: var(--gold-light);
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.posts-mark-read-btn:hover {
+  background: var(--gold);
+  color: #06111c;
+}
 .posts-body { padding: 0; max-height: 680px; overflow-y: auto; }
 .post-item {
   padding: 18px 22px;
@@ -1074,7 +1107,7 @@ body::before {
   color: #9c9689;
 }
 </style>
-<script src="/_aistudio-iframe.js?v=1f94f900"></script></head>
+</head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
@@ -1104,6 +1137,7 @@ body::before {
   <button onclick="openAdmin()">لوحة الأدمن</button>
   <button onclick="openFawaidAdmin()">أدمن الفوائد</button>
   <button onclick="enableNotifications()">تفعيل الإشعارات</button>
+  <button id="sidebarInstallAppBtn" onclick="installPlatformApp()" style="display:none;">📲 تثبيت التطبيق</button>
   <button class="sidebar-close-btn" onclick="closeMenu()">إغلاق</button>
 </div>
 
@@ -1330,7 +1364,11 @@ body::before {
     <div class="posts-section">
       <div class="posts-header">
         <h3>📢 المنشورات والتنبيهات</h3>
-        <span class="posts-header-badge" id="postsCountBadge">0</span>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span class="posts-unread-badge" id="postsUnreadBadge" style="display:none;">0 جديد</span>
+          <button type="button" class="posts-mark-read-btn" id="markPostsReadBtn" onclick="markPostsAsRead()" style="display:none;">✓ تم الاطلاع</button>
+          <span class="posts-header-badge" id="postsCountBadge">0</span>
+        </div>
       </div>
       <div class="posts-body" id="postsContainer">
         <div class="posts-empty"><div class="posts-empty-icon">📭</div>لا توجد منشورات حالياً</div>
@@ -1428,6 +1466,23 @@ body::before {
 </div>
 </div>
 
+<div class="chapters-modal" id="iosInstallModal" onclick="if(event.target===this)this.classList.remove('active')">
+  <div class="chapters-content" onclick="event.stopPropagation()" style="max-width:400px;">
+    <div class="chapters-header">
+      <h3>📲 تثبيت التطبيق على iPhone / iPad</h3>
+      <button class="chapters-close" onclick="document.getElementById('iosInstallModal').classList.remove('active')">إغلاق ✕</button>
+    </div>
+    <p style="font-size:14px;color:#e5dfd3;line-height:1.9;margin:0 0 10px;">
+      لتثبيت المنصة كتطبيق مستقل وتلقي عداد الإشعارات على الأيقونة:
+    </p>
+    <ol style="font-size:13.5px;color:#f5e6b3;line-height:2;padding-right:20px;margin:0;">
+      <li>اضغطي على زر <strong>المشاركة (Share)</strong> في شريط متصفح Safari.</li>
+      <li>اختاري <strong>إضافة إلى الشاشة الرئيسية (Add to Home Screen)</strong>.</li>
+      <li>اضغطي <strong>إضافة (Add)</strong> في الزاوية العلوية.</li>
+    </ol>
+  </div>
+</div>
+
 <script>
 function toggleMenu(){
   document.getElementById("sidebar").classList.toggle("active");
@@ -1500,11 +1555,51 @@ document.addEventListener('keydown', function(e) {
     toggleCircleWidget();
   }
 });
+
+/* ===== تثبيت التطبيق على الهاتف (PWA Install Prompt) ===== */
+let deferredInstallPrompt = null;
+(function initPWAInstallUI(){
+  const btn = document.getElementById('sidebarInstallAppBtn');
+  if(!btn) return;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if(isStandalone){ btn.style.display = 'none'; return; }
+  const isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+  if(isIOS){ btn.style.display = 'block'; }
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    btn.style.display = 'block';
+  });
+  window.addEventListener('appinstalled', function(){
+    deferredInstallPrompt = null;
+    btn.style.display = 'none';
+  });
+})();
+
+window.installPlatformApp = async function(){
+  const isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+  if(deferredInstallPrompt){
+    await deferredInstallPrompt.prompt();
+    const res = await deferredInstallPrompt.userChoice;
+    if(res && res.outcome === 'accepted'){
+      deferredInstallPrompt = null;
+      const btn = document.getElementById('sidebarInstallAppBtn');
+      if(btn) btn.style.display = 'none';
+    }
+    return;
+  }
+  if(isIOS){
+    const modal = document.getElementById('iosInstallModal');
+    if(modal) modal.classList.add('active');
+    return;
+  }
+  alert('لتثبيت التطبيق: افتحي قائمة المتصفح (⋮) ثم اختاري "تثبيت التطبيق" أو "إضافة إلى الشاشة الرئيسية".');
+};
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging.js";
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc, updateDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",
@@ -1611,22 +1706,31 @@ window.resetPlatformBackground = async function(){
 window.enableNotifications = async function(){
 try{
 if(!('serviceWorker' in navigator)){alert("المتصفح لا يدعم الإشعارات ❌");return;}
-if(Notification.permission === "granted"){
-const savedToken=localStorage.getItem("firebaseToken");
-if(savedToken){alert("الإشعارات مفعلة بالفعل ✅");return;}
-}
-if(Notification.permission === "denied"){alert("لقد قمت بحظر الإشعارات من المتصفح ❌");return;}
+if(Notification.permission === "denied"){alert("لقد قمت بحظر الإشعارات من المتصفح ❌ يرجى السماح بالإشعارات من إعدادات الموقع.");return;}
 const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
-const permission = await Notification.requestPermission();
+cachedRegistration = registration;
+const permission = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
 if(permission !== "granted"){alert("تم رفض الإشعارات ❌");return;}
-const currentToken = await getToken(messaging, {vapidKey: "BC1mnmEtPonum_POxdZ-1cFOAlr803s3YkOOlfz17cg-uwB3XdPF7jxepKWcBtoeppUJUcM22FhQYAFmEyMVDJw", serviceWorkerRegistration: registration});
-if(currentToken){
-const tokenRef = doc(db,"tokens",currentToken);
-const tokenSnap = await getDoc(tokenRef);
-if(!tokenSnap.exists()){await setDoc(tokenRef,{token: currentToken, createdAt: Date.now()});}
-localStorage.setItem("firebaseToken", currentToken);
-alert("تم تفعيل الإشعارات بنجاح ✅");
-}else{alert("فشل إنشاء TOKEN ❌");}
+
+try{
+ const currentToken = await getToken(messaging, {vapidKey: "BC1mnmEtPonum_POxdZ-1cFOAlr803s3YkOOlfz17cg-uwB3XdPF7jxepKWcBtoeppUJUcM22FhQYAFmEyMVDJw", serviceWorkerRegistration: registration});
+ if(currentToken){
+  const tokenRef = doc(db,"tokens",currentToken);
+  const tokenSnap = await getDoc(tokenRef);
+  if(!tokenSnap.exists()){await setDoc(tokenRef,{token: currentToken, createdAt: Date.now()});}
+  localStorage.setItem("firebaseToken", currentToken);
+ }
+}catch(tokenErr){
+ console.log("FCM token notice:", tokenErr);
+}
+
+await showPhoneShadeNotification(
+  "✅ تم تفعيل إشعارات المنصة",
+  "ستصلك إشعارات الملخصات والمنشورات الجديدة في شريط الهاتف العلوي وعلى أيقونة التطبيق.",
+  "./index.html",
+  "talibat-enabled"
+);
+alert("تم تفعيل الإشعارات بنجاح ✅ ستظهر التنبيهات في شريط الهاتف العلوي.");
 }catch(error){console.log("FCM ERROR:", error);alert("حدث خطأ أثناء التفعيل ❌");}
 };
 
@@ -1690,32 +1794,331 @@ setInterval(()=>{
 
 loadFawaid();
 
-/* ===== إشعارات المواد ===== */
-async function updateSubjectBadges(){
-try{
-const lessons = await getDocs(collection(db,"lessons"));
-const latest = {};
-lessons.forEach(docu=>{
- const data = docu.data();
- if(!data.subject) return;
- const t = data.time || 0;
- if(!latest[data.subject] || t > latest[data.subject]){latest[data.subject] = t;}
-});
-Object.keys(latest).forEach(subject=>{
- const seen = parseInt(localStorage.getItem("seenTime_"+subject) || "0");
- const badge = document.getElementById("badge-"+subject);
- if(badge && latest[subject] > seen){badge.style.display = "flex";}
-});
-}catch(err){console.log(err);}
+/* ===== إشعارات المواد والمنشورات وشارة أيقونة التطبيق الخارجي وإشعارات الهاتف العلوية ===== */
+const BASE_PAGE_TITLE = "طالبة علم شرعي - السنة الثانية";
+const SUBJECT_ARABIC_NAMES = {
+  aqida: "العقيدة",
+  hadith: "الحديث",
+  fiqh: "الفقه",
+  usul: "أصول الفقه",
+  history: "تاريخ الخلفاء الراشدين",
+  dawah: "منهج الدعوة",
+  tajweed: "أحكام وتجويد القرآن",
+  literature: "الدراسات الأدبية",
+  nahw: "النحو والصرف",
+  computer: "الحاسوب",
+  english: "الإنجليزي",
+  tafsir: "التفسير"
+};
+let latestLessonsSnapshot = [];
+let latestPostsSnapshot = [];
+let cachedRegistration = null;
+
+async function ensurePlatformServiceWorker(){
+  if(!('serviceWorker' in navigator)) return null;
+  try{
+    const reg = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+    cachedRegistration = reg;
+    if('periodicSync' in reg){
+      try{
+        await reg.periodicSync.register('talibat-check-updates', { minInterval: 15 * 60 * 1000 });
+      }catch(e){}
+    }
+    return reg;
+  }catch(err){
+    return null;
+  }
 }
-updateSubjectBadges();
+ensurePlatformServiceWorker();
+
+function getJsonArrayStorage(key){
+  try{
+    const raw = localStorage.getItem(key);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(e){return [];}
+}
+
+function setJsonArrayStorage(key, arr){
+  try{localStorage.setItem(key, JSON.stringify(arr.slice(-600)));}catch(e){}
+}
+
+async function showPhoneShadeNotification(title, body, url, tag){
+  try{
+    if(typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+    const reg = cachedRegistration || await navigator.serviceWorker?.getRegistration('./') || await navigator.serviceWorker?.ready;
+    const safeBody = body || 'تمت إضافة محتوى جديد في المنصة';
+    if(reg && typeof reg.showNotification === 'function'){
+      await reg.showNotification(title, {
+        body: safeBody,
+        icon: './pwa-192x192.png',
+        badge: './pwa-192x192.png',
+        dir: 'rtl',
+        lang: 'ar',
+        tag: tag || ('talibat-alert-' + Date.now()),
+        renotify: true,
+        vibrate: [200, 100, 200],
+        data: { url: url || './index.html' }
+      });
+      return;
+    }
+    const swTarget = navigator.serviceWorker?.controller;
+    if(swTarget){
+      swTarget.postMessage({ type: 'SHOW_SYSTEM_NOTIFICATION', title, body: safeBody, url, tag });
+    }
+  }catch(e){
+    console.log("Notification display error:", e);
+  }
+}
+
+async function syncExternalAppBadge(totalUnread){
+  const count = Math.max(0, Number(totalUnread) || 0);
+  document.title = count > 0 ? `(${count}) ${BASE_PAGE_TITLE}` : BASE_PAGE_TITLE;
+
+  try{
+    if(typeof navigator.setAppBadge === 'function'){
+      if(count > 0){
+        await navigator.setAppBadge(count);
+      }else if(typeof navigator.clearAppBadge === 'function'){
+        await navigator.clearAppBadge();
+      }
+    }
+  }catch(e){}
+
+  try{
+    const subjectsState = {};
+    subjects.forEach(s => {
+      subjectsState[s] = parseInt(localStorage.getItem("appSeen_" + s) || localStorage.getItem("seenTime_" + s) || "0", 10) || 0;
+    });
+    const seenState = {
+      subjects: subjectsState,
+      posts: parseInt(localStorage.getItem("seenTime_posts") || "0", 10) || 0
+    };
+    const notifiedIds = getJsonArrayStorage("notifiedSystemIds");
+    const swTarget = navigator.serviceWorker?.controller || cachedRegistration?.active;
+    if(swTarget){
+      swTarget.postMessage({ type: 'SET_APP_BADGE', count });
+      swTarget.postMessage({ type: 'SYNC_SEEN_STATE', seenState });
+      swTarget.postMessage({ type: 'SYNC_NOTIFIED_IDS', ids: notifiedIds });
+    }
+  }catch(e){}
+
+  try{
+    if(window.parent && window.parent !== window){
+      window.parent.postMessage({ type: 'PLATFORM_APP_BADGE', count }, '*');
+    }
+  }catch(e){}
+}
+
+function recomputeUnreadAndApplyBadges(){
+  let totalAppUnread = 0;
+  const notifiedSet = new Set(getJsonArrayStorage("notifiedSystemIds"));
+  const pendingNotifications = [];
+
+  // 1) تهيئة خط الأساس لأول مرة حتى لا تُحسب الملخصات القديمة كإشعارات جديدة
+  if(!localStorage.getItem("appLessonsBaselineReady") && latestLessonsSnapshot.length > 0){
+    const latestBySubj = {};
+    const allIds = [];
+    latestLessonsSnapshot.forEach(item => {
+      allIds.push(item.id);
+      notifiedSet.add("lesson_" + item.id);
+      if(!item.subject) return;
+      if(!latestBySubj[item.subject] || item.time > latestBySubj[item.subject]){
+        latestBySubj[item.subject] = item.time;
+      }
+    });
+    subjects.forEach(s => {
+      if(localStorage.getItem("appSeen_" + s) === null){
+        const existingSeen = parseInt(localStorage.getItem("seenTime_" + s) || "0", 10) || 0;
+        const initVal = existingSeen > 0 ? existingSeen : (latestBySubj[s] || 0);
+        localStorage.setItem("appSeen_" + s, String(initVal));
+      }
+    });
+    setJsonArrayStorage("knownLessonIds", allIds);
+    setJsonArrayStorage("notifiedSystemIds", Array.from(notifiedSet));
+    localStorage.setItem("appLessonsBaselineReady", "1");
+  }
+
+  if(!localStorage.getItem("appPostsBaselineReady") && latestPostsSnapshot.length > 0){
+    let maxPostTime = 0;
+    const allPostIds = [];
+    latestPostsSnapshot.forEach(p => {
+      allPostIds.push(p.id);
+      notifiedSet.add("post_" + p.id);
+      if(p.time > maxPostTime) maxPostTime = p.time;
+    });
+    if(localStorage.getItem("seenTime_posts") === null){
+      localStorage.setItem("seenTime_posts", String(maxPostTime));
+    }
+    setJsonArrayStorage("knownPostIds", allPostIds);
+    setJsonArrayStorage("notifiedSystemIds", Array.from(notifiedSet));
+    localStorage.setItem("appPostsBaselineReady", "1");
+  }
+
+  // 2) حساب الملخصات الجديدة لكل مادة (للبطاقة + للأيقونة الخارجية + لإشعار الهاتف العلوي)
+  const knownLessonIds = new Set(getJsonArrayStorage("knownLessonIds"));
+  const cardUnreadBySubject = {};
+  const cardLatestBySubject = {};
+  const appUnreadBySubject = {};
+
+  latestLessonsSnapshot.forEach(item => {
+    const subj = item.subject;
+    if(!subj) return;
+    const t = item.time || 0;
+    if(!cardLatestBySubject[subj] || t > cardLatestBySubject[subj]){
+      cardLatestBySubject[subj] = t;
+    }
+    const cardSeen = parseInt(localStorage.getItem("seenTime_" + subj) || "0", 10) || 0;
+    const appSeen = parseInt(localStorage.getItem("appSeen_" + subj) || localStorage.getItem("seenTime_" + subj) || "0", 10) || 0;
+    const isUnknownNewDoc = !knownLessonIds.has(item.id) && localStorage.getItem("appLessonsBaselineReady") === "1";
+
+    if(t > cardSeen || isUnknownNewDoc){
+      cardUnreadBySubject[subj] = (cardUnreadBySubject[subj] || 0) + 1;
+    }
+    const isAppUnread = (t > 0 && t > appSeen) || (t === 0 && isUnknownNewDoc);
+    if(isAppUnread){
+      appUnreadBySubject[subj] = (appUnreadBySubject[subj] || 0) + 1;
+      const nKey = "lesson_" + item.id;
+      if(!notifiedSet.has(nKey)){
+        notifiedSet.add(nKey);
+        const subjName = SUBJECT_ARABIC_NAMES[subj] || subj;
+        pendingNotifications.push({
+          title: `📚 ملخص جديد في مادة ${subjName}`,
+          body: item.title || "تمت إضافة ملخص جديد — اضغطي للمشاهدة",
+          url: `./subject.html?id=${encodeURIComponent(subj)}`,
+          tag: `talibat-lesson-${item.id}`
+        });
+      }
+    }
+  });
+
+  subjects.forEach(subj => {
+    const badge = document.getElementById("badge-" + subj);
+    const appNewCount = appUnreadBySubject[subj] || 0;
+    const cardNewCount = cardUnreadBySubject[subj] || 0;
+    totalAppUnread += appNewCount;
+    if(badge){
+      if(cardNewCount > 0){
+        badge.innerText = String(cardNewCount);
+        badge.style.display = "flex";
+      }else{
+        badge.style.display = "none";
+      }
+    }
+  });
+
+  // 3) حساب المنشورات الجديدة
+  const seenPostsTime = parseInt(localStorage.getItem("seenTime_posts") || "0", 10) || 0;
+  const knownPostIds = new Set(getJsonArrayStorage("knownPostIds"));
+  let unreadPostsCount = 0;
+
+  latestPostsSnapshot.forEach(p => {
+    const t = p.time || 0;
+    const isUnknownNewPost = !knownPostIds.has(p.id) && localStorage.getItem("appPostsBaselineReady") === "1";
+    const isPostUnread = (t > 0 && t > seenPostsTime) || (t === 0 && isUnknownNewPost);
+    if(isPostUnread){
+      unreadPostsCount++;
+      const nKey = "post_" + p.id;
+      if(!notifiedSet.has(nKey)){
+        notifiedSet.add(nKey);
+        const preview = p.text ? (p.text.length > 110 ? p.text.slice(0, 110) + "..." : p.text) : "منشور جديد في المنصة";
+        pendingNotifications.push({
+          title: "📢 منشور جديد — طالبة علم شرعي",
+          body: preview,
+          url: `./index.html?post=${encodeURIComponent(p.id)}`,
+          tag: `talibat-post-${p.id}`
+        });
+      }
+    }
+  });
+
+  totalAppUnread += unreadPostsCount;
+
+  const unreadPostsBadge = document.getElementById("postsUnreadBadge");
+  const markReadBtn = document.getElementById("markPostsReadBtn");
+  if(unreadPostsBadge && markReadBtn){
+    if(unreadPostsCount > 0){
+      unreadPostsBadge.innerText = unreadPostsCount + " جديد";
+      unreadPostsBadge.style.display = "inline-block";
+      markReadBtn.style.display = "inline-block";
+    }else{
+      unreadPostsBadge.style.display = "none";
+      markReadBtn.style.display = "none";
+    }
+  }
+
+  if(pendingNotifications.length > 0){
+    setJsonArrayStorage("notifiedSystemIds", Array.from(notifiedSet));
+    pendingNotifications.slice(0, 4).forEach(n => {
+      showPhoneShadeNotification(n.title, n.body, n.url, n.tag);
+    });
+  }
+
+  syncExternalAppBadge(totalAppUnread);
+}
+
+window.markPostsAsRead = function(){
+  let maxPostTime = Date.now();
+  const ids = [];
+  latestPostsSnapshot.forEach(p => {
+    ids.push(p.id);
+    if(p.time > maxPostTime) maxPostTime = p.time;
+  });
+  localStorage.setItem("seenTime_posts", String(maxPostTime));
+  setJsonArrayStorage("knownPostIds", ids);
+  localStorage.setItem("appPostsBaselineReady", "1");
+  recomputeUnreadAndApplyBadges();
+};
+
+async function updateSubjectBadges(){
+  try{
+    const lessons = await getDocs(collection(db,"lessons"));
+    latestLessonsSnapshot = [];
+    lessons.forEach(docu=>{
+      const data = docu.data();
+      if(!data.subject) return;
+      latestLessonsSnapshot.push({
+        id: docu.id,
+        subject: data.subject,
+        title: data.title || "",
+        time: data.time || data.createdAt || 0
+      });
+    });
+    recomputeUnreadAndApplyBadges();
+  }catch(err){console.log(err);}
+}
+
+// متابعة حية للملخصات الجديدة فور إضافتها
+onSnapshot(collection(db,"lessons"), (snap)=>{
+  latestLessonsSnapshot = [];
+  snap.forEach(docu=>{
+    const data = docu.data();
+    if(!data.subject) return;
+    latestLessonsSnapshot.push({
+      id: docu.id,
+      subject: data.subject,
+      title: data.title || "",
+      time: data.time || data.createdAt || 0
+    });
+  });
+  recomputeUnreadAndApplyBadges();
+}, ()=> updateSubjectBadges());
+
+window.addEventListener("focus", recomputeUnreadAndApplyBadges);
+window.addEventListener("storage", recomputeUnreadAndApplyBadges);
 
 /* ===== المنشورات المحسّنة ===== */
+function renderPostsFromArray(arr){
+  latestPostsSnapshot = arr.map(p => ({ id: p.id, text: p.text || "", time: p.time || p.createdAt || 0 }));
+  recomputeUnreadAndApplyBadges();
+}
+
 async function loadPosts(){
  const snap = await getDocs(collection(db,"posts"));
  let arr=[];
  snap.forEach(d=>arr.push({id:d.id,...d.data()}));
  arr.sort((a,b)=>(b.time||0)-(a.time||0));
+ renderPostsFromArray(arr);
  const box=document.getElementById("postsContainer");
  const admin=document.getElementById("postsAdminList");
  const badge = document.getElementById('postsCountBadge');
@@ -2362,7 +2765,30 @@ window.clearIconForm = function() {
 
 loadCircleWidget();
 
-onMessage(messaging,(payload)=>{console.log("Message received:", payload);});
+// استماع حي للمنشورات الجديدة لتحديث شارة أيقونة التطبيق فور النشر
+let initialPostsSnapHandled = false;
+onSnapshot(collection(db,"posts"), (snap)=>{
+  const arr = [];
+  snap.forEach(d => arr.push({id: d.id, ...d.data()}));
+  arr.sort((a,b) => (b.time||0) - (a.time||0));
+  if(initialPostsSnapHandled){
+    loadPosts();
+  }else{
+    initialPostsSnapHandled = true;
+    renderPostsFromArray(arr);
+  }
+});
+
+onMessage(messaging,(payload)=>{
+  console.log("Message received:", payload);
+  const title = (payload.notification && payload.notification.title) || (payload.data && payload.data.title) || "طالبة علم شرعي";
+  const body = (payload.notification && payload.notification.body) || (payload.data && payload.data.body) || "تمت إضافة محتوى جديد في المنصة";
+  const url = (payload.data && payload.data.url) || "./index.html";
+  const tag = (payload.data && payload.data.tag) || ("talibat-fcm-" + Date.now());
+  showPhoneShadeNotification(title, body, url, tag);
+  updateSubjectBadges();
+  loadPosts();
+});
 </script>
 </body>
 </html>
