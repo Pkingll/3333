@@ -16,18 +16,18 @@ const DB_NAME = 'talibatBadgeDB';
 const STORE_NAME = 'state';
 
 const SUBJECT_NAMES = {
-  aqida: 'العقيدة',
-  hadith: 'الحديث',
-  fiqh: 'الفقه',
-  usul: 'أصول الفقه',
-  history: 'تاريخ الخلفاء الراشدين',
-  dawah: 'منهج الدعوة',
-  tajweed: 'أحكام وتجويد القرآن',
-  literature: 'الدراسات الأدبية',
-  nahw: 'النحو والصرف',
-  computer: 'الحاسوب',
-  english: 'الإنجليزي',
-  tafsir: 'التفسير'
+  aqida: 'ط§ظ„ط¹ظ‚ظٹط¯ط©',
+  hadith: 'ط§ظ„ط­ط¯ظٹط«',
+  fiqh: 'ط§ظ„ظپظ‚ظ‡',
+  usul: 'ط£طµظˆظ„ ط§ظ„ظپظ‚ظ‡',
+  history: 'طھط§ط±ظٹط® ط§ظ„ط®ظ„ظپط§ط، ط§ظ„ط±ط§ط´ط¯ظٹظ†',
+  dawah: 'ظ…ظ†ظ‡ط¬ ط§ظ„ط¯ط¹ظˆط©',
+  tajweed: 'ط£ط­ظƒط§ظ… ظˆطھط¬ظˆظٹط¯ ط§ظ„ظ‚ط±ط¢ظ†',
+  literature: 'ط§ظ„ط¯ط±ط§ط³ط§طھ ط§ظ„ط£ط¯ط¨ظٹط©',
+  nahw: 'ط§ظ„ظ†ط­ظˆ ظˆط§ظ„طµط±ظپ',
+  computer: 'ط§ظ„ط­ط§ط³ظˆط¨',
+  english: 'ط§ظ„ط¥ظ†ط¬ظ„ظٹط²ظٹ',
+  tafsir: 'ط§ظ„طھظپط³ظٹط±'
 };
 
 function openBadgeDB() {
@@ -90,7 +90,7 @@ async function applyAppIconBadge(count) {
 async function showTopShadeNotification(title, body, url, tag) {
   try {
     await self.registration.showNotification(title, {
-      body: body || 'تمت إضافة محتوى جديد في منصة طالبة علم شرعي',
+      body: body || 'طھظ…طھ ط¥ط¶ط§ظپط© ظ…ط­طھظˆظ‰ ط¬ط¯ظٹط¯ ظپظٹ ظ…ظ†طµط© ط·ط§ظ„ط¨ط© ط¹ظ„ظ… ط´ط±ط¹ظٹ',
       icon: './pwa-192x192.png',
       badge: './pwa-192x192.png',
       dir: 'rtl',
@@ -146,7 +146,7 @@ async function syncUnreadFromFirestoreRest() {
         const fields = d.fields || {};
         const subject = getFirestoreStringField(fields, 'subject');
         if (!subject) continue;
-        const lessonTitle = getFirestoreStringField(fields, 'title') || 'ملخص جديد';
+        const lessonTitle = getFirestoreStringField(fields, 'title') || 'ظ…ظ„ط®طµ ط¬ط¯ظٹط¯';
         const t = getFirestoreNumberField(fields, 'time') || getFirestoreNumberField(fields, 'createdAt');
         const seenTime = (seenState.subjects && seenState.subjects[subject]) || 0;
         if (t > seenTime) {
@@ -155,7 +155,7 @@ async function syncUnreadFromFirestoreRest() {
           if (docId && !notifiedIds.has(nKey)) {
             notifiedIds.add(nKey);
             newlyNotified.push({
-              title: `📚 ملخص جديد في ${SUBJECT_NAMES[subject] || subject}`,
+              title: `ًں“ڑ ظ…ظ„ط®طµ ط¬ط¯ظٹط¯ ظپظٹ ${SUBJECT_NAMES[subject] || subject}`,
               body: lessonTitle,
               url: `./subject.html?id=${encodeURIComponent(subject)}`,
               tag: `talibat-lesson-${docId}`
@@ -172,7 +172,7 @@ async function syncUnreadFromFirestoreRest() {
       for (const d of docs) {
         const docId = getDocIdFromName(d.name);
         const fields = d.fields || {};
-        const postText = getFirestoreStringField(fields, 'text') || 'منشور جديد في المنصة';
+        const postText = getFirestoreStringField(fields, 'text') || 'ظ…ظ†ط´ظˆط± ط¬ط¯ظٹط¯ ظپظٹ ط§ظ„ظ…ظ†طµط©';
         const t = getFirestoreNumberField(fields, 'time') || getFirestoreNumberField(fields, 'createdAt');
         if (t > seenPosts) {
           unread++;
@@ -180,7 +180,7 @@ async function syncUnreadFromFirestoreRest() {
           if (docId && !notifiedIds.has(nKey)) {
             notifiedIds.add(nKey);
             newlyNotified.push({
-              title: '📢 منشور جديد — طالبة علم شرعي',
+              title: 'ًں“¢ ظ…ظ†ط´ظˆط± ط¬ط¯ظٹط¯ â€” ط·ط§ظ„ط¨ط© ط¹ظ„ظ… ط´ط±ط¹ظٹ',
               body: postText.length > 110 ? postText.slice(0, 110) + '...' : postText,
               url: `./index.html?post=${encodeURIComponent(docId)}`,
               tag: `talibat-post-${docId}`
@@ -213,10 +213,10 @@ messaging.onBackgroundMessage(async (payload) => {
 
   const title = (payload.notification && payload.notification.title) ||
     (payload.data && payload.data.title) ||
-    'طالبة علم شرعي';
+    'ط·ط§ظ„ط¨ط© ط¹ظ„ظ… ط´ط±ط¹ظٹ';
   const body = (payload.notification && payload.notification.body) ||
     (payload.data && payload.data.body) ||
-    'تمت إضافة ملخص أو منشور جديد في المنصة';
+    'طھظ…طھ ط¥ط¶ط§ظپط© ظ…ظ„ط®طµ ط£ظˆ ظ…ظ†ط´ظˆط± ط¬ط¯ظٹط¯ ظپظٹ ط§ظ„ظ…ظ†طµط©';
   const url = (payload.data && payload.data.url) || './index.html';
   const tag = (payload.data && payload.data.tag) || ('talibat-fcm-' + Date.now());
 
@@ -261,4 +261,12 @@ self.addEventListener('notificationclick', (event) => {
       if (clients.openWindow) return clients.openWindow(fullUrl);
     })
   );
+});
+
+self.addEventListener('install', () => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim());
 });
