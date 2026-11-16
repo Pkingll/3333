@@ -131,6 +131,12 @@ body::before {
 }
 .nav-links a:hover { color: var(--gold-light); }
 @media (max-width: 768px) { .nav-links { display: none; } }
+@media (max-width: 520px) {
+  .topbar-inner { padding: 10px 14px 10px 64px; gap: 8px; }
+  .brand-title { font-size: 18px; }
+  .brand-sub { font-size: 10px; padding: 2px 7px; }
+  .topbar .btn-primary { padding: 7px 11px; font-size: 12px; }
+}
 
 .btn-primary {
   background: var(--gold);
@@ -1796,6 +1802,7 @@ body::before {
 
     <div id="shareCanvasWrap" style="text-align:center;margin-bottom:12px;">
       <canvas id="shareQuoteCanvas" width="1080" height="1080" style="width:100%;max-width:340px;max-height:380px;object-fit:contain;border-radius:14px;border:1px solid rgba(212,175,55,0.5);box-shadow:0 12px 30px rgba(0,0,0,0.45);background:#06111c;"></canvas>
+      <img id="shareQuoteImgPreview" alt="معاينة البطاقة" style="display:none;width:100%;max-width:340px;max-height:380px;object-fit:contain;border-radius:14px;border:1px solid rgba(212,175,55,0.5);box-shadow:0 12px 30px rgba(0,0,0,0.45);background:#06111c;margin:0 auto;">
     </div>
 
     <div id="shareMediaWrap" style="display:none;margin-bottom:12px;border-radius:14px;overflow:hidden;border:1px solid rgba(212,175,55,0.45);background:#000000;">
@@ -1969,8 +1976,16 @@ appId: "1:752913389065:web:20cf8c03fe4ace03650ad8"
 };
 
 const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+let messaging = null;
+try {
+  if ('Notification' in window && 'serviceWorker' in navigator) {
+    messaging = getMessaging(app);
+  }
+} catch (msgInitErr) {
+  console.log("Messaging not supported in this webview:", msgInitErr);
+}
 const db = getFirestore(app);
+var activeDailyChallenge = null;
 
 /* ===== خلفية موحدة لجميع صفحات المنصة ===== */
 const PLATFORM_BACKGROUND_DOC = doc(db,"settings","platform");
@@ -3342,6 +3357,7 @@ window.sharePost = async function(postId){
   if(downloadBtn) downloadBtn.innerText = '⬇️ حفظ الصورة في الهاتف (PNG)';
   if(statusEl) statusEl.innerText = 'جاري تجهيز البطاقة...';
   await renderShareQuoteCard(post, false);
+  syncShareImagePreview();
   if(statusEl) statusEl.innerText = 'جاهز للمشاركة كمنشور معاد مشاركته من المنصة ✅';
 };
 
@@ -3354,6 +3370,7 @@ window.switchToQuoteCardPreview = async function(){
   document.getElementById('sharePrimaryBtn').innerText = '📤 مشاركة البطاقة المصورة (لحالة واتساب / فيسبوك)';
   document.getElementById('shareDownloadBtn').innerText = '⬇️ حفظ البطاقة في الهاتف (PNG)';
   await renderShareQuoteCard(currentShareQuoteData, true);
+  syncShareImagePreview();
   document.getElementById('shareQuoteStatus').innerText = 'تم تجهيز بطاقة الصورة المقتبسة ✅';
 };
 
@@ -3375,12 +3392,59 @@ async function fetchMediaAsFile(mediaUrl, defaultName, defaultMime){
   return new File([blob], `${base}.${ext}`, { type: mime });
 }
 
+async function copyTextReliable(text){
+  try{
+    if(navigator.clipboard && typeof navigator.clipboard.writeText === 'function'){
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  }catch(_){}
+  try{
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    const ok = document.execCommand('copy');
+    ta.remove();
+    return Boolean(ok);
+  }catch(_){
+    return false;
+  }
+}
+
+function syncShareImagePreview(){
+  const canvas = document.getElementById('shareQuoteCanvas');
+  const imgEl = document.getElementById('shareQuoteImgPreview');
+  if(!canvas || !imgEl) return;
+  try{
+    const dataUrl = canvas.toDataURL('image/png');
+    if(dataUrl && dataUrl.startsWith('data:image/png')){
+      imgEl.src = dataUrl;
+      imgEl.style.display = 'block';
+      canvas.style.display = 'none';
+      return;
+    }
+  }catch(_){}
+  imgEl.style.display = 'none';
+  canvas.style.display = 'inline-block';
+}
+
+function isAndroidWebView(){
+  return /;\s*wv\)|median|gonative/i.test(navigator.userAgent || '');
+}
+
 window.shareFullPostMedia = async function(){
   if(!currentShareQuoteData) return;
   const caption = buildQuotedPostCaption(currentShareQuoteData);
+  const directUrl = buildPostDirectUrl(currentShareQuoteData);
   const statusEl = document.getElementById('shareQuoteStatus');
   const primaryBtn = document.getElementById('sharePrimaryBtn');
-  try{ if(navigator.clipboard) await navigator.clipboard.writeText(caption); }catch(e){}
+  await copyTextReliable(caption);
 
   if(primaryBtn) primaryBtn.disabled = true;
   try{
@@ -3428,16 +3492,38 @@ window.shareFullPostMedia = async function(){
       }
     }
 
-    // بديل تلقائي إذا منع المتصفح مشاركة الملف مباشرة
-    await downloadFullPostMedia();
+    // جسر المشاركة داخل تطبيق Median إذا كان متاحاً
+    try{
+      if(window.median && window.median.share && typeof window.median.share.sharePage === 'function'){
+        window.median.share.sharePage({ url: directUrl, text: caption });
+        if(statusEl) statusEl.innerText = 'تم فتح نافذة المشاركة ونسخ النص ✅';
+        return;
+      }
+    }catch(_){}
+
     if(navigator.share){
       try{
-        await navigator.share({ title: 'معاد مشاركتها من منصة طالبة علم شرعي', text: caption });
+        await navigator.share({ title: 'طالبة علم شرعي -سنة الثانية', text: caption, url: directUrl });
+        if(statusEl) statusEl.innerText = 'تمت المشاركة بنجاح ✅';
         return;
-      }catch(e){}
+      }catch(err){
+        if(err && err.name === 'AbortError'){
+          if(statusEl) statusEl.innerText = 'تم إلغاء المشاركة.';
+          return;
+        }
+      }
     }
-    if(statusEl) statusEl.innerText = 'تم حفظ الملف في جهازك ونسخ النص ✅ ارفعيه الآن في واتساب أو فيسبوك';
-    alert('تم حفظ الملف في الهاتف ونسخ عبارة «معاد مشاركتها من المنصة» ✅ يمكنك رفعه الآن مباشرة في حالة واتساب أو فيسبوك.');
+
+    // بديل تطبيق الأندرويد (WebView): تنزيل إن أمكن + فتح واتساب مباشرة بالنص والرابط
+    if(!isAndroidWebView()){
+      await downloadFullPostMedia();
+    }
+    if(statusEl){
+      statusEl.innerText = currentShareMode === 'video' || currentShareMode === 'audio'
+        ? 'تم نسخ النص والرابط ✅ اضغطي «حفظ في الهاتف» أو «إرسال كحالة رابط» للمتابعة في واتساب'
+        : 'تم نسخ النص والرابط ✅ اضغطي مطولاً على الصورة لحفظها، أو اضغطي «إرسال كحالة رابط» لفتح واتساب';
+    }
+    window.shareQuoteTextWhatsApp();
   }finally{
     if(primaryBtn) primaryBtn.disabled = false;
   }
@@ -3447,6 +3533,10 @@ window.downloadFullPostMedia = async function(){
   if(!currentShareQuoteData) return;
   const statusEl = document.getElementById('shareQuoteStatus');
   if(currentShareMode === 'video' && currentShareQuoteData.video){
+    if(isAndroidWebView()){
+      window.location.href = currentShareQuoteData.video;
+      return;
+    }
     try{
       if(statusEl) statusEl.innerText = 'جاري تنزيل الفيديو على الهاتف...';
       const file = await fetchMediaAsFile(currentShareQuoteData.video, `talibat-video-${currentShareQuoteData.id}.mp4`, 'video/mp4');
@@ -3458,11 +3548,15 @@ window.downloadFullPostMedia = async function(){
       if(statusEl) statusEl.innerText = 'تم حفظ الفيديو في الهاتف ✅';
       return;
     }catch(e){
-      window.open(currentShareQuoteData.video, '_blank', 'noopener,noreferrer');
+      window.location.href = currentShareQuoteData.video;
       return;
     }
   }
   if(currentShareMode === 'audio' && currentShareQuoteData.audio){
+    if(isAndroidWebView()){
+      window.location.href = currentShareQuoteData.audio;
+      return;
+    }
     try{
       if(statusEl) statusEl.innerText = 'جاري تنزيل الصوت على الهاتف...';
       const file = await fetchMediaAsFile(currentShareQuoteData.audio, `talibat-audio-${currentShareQuoteData.id}.mp3`, 'audio/mpeg');
@@ -3474,31 +3568,35 @@ window.downloadFullPostMedia = async function(){
       if(statusEl) statusEl.innerText = 'تم حفظ الملف الصوتي في الهاتف ✅';
       return;
     }catch(e){
-      window.open(currentShareQuoteData.audio, '_blank', 'noopener,noreferrer');
+      window.location.href = currentShareQuoteData.audio;
       return;
     }
   }
   const blob = await getShareCanvasBlob();
-  if(!blob) return;
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `talibat-repost-${currentShareQuoteData.id}.png`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 4000);
-  if(statusEl) statusEl.innerText = 'تم حفظ الصورة في الهاتف ✅';
+  if(blob && !isAndroidWebView()){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `talibat-repost-${currentShareQuoteData.id}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    if(statusEl) statusEl.innerText = 'تم حفظ الصورة في الهاتف ✅';
+    return;
+  }
+  syncShareImagePreview();
+  if(statusEl) statusEl.innerText = 'اضغطي مطولاً على الصورة بالأعلى واختر «تنزيل / حفظ الصورة» 📱';
 };
 
 window.copyStatusLinkOnly = async function(){
   if(!currentShareQuoteData) return;
   const linkText = buildStatusLinkCaption(currentShareQuoteData);
   const statusEl = document.getElementById('shareQuoteStatus');
-  try{
-    await navigator.clipboard.writeText(linkText);
+  const ok = await copyTextReliable(linkText);
+  if(ok){
     if(statusEl) statusEl.innerText = 'تم نسخ الرابط ✅ الصقيه الآن في خانة «إضافة شرح توضيحي...» أسفل الصورة أو الفيديو';
-  }catch(e){
+  }else{
     alert(linkText);
   }
 };
@@ -3506,17 +3604,23 @@ window.copyStatusLinkOnly = async function(){
 window.shareQuoteTextWhatsApp = function(){
   if(!currentShareQuoteData) return;
   const caption = buildQuotedPostCaption(currentShareQuoteData);
-  window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, '_blank', 'noopener,noreferrer');
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(caption)}`;
+  if(isAndroidWebView()){
+    window.location.href = waUrl;
+  }else{
+    const w = window.open(waUrl, '_blank', 'noopener,noreferrer');
+    if(!w) window.location.href = waUrl;
+  }
 };
 
 window.copyQuoteText = async function(){
   if(!currentShareQuoteData) return;
   const caption = buildQuotedPostCaption(currentShareQuoteData);
   const statusEl = document.getElementById('shareQuoteStatus');
-  try{
-    await navigator.clipboard.writeText(caption);
+  const ok = await copyTextReliable(caption);
+  if(ok){
     if(statusEl) statusEl.innerText = 'تم نسخ الوصف والرابط ✅ الصقيه في فيسبوك أو واتساب';
-  }catch(e){
+  }else{
     alert(caption);
   }
 };
@@ -3993,16 +4097,22 @@ window.clearIconForm = function() {
 
 loadCircleWidget();
 
-onMessage(messaging,(payload)=>{
-  console.log("Message received:", payload);
-  const title = (payload.notification && payload.notification.title) || (payload.data && payload.data.title) || "طالبة علم شرعي";
-  const body = (payload.notification && payload.notification.body) || (payload.data && payload.data.body) || "تمت إضافة محتوى جديد في المنصة";
-  const url = (payload.data && payload.data.url) || "./index.html";
-  const tag = (payload.data && payload.data.tag) || ("talibat-fcm-" + Date.now());
-  showPhoneShadeNotification(title, body, url, tag);
-  updateSubjectBadges(true);
-  loadPosts(true);
-});
+if(messaging){
+  try{
+    onMessage(messaging,(payload)=>{
+      console.log("Message received:", payload);
+      const title = (payload.notification && payload.notification.title) || (payload.data && payload.data.title) || "طالبة علم شرعي";
+      const body = (payload.notification && payload.notification.body) || (payload.data && payload.data.body) || "تمت إضافة محتوى جديد في المنصة";
+      const url = (payload.data && payload.data.url) || "./index.html";
+      const tag = (payload.data && payload.data.tag) || ("talibat-fcm-" + Date.now());
+      showPhoneShadeNotification(title, body, url, tag);
+      updateSubjectBadges(true);
+      loadPosts(true);
+    });
+  }catch(e){
+    console.log("onMessage fallback:", e);
+  }
+}
 
 /* ===== نظام متابعة المنصة + عداد المتابعين الحي ===== */
 const PLATFORM_STATS_DOC = doc(db, "settings", "platformStats");
@@ -4022,7 +4132,7 @@ function updateFollowButtonsUI(){
   if(heroCount) heroCount.textContent = currentFollowersCount;
   if(statCount) statCount.textContent = `${currentFollowersCount} متابع`;
   if(modalCount) modalCount.textContent = currentFollowersCount;
-  if(typeof activeDailyChallenge !== "undefined" && activeDailyChallenge){
+  if(activeDailyChallenge){
     renderDailyChallengeBox(activeDailyChallenge);
   }
 }
@@ -4075,15 +4185,14 @@ window.closeFollowModal = function(){
   if(modal) modal.classList.remove("active");
 };
 
-window.handleHeroFollowClick = async function(){
+window.handleHeroFollowClick = function(){
   const already = localStorage.getItem("talibat_is_following") === "1";
   if(!already){
     localStorage.setItem("talibat_is_following", "1");
     currentFollowersCount = currentFollowersCount + 1;
     updateFollowButtonsUI();
-    try{
-      await setDoc(PLATFORM_STATS_DOC, { followersCount: increment(1), updatedAt: Date.now() }, { merge: true });
-    }catch(e){ console.log("follow increment err:", e); }
+    setDoc(PLATFORM_STATS_DOC, { followersCount: increment(1), updatedAt: Date.now() }, { merge: true })
+      .catch((e) => console.log("follow increment err:", e));
   }
   openFollowModal();
 };
@@ -4117,7 +4226,7 @@ window.activateNotificationsFromFollow = async function(){
   await enableNotifications();
 };
 
-window.unfollowPlatform = async function(){
+window.unfollowPlatform = function(){
   if(localStorage.getItem("talibat_is_following") !== "1"){
     closeFollowModal();
     return;
@@ -4126,11 +4235,10 @@ window.unfollowPlatform = async function(){
   currentFollowersCount = Math.max(0, currentFollowersCount - 1);
   updateFollowButtonsUI();
   closeFollowModal();
-  try{
-    if(currentFollowersCount >= 0){
-      await setDoc(PLATFORM_STATS_DOC, { followersCount: currentFollowersCount, updatedAt: Date.now() }, { merge: true });
-    }
-  }catch(e){}
+  if(currentFollowersCount >= 0){
+    setDoc(PLATFORM_STATS_DOC, { followersCount: currentFollowersCount, updatedAt: Date.now() }, { merge: true })
+      .catch(() => {});
+  }
 };
 
 window.inviteFriendsToPlatform = async function(){
@@ -4160,6 +4268,7 @@ window.inviteFriendsToPlatform = async function(){
   if(modal) modal.classList.add("active");
   if(statusEl) statusEl.innerText = "جاري تجهيز بطاقة الدعوة...";
   await renderShareQuoteCard(invitePost, true);
+  syncShareImagePreview();
   if(statusEl) statusEl.innerText = "بطاقة الدعوة جاهزة ✅ شاركيها والصقي الرابط في «إضافة شرح توضيحي»";
 };
 
@@ -4187,7 +4296,7 @@ window.loadAdminFollowers = async function(){
 
 /* ===== فعالية تحدي اليوم التفاعلي (سؤال + تصويت + مشاركة تحدي) ===== */
 const DAILY_CHALLENGE_DOC = doc(db, "settings", "dailyChallenge");
-let activeDailyChallenge = null;
+activeDailyChallenge = null;
 
 function renderDailyChallengeBox(data){
   const section = document.getElementById("dailyChallengeSection");
@@ -4273,22 +4382,21 @@ window.closeChallengeFollowGate = function(){
   if(m) m.classList.remove("active");
 };
 
-window.confirmFollowAndSubmitChallenge = async function(){
+window.confirmFollowAndSubmitChallenge = function(){
   const idxToSubmit = pendingChallengeVoteIdx;
   const already = localStorage.getItem("talibat_is_following") === "1";
   if(!already){
     localStorage.setItem("talibat_is_following", "1");
     currentFollowersCount = currentFollowersCount + 1;
     updateFollowButtonsUI();
-    try{
-      await setDoc(PLATFORM_STATS_DOC, { followersCount: increment(1), updatedAt: Date.now() }, { merge: true });
-    }catch(e){ console.log("follow gate err:", e); }
+    setDoc(PLATFORM_STATS_DOC, { followersCount: increment(1), updatedAt: Date.now() }, { merge: true })
+      .catch((e) => console.log("follow gate err:", e));
   }
   const m = document.getElementById("challengeFollowGateModal");
   if(m) m.classList.remove("active");
   pendingChallengeVoteIdx = null;
   if(idxToSubmit !== null && idxToSubmit !== undefined){
-    await window.voteDailyChallenge(idxToSubmit);
+    window.voteDailyChallenge(idxToSubmit);
   }
 };
 
@@ -4317,11 +4425,9 @@ window.voteDailyChallenge = async function(idx){
   copy.votes[String(idx)] = Number(copy.votes[String(idx)] || 0) + 1;
   renderDailyChallengeBox(copy);
 
-  try{
-    await setDoc(DAILY_CHALLENGE_DOC, {
-      votes: { [String(idx)]: increment(1) }
-    }, { merge: true });
-  }catch(e){ console.log("vote err:", e); }
+  setDoc(DAILY_CHALLENGE_DOC, {
+    votes: { [String(idx)]: increment(1) }
+  }, { merge: true }).catch((e) => console.log("vote err:", e));
 };
 
 window.shareDailyChallengeCard = async function(){
@@ -4353,6 +4459,7 @@ window.shareDailyChallengeCard = async function(){
   if(modal) modal.classList.add("active");
   if(statusEl) statusEl.innerText = "جاري تجهيز بطاقة التحدي...";
   await renderShareQuoteCard(chPost, true);
+  syncShareImagePreview();
   if(statusEl) statusEl.innerText = "جاهز ✅ شاركي التحدي والصقي الرابط في «إضافة شرح توضيحي» ليدخل الجميع ويصوتوا!";
 };
 
