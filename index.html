@@ -1401,6 +1401,38 @@ body::before {
  <button type="button" onclick="savePlatformBackground()">💾 اعتماد الخلفية للجميع</button>
  <button type="button" onclick="resetPlatformBackground()">↩️ استعادة الخلفية الأصلية</button>
 </div>
+<div id="pushServerAdmin" style="margin:12px 0;padding:12px;border:1px solid rgba(212,175,55,.35);border-radius:12px;background:rgba(255,255,255,.03);">
+ <h4 style="color:#f5e6b3;margin:0 0 8px;">🚀 ربط سيرفر الإشعارات المجاني (Vercel)</h4>
+ <input type="url" id="pushServerUrlInput" class="admin-chapter-input" placeholder="رابط السيرفر (مثال: https://your-app.vercel.app/api/notify)" dir="ltr">
+ <input type="password" id="pushSecretInput" class="admin-chapter-input" placeholder="رمز الأمان PUSH_SECRET (الافتراضي: 1997)" dir="ltr">
+ <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#e5dfd3;margin:4px 0 8px;cursor:pointer;">
+  <input type="checkbox" id="pushAutoOnPost" checked style="width:16px;height:16px;accent-color:#d4af37;">
+  <span>إرسال إشعار لهواتف الطالبات تلقائياً عند نشر أي منشور</span>
+ </label>
+ <div id="pushServerStatus" style="font-size:12px;color:#f5e6b3;margin:6px 0;">الصقي رابط سيرفر Vercel المجاني ليصل الإشعار حتى والهاتف مغلق.</div>
+ <button type="button" onclick="savePushServerSettings()">💾 حفظ إعدادات السيرفر</button>
+ <button type="button" onclick="testPushServer()" class="btn-edit">🧪 إرسال إشعار تجريبي</button>
+ <hr style="margin:12px 0;border-color:rgba(255,255,255,.1)">
+ <h4 style="color:#f5e6b3;margin:0 0 8px;">📣 إرسال إشعار فوري للجميع (ملخص جديد أو تنبيه)</h4>
+ <select id="pushManualTargetSelect" class="subject-selector" style="margin-bottom:8px;">
+  <option value="general">📢 تنبيه عام — الرئيسية</option>
+  <option value="aqida">📚 ملخص جديد: العقيدة</option>
+  <option value="hadith">📚 ملخص جديد: الحديث</option>
+  <option value="fiqh">📚 ملخص جديد: الفقه</option>
+  <option value="usul">📚 ملخص جديد: أصول الفقه</option>
+  <option value="history">📚 ملخص جديد: تاريخ الخلفاء الراشدين</option>
+  <option value="dawah">📚 ملخص جديد: منهج الدعوة</option>
+  <option value="tajweed">📚 ملخص جديد: أحكام وتجويد القرآن</option>
+  <option value="literature">📚 ملخص جديد: الدراسات الأدبية</option>
+  <option value="nahw">📚 ملخص جديد: النحو والصرف</option>
+  <option value="computer">📚 ملخص جديد: الحاسوب</option>
+  <option value="english">📚 ملخص جديد: الإنجليزي</option>
+  <option value="tafsir">📚 ملخص جديد: التفسير</option>
+ </select>
+ <input type="text" id="pushManualTitleInput" class="admin-chapter-input" placeholder="عنوان الإشعار أو اسم الدرس (اختياري)">
+ <input type="text" id="pushManualBodyInput" class="admin-chapter-input" placeholder="نص التنبيه الظاهر في شريط الهاتف العلوي...">
+ <button type="button" onclick="sendManualPush()">📣 إرسال الإشعار لجميع الهواتف الآن</button>
+</div>
 <textarea id="fawaidInput" placeholder="اكتب الفائدة هنا..."></textarea>
 <button onclick="addFawaid()">إضافة</button>
 <button onclick="closeFawaidPanel()">إغلاق</button>
@@ -1702,6 +1734,235 @@ window.resetPlatformBackground = async function(){
  }
 };
 
+/* ===== ربط سيرفر الإشعارات المجاني (Vercel) ===== */
+const PUSH_SERVER_SETTINGS_DOC = doc(db, "settings", "pushServer");
+
+function normalizePushEndpoint(rawUrl){
+  let clean = String(rawUrl || "").trim().replace(/\/+$/, "");
+  if(!clean) return "";
+  if(!/^https?:\/\//i.test(clean)) clean = "https://" + clean;
+  if(!clean.endsWith("/api/notify")) clean = clean + "/api/notify";
+  return clean;
+}
+
+window.loadPushServerSettings = async function(){
+  let url = localStorage.getItem("pushServerUrl") || "";
+  const secret = localStorage.getItem("pushServerSecret") || "";
+  const autoOnPost = localStorage.getItem("pushAutoOnPost") !== "0";
+  try{
+    const snap = await getDoc(PUSH_SERVER_SETTINGS_DOC);
+    if(snap.exists() && snap.data().url){
+      url = snap.data().url;
+      localStorage.setItem("pushServerUrl", url);
+    }
+  }catch(e){}
+  const urlEl = document.getElementById("pushServerUrlInput");
+  const secEl = document.getElementById("pushSecretInput");
+  const autoEl = document.getElementById("pushAutoOnPost");
+  const statusEl = document.getElementById("pushServerStatus");
+  if(urlEl) urlEl.value = url;
+  if(secEl) secEl.value = secret;
+  if(autoEl) autoEl.checked = autoOnPost;
+  if(statusEl && url){
+    statusEl.textContent = "السيرفر مربوط وجاهز ✅: " + url;
+  }
+};
+
+window.savePushServerSettings = async function(){
+  const urlEl = document.getElementById("pushServerUrlInput");
+  const secEl = document.getElementById("pushSecretInput");
+  const autoEl = document.getElementById("pushAutoOnPost");
+  const statusEl = document.getElementById("pushServerStatus");
+  const normalizedUrl = normalizePushEndpoint(urlEl ? urlEl.value : "");
+  const secretVal = secEl ? secEl.value.trim() : "";
+  const autoVal = autoEl ? autoEl.checked : true;
+
+  if(!normalizedUrl){
+    alert("يرجى إدخال رابط سيرفر Vercel أولاً.");
+    return;
+  }
+  if(urlEl) urlEl.value = normalizedUrl;
+  localStorage.setItem("pushServerUrl", normalizedUrl);
+  if(secretVal) localStorage.setItem("pushServerSecret", secretVal);
+  else localStorage.removeItem("pushServerSecret");
+  localStorage.setItem("pushAutoOnPost", autoVal ? "1" : "0");
+
+  try{
+    await setDoc(PUSH_SERVER_SETTINGS_DOC, { url: normalizedUrl, updatedAt: Date.now() }, { merge: true });
+  }catch(e){}
+
+  if(statusEl) statusEl.textContent = "تم حفظ رابط السيرفر بنجاح ✅ (" + normalizedUrl + ")";
+  alert("تم حفظ إعدادات سيرفر الإشعارات بنجاح ✅");
+};
+
+async function dispatchPushNotification({ title, body, url, tag }){
+  let endpoint = localStorage.getItem("pushServerUrl") || "";
+  if(!endpoint){
+    try{
+      const snap = await getDoc(PUSH_SERVER_SETTINGS_DOC);
+      if(snap.exists() && snap.data().url){
+        endpoint = normalizePushEndpoint(snap.data().url);
+        localStorage.setItem("pushServerUrl", endpoint);
+      }
+    }catch(e){}
+  }
+  if(!endpoint) return { skipped: true, reason: "no_endpoint" };
+  const secret = localStorage.getItem("pushServerSecret") || "1997";
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-push-secret": secret
+    },
+    body: JSON.stringify({
+      title: title || "طالبة علم شرعي",
+      body: body || "تمت إضافة محتوى جديد في المنصة",
+      url: url || "./index.html",
+      tag: tag || ("talibat-push-" + Date.now())
+    })
+  });
+  const data = await res.json().catch(() => ({}));
+  if(!res.ok || !data.ok){
+    throw new Error(data.error || ("HTTP " + res.status));
+  }
+  return data;
+}
+
+window.testPushServer = async function(){
+  const statusEl = document.getElementById("pushServerStatus");
+  const urlEl = document.getElementById("pushServerUrlInput");
+  if(urlEl && urlEl.value.trim()){
+    const normalized = normalizePushEndpoint(urlEl.value);
+    localStorage.setItem("pushServerUrl", normalized);
+  }
+  const secEl = document.getElementById("pushSecretInput");
+  if(secEl && secEl.value.trim()){
+    localStorage.setItem("pushServerSecret", secEl.value.trim());
+  }
+  try{
+    if(statusEl) statusEl.textContent = "جاري إرسال إشعار تجريبي لجميع الأجهزة المسجلة...";
+    const result = await dispatchPushNotification({
+      title: "🔔 إشعار تجريبي — طالبة علم شرعي",
+      body: "تم ربط سيرفر الإرسال المجاني بنجاح ✅ ستصل التنبيهات الآن حتى والهاتف مغلق.",
+      url: "./index.html",
+      tag: "talibat-test-" + Date.now()
+    });
+    if(result.skipped){
+      alert("أدخلي رابط سيرفر Vercel واحفظي الإعدادات أولاً.");
+      return;
+    }
+    const msg = `تم الإرسال بنجاح ✅ (وصل إلى ${result.sentCount || 0} جهاز من أصل ${result.totalTokens || 0})`;
+    if(statusEl) statusEl.textContent = msg;
+    alert(msg);
+  }catch(err){
+    const msg = "تعذر الإرسال: " + (err.message || "تأكدي من رابط السيرفر ورمز الأمان ومتغير FIREBASE_SERVICE_ACCOUNT");
+    if(statusEl) statusEl.textContent = msg;
+    alert(msg);
+  }
+};
+
+window.sendManualPush = async function(){
+  const target = document.getElementById("pushManualTargetSelect")?.value || "general";
+  const customTitle = document.getElementById("pushManualTitleInput")?.value.trim() || "";
+  const customBody = document.getElementById("pushManualBodyInput")?.value.trim() || "";
+  const statusEl = document.getElementById("pushServerStatus");
+
+  let title = customTitle;
+  let url = "./index.html";
+  if(target !== "general"){
+    const subjName = SUBJECT_ARABIC_NAMES[target] || target;
+    if(!title) title = `📚 ملخص جديد في مادة ${subjName}`;
+    url = `./subject.html?id=${encodeURIComponent(target)}`;
+  }else if(!title){
+    title = "📢 تنبيه جديد — طالبة علم شرعي";
+  }
+  const body = customBody || "تمت إضافة محتوى علمي جديد في المنصة — اضغطي للمشاهدة";
+
+  try{
+    if(statusEl) statusEl.textContent = "جاري بث الإشعار لجميع الطالبات...";
+    const result = await dispatchPushNotification({
+      title,
+      body,
+      url,
+      tag: "talibat-manual-" + Date.now()
+    });
+    if(result.skipped){
+      alert("يرجى حفظ رابط سيرفر Vercel أولاً في الحقل أعلاه.");
+      return;
+    }
+    const msg = `تم بث الإشعار بنجاح ✅ (وصل إلى ${result.sentCount || 0} من ${result.totalTokens || 0} هاتف)`;
+    if(statusEl) statusEl.textContent = msg;
+    document.getElementById("pushManualTitleInput").value = "";
+    document.getElementById("pushManualBodyInput").value = "";
+    alert(msg);
+  }catch(err){
+    const msg = "تعذر إرسال الإشعار: " + (err.message || "خطأ غير معروف");
+    if(statusEl) statusEl.textContent = msg;
+    alert(msg);
+  }
+};
+
+
+const WEB_PUSH_VAPID_PUBLIC_KEY = "BJCFLpVa4YjcaFYj9k4Syl8mycfHKE7XHzMkVIksHXnxNegoN6Z3NrSvL5HXfOP78XsSd7lJaSj0L6hx4tj5nJk";
+
+function urlBase64ToUint8Array(base64String){
+  const padding = "=".repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for(let i = 0; i < rawData.length; ++i){
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+function uint8ArrayToBase64Url(bytes){
+  let bin = "";
+  const arr = new Uint8Array(bytes);
+  for(let i = 0; i < arr.length; i++) bin += String.fromCharCode(arr[i]);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function hashEndpointId(endpoint){
+  const data = new TextEncoder().encode(endpoint);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest)).slice(0, 16).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function ensureWebPushSubscription(registration){
+  if(!registration || !registration.pushManager) return null;
+  const appServerKey = urlBase64ToUint8Array(WEB_PUSH_VAPID_PUBLIC_KEY);
+  let sub = await registration.pushManager.getSubscription();
+  if(sub){
+    const existingKeyBuf = sub.options && sub.options.applicationServerKey;
+    const existingKeyB64 = existingKeyBuf ? uint8ArrayToBase64Url(existingKeyBuf) : "";
+    if(existingKeyB64 !== WEB_PUSH_VAPID_PUBLIC_KEY){
+      try{ await sub.unsubscribe(); }catch(e){}
+      sub = null;
+    }
+  }
+  if(!sub){
+    sub = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: appServerKey
+    });
+  }
+  const json = sub.toJSON ? sub.toJSON() : {};
+  const endpoint = sub.endpoint || json.endpoint || "";
+  const p256dh = (json.keys && json.keys.p256dh) || "";
+  const auth = (json.keys && json.keys.auth) || "";
+  if(endpoint && p256dh && auth){
+    const subId = await hashEndpointId(endpoint);
+    await setDoc(doc(db, "webPushSubs", subId), {
+      endpoint,
+      p256dh,
+      auth,
+      updatedAt: Date.now()
+    }, { merge: true });
+    localStorage.setItem("webPushSubId", subId);
+  }
+  return sub;
+}
 
 window.enableNotifications = async function(){
 try{
@@ -1709,19 +1970,14 @@ if(!('serviceWorker' in navigator)){alert("المتصفح لا يدعم الإش
 if(Notification.permission === "denied"){alert("لقد قمت بحظر الإشعارات من المتصفح ❌ يرجى السماح بالإشعارات من إعدادات الموقع.");return;}
 const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
 cachedRegistration = registration;
+await navigator.serviceWorker.ready;
 const permission = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
 if(permission !== "granted"){alert("تم رفض الإشعارات ❌");return;}
 
 try{
- const currentToken = await getToken(messaging, {vapidKey: "BC1mnmEtPonum_POxdZ-1cFOAlr803s3YkOOlfz17cg-uwB3XdPF7jxepKWcBtoeppUJUcM22FhQYAFmEyMVDJw", serviceWorkerRegistration: registration});
- if(currentToken){
-  const tokenRef = doc(db,"tokens",currentToken);
-  const tokenSnap = await getDoc(tokenRef);
-  if(!tokenSnap.exists()){await setDoc(tokenRef,{token: currentToken, createdAt: Date.now()});}
-  localStorage.setItem("firebaseToken", currentToken);
- }
-}catch(tokenErr){
- console.log("FCM token notice:", tokenErr);
+ await ensureWebPushSubscription(registration);
+}catch(subErr){
+ console.log("Web Push subscription notice:", subErr);
 }
 
 await showPhoneShadeNotification(
@@ -1731,7 +1987,7 @@ await showPhoneShadeNotification(
   "talibat-enabled"
 );
 alert("تم تفعيل الإشعارات بنجاح ✅ ستظهر التنبيهات في شريط الهاتف العلوي.");
-}catch(error){console.log("FCM ERROR:", error);alert("حدث خطأ أثناء التفعيل ❌");}
+}catch(error){console.log("PUSH ENABLE ERROR:", error);alert("حدث خطأ أثناء التفعيل ❌");}
 };
 
 /* ===== فوائد Firestore ===== */
@@ -1745,6 +2001,7 @@ window.openFawaidAdmin = async function(){
    await loadFawaid();
    await loadAdminChapters();
    await loadAdminIconsList();
+   await loadPushServerSettings();
  }else{
    alert("كلمة المرور غير صحيحة");
  }
@@ -1820,6 +2077,9 @@ async function ensurePlatformServiceWorker(){
     const reg = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
     cachedRegistration = reg;
     try{ await reg.update(); }catch(e){}
+    if(typeof Notification !== 'undefined' && Notification.permission === 'granted'){
+      ensureWebPushSubscription(reg).catch(() => {});
+    }
     if('periodicSync' in reg){
       try{
         await reg.periodicSync.register('talibat-check-updates', { minInterval: 15 * 60 * 1000 });
@@ -2217,7 +2477,16 @@ window.addPost = async function(){
    if(imageFile){if(status) status.innerText="جاري رفع الصورة...";image=await uploadPostMediaFile(imageFile);}
    if(audioFile){if(status) status.innerText="جاري رفع الملف الصوتي...";audio=await uploadPostMediaFile(audioFile);}
    if(videoFile){if(status) status.innerText="جاري رفع الفيديو...";video=await uploadPostMediaFile(videoFile);}
-   await addDoc(collection(db,"posts"),{text,image,audio,video,time:Date.now(),leaf:0,rose:0,book:0,like:0,heart:0});
+   const addedPostRef = await addDoc(collection(db,"posts"),{text,image,audio,video,time:Date.now(),leaf:0,rose:0,book:0,like:0,heart:0});
+   if(localStorage.getItem("pushAutoOnPost") !== "0"){
+     const preview = text ? (text.length > 110 ? text.slice(0, 110) + "..." : text) : "تم نشر منشور جديد بمرفقات في المنصة";
+     dispatchPushNotification({
+       title: "📢 منشور جديد — طالبة علم شرعي",
+       body: preview,
+       url: `./index.html?post=${encodeURIComponent(addedPostRef.id)}`,
+       tag: `talibat-post-${addedPostRef.id}`
+     }).catch((pushErr) => console.log("Push server notice:", pushErr));
+   }
    document.getElementById("postInput").value="";
    document.getElementById("postImageFile").value="";
    document.getElementById("postAudioFile").value="";
