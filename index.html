@@ -2314,14 +2314,21 @@ window.openFawaidAdmin = async function(){
 window.closeFawaidPanel=function(){document.getElementById("fawaidPanel").style.display="none";document.body.style.overflow="";clearIconForm();};
 
 async function loadFawaid(){
- const snap = await getDocs(collection(db,"fawaid"));
- fawaid=[];
- snap.forEach(d=>fawaid.push({id:d.id,text:d.data().text||""}));
+ try{
+   const snap = await getDocs(collection(db,"fawaid"));
+   fawaid=[];
+   snap.forEach(d=>fawaid.push({id:d.id,text:d.data().text||""}));
+   try{ localStorage.setItem("talibat_cache_fawaid_v1", JSON.stringify(fawaid)); }catch(_){}
+ }catch(err){
+   try{ fawaid = JSON.parse(localStorage.getItem("talibat_cache_fawaid_v1") || "[]"); }catch(_){ fawaid = []; }
+ }
  const box=document.getElementById("fawaidList");
- box.innerHTML="";
- fawaid.forEach(item=>{
-   box.innerHTML += `<div class="fawaid-item" id="fawaid-${item.id}"><div style="margin-bottom:10px;">${item.text}</div><button onclick="editFawaid('${item.id}')">تعديل</button><button onclick="deleteFawaid('${item.id}')">حذف</button></div>`;
- });
+ if(box){
+   box.innerHTML="";
+   fawaid.forEach(item=>{
+     box.innerHTML += `<div class="fawaid-item" id="fawaid-${item.id}"><div style="margin-bottom:10px;">${item.text}</div><button onclick="editFawaid('${item.id}')">تعديل</button><button onclick="deleteFawaid('${item.id}')">حذف</button></div>`;
+   });
+ }
  if(fawaid.length){document.getElementById("fawaidText").innerText="📖 "+fawaid[0].text;}
 }
 
@@ -2635,8 +2642,17 @@ window.markPostsAsRead = function(){
   recomputeUnreadAndApplyBadges();
 };
 
-async function updateSubjectBadges(){
+async function updateSubjectBadges(forceRefresh){
   try{
+    const cacheTs = Number(sessionStorage.getItem("talibat_lessons_ts") || "0");
+    if(!forceRefresh && (Date.now() - cacheTs) < 180000){
+      const cached = JSON.parse(localStorage.getItem("talibat_cache_lessons_v1") || "null");
+      if(Array.isArray(cached)){
+        latestLessonsSnapshot = cached;
+        recomputeUnreadAndApplyBadges();
+        return;
+      }
+    }
     const lessons = await getDocs(collection(db,"lessons"));
     latestLessonsSnapshot = [];
     lessons.forEach(docu=>{
@@ -2649,25 +2665,24 @@ async function updateSubjectBadges(){
         time: data.time || data.createdAt || 0
       });
     });
+    try{
+      localStorage.setItem("talibat_cache_lessons_v1", JSON.stringify(latestLessonsSnapshot));
+      sessionStorage.setItem("talibat_lessons_ts", String(Date.now()));
+    }catch(_){}
     recomputeUnreadAndApplyBadges();
-  }catch(err){console.log(err);}
+  }catch(err){
+    console.log("lessons fallback:", err);
+    try{
+      const cached = JSON.parse(localStorage.getItem("talibat_cache_lessons_v1") || "null");
+      if(Array.isArray(cached)){
+        latestLessonsSnapshot = cached;
+        recomputeUnreadAndApplyBadges();
+      }
+    }catch(_){}
+  }
 }
 
-// متابعة حية للملخصات الجديدة فور إضافتها
-onSnapshot(collection(db,"lessons"), (snap)=>{
-  latestLessonsSnapshot = [];
-  snap.forEach(docu=>{
-    const data = docu.data();
-    if(!data.subject) return;
-    latestLessonsSnapshot.push({
-      id: docu.id,
-      subject: data.subject,
-      title: data.title || "",
-      time: data.time || data.createdAt || 0
-    });
-  });
-  recomputeUnreadAndApplyBadges();
-}, ()=> updateSubjectBadges());
+updateSubjectBadges(false);
 
 window.addEventListener("focus", recomputeUnreadAndApplyBadges);
 window.addEventListener("storage", recomputeUnreadAndApplyBadges);
@@ -2678,63 +2693,103 @@ function renderPostsFromArray(arr){
   recomputeUnreadAndApplyBadges();
 }
 
-async function loadPosts(){
- const snap = await getDocs(collection(db,"posts"));
- let arr=[];
- snap.forEach(d=>arr.push({id:d.id,...d.data()}));
- arr.sort((a,b)=>(b.time||0)-(a.time||0));
- window._postsById = {};
- arr.forEach(p => { window._postsById[p.id] = p; });
- renderPostsFromArray(arr);
- const box=document.getElementById("postsContainer");
- const admin=document.getElementById("postsAdminList");
- const badge = document.getElementById('postsCountBadge');
- if(badge) badge.innerText = arr.length;
- if(box){
- if(arr.length === 0){
-   box.innerHTML = `<div class="posts-empty"><div class="posts-empty-icon">📭</div>لا توجد منشورات حالياً</div>`;
-   return;
- }
- let postsHtml='';
- for(const p of arr){
- const comments=await loadCommentsForPost(p.id);
- const dateStr = p.time ? new Date(p.time).toLocaleDateString('ar-LY', {year:'numeric', month:'short', day:'numeric'}) : '';
- postsHtml+=`<div class="post-item" id="post-${p.id}">
-   ${p.image ? `<img src="${p.image}" class="post-media" alt="صورة المنشور">` : ""}
-   ${p.video ? `<video controls class="post-media" style="max-height:350px;"><source src="${p.video}"></video>` : ""}
-   ${p.audio ? `<audio controls style="width:100%;margin:0;padding:16px 18px 0;background:transparent;"><source src="${p.audio}"></audio>` : ""}
-   <div class="post-content">
-     <div class="post-text">${p.text||""}</div>
-     <div class="post-meta"><span>📅 ${dateStr}</span><span class="post-meta-dot"></span><span>💬 ${comments.length} رد${comments.length !== 1 ? 'ود' : ''}</span></div>
-     <div class="post-reactions">
-       <button class="react-btn" onclick="reactPost('${p.id}','leaf')">🍂 <span>${p.leaf||0}</span></button>
-       <button class="react-btn" onclick="reactPost('${p.id}','rose')">🌹 <span>${p.rose||0}</span></button>
-       <button class="react-btn" onclick="reactPost('${p.id}','book')">📚 <span>${p.book||0}</span></button>
-       <button class="react-btn" onclick="reactPost('${p.id}','like')">👍🏻 <span>${p.like||0}</span></button>
-       <button class="react-btn" onclick="reactPost('${p.id}','heart')">🫀 <span>${p.heart||0}</span></button>
-       <button class="post-share-btn" onclick="sharePost('${p.id}')">📤 مشاركة</button>
-     </div>
-   </div>
-   <div class="post-comments-section">
-     <div class="post-comment-input-row">
-       <input type="text" class="post-comment-input" id="comment_${p.id}" placeholder="اكتب رداً على هذا المنشور...">
-       <button class="post-comment-submit" onclick="addComment('${p.id}')">إرسال</button>
-     </div>
-     ${comments.length > 0 ? `<div class="comments-list">${comments.map(c=>`<div class="comment-card" id="comment-${c.id}"><div class="comment-text">${c.text}</div><div class="comment-reactions"><button class="comment-react-btn" onclick="reactComment('${c.id}','like')">👍🏻 ${c.like||0}</button><button class="comment-react-btn" onclick="reactComment('${c.id}','rose')">🌹 ${c.rose||0}</button><button class="comment-react-btn" onclick="reactComment('${c.id}','heart')">🫀 ${c.heart||0}</button><button class="comment-react-btn" onclick="reactComment('${c.id}','book')">📚 ${c.book||0}</button><button class="comment-react-btn" onclick="reactComment('${c.id}','leaf')">🍂 ${c.leaf||0}</button></div></div>`).join('')}</div>` : ''}
-   </div>
- </div>`;
- }
- box.innerHTML=postsHtml;
- }
-const commentsAdmin=document.getElementById("commentsAdminList");
-if(commentsAdmin){
- const cs=await getDocs(collection(db,"comments"));
- let ca=[]; cs.forEach(d=>ca.push({id:d.id,...d.data()}));
- commentsAdmin.innerHTML=ca.map(c=>`<div class="fawaid-item" id="comment-${c.id}">${c.text}<br><button onclick="deleteCommentItem('${c.id}')">حذف الرد</button></div>`).join('');
+function renderPostsUI(arr, allComments){
+  window._postsById = {};
+  arr.forEach(p => { window._postsById[p.id] = p; });
+  renderPostsFromArray(arr);
+
+  const commentsByPost = {};
+  (allComments || []).forEach(c => {
+    if(!c.postId) return;
+    if(!commentsByPost[c.postId]) commentsByPost[c.postId] = [];
+    commentsByPost[c.postId].push(c);
+  });
+  Object.keys(commentsByPost).forEach(pid => {
+    commentsByPost[pid].sort((a,b) => (b.time||0) - (a.time||0));
+  });
+
+  const box=document.getElementById("postsContainer");
+  const admin=document.getElementById("postsAdminList");
+  const badge = document.getElementById('postsCountBadge');
+  if(badge) badge.innerText = arr.length;
+  if(box){
+    if(arr.length === 0){
+      box.innerHTML = `<div class="posts-empty"><div class="posts-empty-icon">📭</div>لا توجد منشورات حالياً</div>`;
+    }else{
+      let postsHtml='';
+      for(const p of arr){
+        const comments = commentsByPost[p.id] || [];
+        const dateStr = p.time ? new Date(p.time).toLocaleDateString('ar-LY', {year:'numeric', month:'short', day:'numeric'}) : '';
+        postsHtml+=`<div class="post-item" id="post-${p.id}">
+          ${p.image ? `<img src="${p.image}" class="post-media" alt="صورة المنشور">` : ""}
+          ${p.video ? `<video controls class="post-media" style="max-height:350px;"><source src="${p.video}"></video>` : ""}
+          ${p.audio ? `<audio controls style="width:100%;margin:0;padding:16px 18px 0;background:transparent;"><source src="${p.audio}"></audio>` : ""}
+          <div class="post-content">
+            <div class="post-text">${p.text||""}</div>
+            <div class="post-meta"><span>📅 ${dateStr}</span><span class="post-meta-dot"></span><span>💬 ${comments.length} رد${comments.length !== 1 ? 'ود' : ''}</span></div>
+            <div class="post-reactions">
+              <button class="react-btn" onclick="reactPost('${p.id}','leaf')">🍂 <span>${p.leaf||0}</span></button>
+              <button class="react-btn" onclick="reactPost('${p.id}','rose')">🌹 <span>${p.rose||0}</span></button>
+              <button class="react-btn" onclick="reactPost('${p.id}','book')">📚 <span>${p.book||0}</span></button>
+              <button class="react-btn" onclick="reactPost('${p.id}','like')">👍🏻 <span>${p.like||0}</span></button>
+              <button class="react-btn" onclick="reactPost('${p.id}','heart')">🫀 <span>${p.heart||0}</span></button>
+              <button class="post-share-btn" onclick="sharePost('${p.id}')">📤 مشاركة</button>
+            </div>
+          </div>
+          <div class="post-comments-section">
+            <div class="post-comment-input-row">
+              <input type="text" class="post-comment-input" id="comment_${p.id}" placeholder="اكتب رداً على هذا المنشور...">
+              <button class="post-comment-submit" onclick="addComment('${p.id}')">إرسال</button>
+            </div>
+            ${comments.length > 0 ? `<div class="comments-list">${comments.map(c=>`<div class="comment-card" id="comment-${c.id}"><div class="comment-text">${c.text}</div><div class="comment-reactions"><button class="comment-react-btn" onclick="reactComment('${c.id}','like')">👍🏻 ${c.like||0}</button><button class="comment-react-btn" onclick="reactComment('${c.id}','rose')">🌹 ${c.rose||0}</button><button class="comment-react-btn" onclick="reactComment('${c.id}','heart')">🫀 ${c.heart||0}</button><button class="comment-react-btn" onclick="reactComment('${c.id}','book')">📚 ${c.book||0}</button><button class="comment-react-btn" onclick="reactComment('${c.id}','leaf')">🍂 ${c.leaf||0}</button></div></div>`).join('')}</div>` : ''}
+          </div>
+        </div>`;
+      }
+      box.innerHTML=postsHtml;
+    }
+  }
+  const commentsAdmin=document.getElementById("commentsAdminList");
+  if(commentsAdmin){
+    commentsAdmin.innerHTML=(allComments||[]).map(c=>`<div class="fawaid-item" id="comment-${c.id}">${c.text}<br><button onclick="deleteCommentItem('${c.id}')">حذف الرد</button></div>`).join('');
+  }
+  if(admin){
+    admin.innerHTML=arr.map(p=>`<div class="fawaid-item" id="post-${p.id}"><div>${p.text||""}</div><button onclick="editPost('${p.id}')">تعديل</button><button onclick="deletePostItem('${p.id}')">حذف</button></div>`).join("");
+  }
 }
-if(admin){
- admin.innerHTML=arr.map(p=>`<div class="fawaid-item" id="post-${p.id}"><div>${p.text||""}</div><button onclick="editPost('${p.id}')">تعديل</button><button onclick="deletePostItem('${p.id}')">حذف</button></div>`).join("");
- }
+
+async function loadPosts(forceRefresh){
+  // عرض فوري من الكاش ريثما يتم التحديث أو في حال امتلاء حصة القراءات
+  try{
+    const cachedPosts = JSON.parse(localStorage.getItem("talibat_cache_posts_v1") || "null");
+    const cachedComments = JSON.parse(localStorage.getItem("talibat_cache_comments_v1") || "null");
+    if(Array.isArray(cachedPosts)){
+      renderPostsUI(cachedPosts, Array.isArray(cachedComments) ? cachedComments : []);
+      const lastSync = Number(sessionStorage.getItem("talibat_posts_ts") || "0");
+      if(!forceRefresh && (Date.now() - lastSync) < 90000){
+        return;
+      }
+    }
+  }catch(_){}
+
+  try{
+    const [postsSnap, commentsSnap] = await Promise.all([
+      getDocs(collection(db,"posts")),
+      getDocs(collection(db,"comments"))
+    ]);
+    let arr=[];
+    postsSnap.forEach(d=>arr.push({id:d.id,...d.data()}));
+    arr.sort((a,b)=>(b.time||0)-(a.time||0));
+    let allComments=[];
+    commentsSnap.forEach(d=>allComments.push({id:d.id,...d.data()}));
+    try{
+      localStorage.setItem("talibat_cache_posts_v1", JSON.stringify(arr));
+      localStorage.setItem("talibat_cache_comments_v1", JSON.stringify(allComments));
+      sessionStorage.setItem("talibat_posts_ts", String(Date.now()));
+    }catch(_){}
+    renderPostsUI(arr, allComments);
+  }catch(err){
+    console.log("posts load fallback:", err);
+  }
 }
 
 /* رفع ملفات المنشور المختارة من الجهاز إلى ImageKit */
@@ -2798,7 +2853,7 @@ window.addPost = async function(){
    document.getElementById("postAudioFile").value="";
    document.getElementById("postVideoFile").value="";
    if(status) status.innerText="تم نشر المنشور بنجاح ✅";
-   await loadPosts();
+   await loadPosts(true);
    setTimeout(focusSharedPost,1500);
  }catch(error){
    console.error("POST MEDIA UPLOAD ERROR:",error);
@@ -2815,14 +2870,14 @@ window.editPost = async function(id){
  const t=prompt("تعديل المنشور",s.data().text||"");
  if(t===null) return;
  await updateDoc(doc(db,"posts",id),{text:t});
- loadPosts();
+ loadPosts(true);
 };
 
 window.deletePostItem = async function(id){
  const commentsSnap = await getDocs(query(collection(db,"comments"),where("postId","==",id)));
  for(const c of commentsSnap.docs){await deleteDoc(doc(db,"comments",c.id));}
  await deleteDoc(doc(db,"posts",id));
- loadPosts();
+ loadPosts(true);
 };
 
 window.reactPost = async function(id,type){
@@ -2830,25 +2885,17 @@ window.reactPost = async function(id,type){
  if(!s.exists()) return;
  const d=s.data();
  await updateDoc(doc(db,"posts",id),{[type]:(d[type]||0)+1});
- loadPosts();
+ loadPosts(true);
 };
 
-loadPosts();
-
-async function loadCommentsForPost(postId){
- const snap=await getDocs(query(collection(db,"comments"),where("postId","==",postId)));
- let arr=[];
- snap.forEach(d=>arr.push({id:d.id,...d.data()}));
- arr.sort((a,b)=>(b.time||0)-(a.time||0));
- return arr;
-}
+loadPosts(false);
 
 window.addComment=async function(postId){
  const el=document.getElementById("comment_"+postId);
  if(!el || !el.value.trim()) return;
  await addDoc(collection(db,"comments"),{postId:postId,text:el.value.trim(),time:Date.now(),like:0,rose:0,heart:0,book:0,leaf:0});
  el.value="";
- loadPosts();
+ loadPosts(true);
 };
 
 window.reactComment=async function(id,type){
@@ -2856,12 +2903,12 @@ window.reactComment=async function(id,type){
  if(!s.exists()) return;
  const d=s.data();
  await updateDoc(doc(db,"comments",id),{[type]:(d[type]||0)+1});
- loadPosts();
+ loadPosts(true);
 };
 
 window.deleteCommentItem=async function(id){
  await deleteDoc(doc(db,"comments",id));
- loadPosts();
+ loadPosts(true);
 };
 
 let currentShareQuoteData = null;
@@ -3922,20 +3969,6 @@ window.clearIconForm = function() {
 
 loadCircleWidget();
 
-// استماع حي للمنشورات الجديدة لتحديث شارة أيقونة التطبيق فور النشر
-let initialPostsSnapHandled = false;
-onSnapshot(collection(db,"posts"), (snap)=>{
-  const arr = [];
-  snap.forEach(d => arr.push({id: d.id, ...d.data()}));
-  arr.sort((a,b) => (b.time||0) - (a.time||0));
-  if(initialPostsSnapHandled){
-    loadPosts();
-  }else{
-    initialPostsSnapHandled = true;
-    renderPostsFromArray(arr);
-  }
-});
-
 onMessage(messaging,(payload)=>{
   console.log("Message received:", payload);
   const title = (payload.notification && payload.notification.title) || (payload.data && payload.data.title) || "طالبة علم شرعي";
@@ -3943,8 +3976,8 @@ onMessage(messaging,(payload)=>{
   const url = (payload.data && payload.data.url) || "./index.html";
   const tag = (payload.data && payload.data.tag) || ("talibat-fcm-" + Date.now());
   showPhoneShadeNotification(title, body, url, tag);
-  updateSubjectBadges();
-  loadPosts();
+  updateSubjectBadges(true);
+  loadPosts(true);
 });
 
 /* ===== نظام متابعة المنصة + عداد المتابعين الحي ===== */
