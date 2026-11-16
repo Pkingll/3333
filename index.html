@@ -1107,6 +1107,163 @@ body::before {
   font-size: 12px;
   color: #9c9689;
 }
+
+/* ===== زر المتابعة وفعالية تحدي اليوم التفاعلية ===== */
+.btn-follow {
+  background: rgba(212, 175, 55, 0.14);
+  color: var(--gold-light);
+  border: 1.5px solid rgba(212, 175, 55, 0.72);
+  border-radius: 10px;
+  padding: 9px 16px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+.btn-follow:hover {
+  background: rgba(212, 175, 55, 0.24);
+  border-color: var(--gold);
+  transform: translateY(-1px);
+}
+.btn-follow.following {
+  background: rgba(37, 211, 102, 0.16);
+  border-color: rgba(37, 211, 102, 0.75);
+  color: #b9f6ca;
+}
+.follow-count-badge {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.followers-strip {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.follower-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  color: var(--gold-light);
+  padding: 3px 9px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.challenge-card {
+  background: linear-gradient(145deg, rgba(10, 27, 44, 0.96), rgba(6, 17, 28, 0.97));
+  border: 1px solid rgba(212, 175, 55, 0.42);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.36);
+}
+.challenge-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.challenge-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--gold-light);
+  background: rgba(212, 175, 55, 0.14);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+.challenge-question {
+  font-family: 'Amiri', serif;
+  font-size: clamp(19px, 2.5vw, 24px);
+  color: #ffffff;
+  margin: 0 0 14px;
+  line-height: 1.5;
+}
+.challenge-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+@media (max-width: 640px) {
+  .challenge-options { grid-template-columns: 1fr; }
+}
+.challenge-opt {
+  position: relative;
+  overflow: hidden;
+  text-align: right;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f4f1ea;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  transition: 0.2s;
+}
+.challenge-opt:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: rgba(212, 175, 55, 0.12);
+}
+.challenge-opt:disabled { cursor: default; }
+.challenge-opt.correct {
+  border-color: rgba(37, 211, 102, 0.8);
+  background: rgba(37, 211, 102, 0.16);
+  color: #d7ffe4;
+}
+.challenge-opt.wrong {
+  border-color: rgba(239, 83, 80, 0.8);
+  background: rgba(239, 83, 80, 0.16);
+  color: #ffd6d6;
+}
+.challenge-opt-fill {
+  position: absolute;
+  inset: 0;
+  width: 0%;
+  background: rgba(212, 175, 55, 0.16);
+  pointer-events: none;
+  transition: width 0.45s ease;
+}
+.challenge-opt > span { position: relative; z-index: 1; }
+.challenge-explanation {
+  margin-top: 12px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: var(--gold-light);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.challenge-actions {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
 </style>
 <script src="/_aistudio-iframe.js?v=1f94f900"></script></head>
 <body>
@@ -1182,7 +1339,14 @@ body::before {
       <p class="intro-desc">بيئة دراسية منظمة لمتابعة فصول المواد الشرعية والعربية، وتصفح الملخصات، ومتابعة الفوائد والمنشورات العلمية.</p>
       <div class="intro-actions">
         <a href="#subjects-section" class="btn-primary">تصفح المواد الدراسية</a>
+        <button type="button" id="heroFollowBtn" class="btn-follow" onclick="handleHeroFollowClick()">
+          <span id="heroFollowIcon">🔔</span>
+          <span id="heroFollowLabel">متابعة المنصة</span>
+          <span class="follow-count-badge tabular-nums" id="heroFollowCount">0</span>
+        </button>
+        <button type="button" class="btn-outline" onclick="inviteFriendsToPlatform()">🤝 دعوة من واتساب وفيسبوك</button>
       </div>
+      <div class="followers-strip" id="recentFollowersStrip" style="display:none;"></div>
     </div>
     <div class="overall-box">
       <div class="overall-row">
@@ -1193,6 +1357,10 @@ body::before {
       <div class="overall-row" style="margin-top:10px;font-size:12px;color:var(--text-muted);">
         <span>إجمالي المواد الدراسية</span>
         <strong id="overallCounts" class="tabular-nums" style="color:var(--gold-light);">12 مادة</strong>
+      </div>
+      <div class="overall-row" style="margin-top:6px;font-size:12px;color:var(--text-muted);">
+        <span>متابعو المنصة</span>
+        <strong id="followersStatCount" class="tabular-nums" style="color:#b9f6ca;">0 متابع</strong>
       </div>
     </div>
   </section>
@@ -1361,6 +1529,22 @@ body::before {
     </div>
   </section>
 
+  <section id="dailyChallengeSection" class="section-block" style="display:none;">
+    <div class="challenge-card">
+      <div class="challenge-head">
+        <span class="challenge-kicker">🎯 تحدي اليوم التفاعلي</span>
+        <span id="challengeTotalVotes" class="tabular-nums" style="font-size:12px;color:var(--text-muted);">0 مشاركة</span>
+      </div>
+      <h3 id="challengeQuestionDisplay" class="challenge-question"></h3>
+      <div id="challengeOptionsBox" class="challenge-options"></div>
+      <div id="challengeFeedbackBox" class="challenge-explanation" style="display:none;"></div>
+      <div class="challenge-actions">
+        <span style="font-size:12px;color:var(--text-muted);">شارك التحدي مع صديقاتكِ دون كشف الإجابة ليتنافسن داخل المنصة!</span>
+        <button type="button" class="btn-primary" onclick="shareDailyChallengeCard()">📤 مشاركة التحدي (واتساب / فيسبوك)</button>
+      </div>
+    </div>
+  </section>
+
   <section id="posts-section" class="section-block">
     <div class="posts-section">
       <div class="posts-header">
@@ -1439,6 +1623,32 @@ body::before {
 <button onclick="closeFawaidPanel()">إغلاق</button>
 <div class="fawaid-list" id="fawaidList"></div>
 <hr style="margin:15px 0;border-color:rgba(255,255,255,.1)">
+<div id="dailyChallengeAdminBox" style="margin:12px 0;padding:12px;border:1px solid rgba(212,175,55,.35);border-radius:12px;background:rgba(255,255,255,.03);">
+ <h4 style="color:#f5e6b3;margin:0 0 8px;">🎯 فعالية «تحدي اليوم التفاعلي» (لجذب زوار واتساب وفيسبوك)</h4>
+ <textarea id="challengeQuestionInput" placeholder="اكتبي سؤالاً شرعياً أو نحوياً مشوقاً للزوار..."></textarea>
+ <input type="text" id="challengeOpt0" class="admin-chapter-input" placeholder="الخيار الأول (إلزامي)">
+ <input type="text" id="challengeOpt1" class="admin-chapter-input" placeholder="الخيار الثاني (إلزامي)">
+ <input type="text" id="challengeOpt2" class="admin-chapter-input" placeholder="الخيار الثالث (اختياري)">
+ <input type="text" id="challengeOpt3" class="admin-chapter-input" placeholder="الخيار الرابع (اختياري)">
+ <select id="challengeCorrectSelect" class="subject-selector" style="margin-bottom:8px;">
+  <option value="0">✅ الإجابة الصحيحة: الخيار الأول</option>
+  <option value="1">✅ الإجابة الصحيحة: الخيار الثاني</option>
+  <option value="2">✅ الإجابة الصحيحة: الخيار الثالث</option>
+  <option value="3">✅ الإجابة الصحيحة: الخيار الرابع</option>
+ </select>
+ <textarea id="challengeExplanationInput" placeholder="فائدة أو شرح مختصر يظهر للزائر بعد الإجابة..."></textarea>
+ <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#e5dfd3;margin:4px 0 8px;cursor:pointer;">
+  <input type="checkbox" id="challengeNotifyCheck" checked style="width:16px;height:16px;accent-color:#d4af37;">
+  <span>إرسال إشعار للمتابعات عند نشر التحدي</span>
+ </label>
+ <button type="button" onclick="publishDailyChallenge()">🚀 نشر التحدي للجميع</button>
+ <button type="button" onclick="clearDailyChallenge()" class="btn-edit">🗑️ إخفاء التحدي</button>
+</div>
+<div id="followersAdminBox" style="margin:12px 0;padding:12px;border:1px solid rgba(37,211,102,.3);border-radius:12px;background:rgba(37,211,102,.05);">
+ <h4 style="color:#b9f6ca;margin:0 0 6px;">👥 متابعو المنصة (<span id="adminFollowersTotal">0</span>)</h4>
+ <div id="followersAdminList" style="font-size:12px;color:#e5dfd3;max-height:160px;overflow:auto;">لا توجد أسماء مسجلة بعد</div>
+</div>
+<hr style="margin:15px 0;border-color:rgba(255,255,255,.1)">
 <h3 style="color:#f5e6b3;">📢 إدارة المنشورات</h3>
 <textarea id="postInput" placeholder="اكتب المنشور هنا..."></textarea>
 <input id="postImageFile" type="file" accept="image/*" aria-label="اختيار صورة من الجهاز" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;color:white;">
@@ -1513,6 +1723,43 @@ body::before {
       <li>اختاري <strong>إضافة إلى الشاشة الرئيسية (Add to Home Screen)</strong>.</li>
       <li>اضغطي <strong>إضافة (Add)</strong> في الزاوية العلوية.</li>
     </ol>
+  </div>
+</div>
+
+<div class="chapters-modal" id="followWelcomeModal" onclick="if(event.target===this)closeFollowModal()">
+  <div class="chapters-content" onclick="event.stopPropagation()" style="max-width:420px;">
+    <div class="chapters-header">
+      <h3>🔔 متابعة منصة طالبة علم شرعي</h3>
+      <button class="chapters-close" onclick="closeFollowModal()">إغلاق ✕</button>
+    </div>
+    <div style="text-align:center;margin-bottom:12px;">
+      <img src="./pwa-192x192.png" alt="شعار المنصة" style="width:64px;height:64px;border-radius:50%;border:2px solid #d4af37;object-fit:cover;">
+      <div style="margin-top:8px;font-size:15px;font-weight:800;color:#b9f6ca;">✓ تم تسجيل متابعتكِ للمنصة بنجاح!</div>
+      <div style="font-size:12.5px;color:#dcd7cc;margin-top:4px;line-height:1.6;">
+        أنتِ الآن ضمن <strong id="modalFollowCountText" style="color:#f5e6b3;">0</strong> متابعاً للملخصات والفوائد والتحديات العلمية.
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.28);border-radius:12px;padding:12px;margin-bottom:10px;">
+      <label for="followerNameInput" style="display:block;font-size:12.5px;color:#f5e6b3;font-weight:700;margin-bottom:6px;">
+        ✨ اكتبي اسمكِ أو لقبكِ ليظهر في لوحة المتابعين (اختياري):
+      </label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="followerNameInput" maxlength="28" placeholder="مثال: أم سارة / طالبة علم" style="flex:1;padding:9px 11px;border-radius:9px;border:1px solid rgba(255,255,255,0.18);background:#06111c;color:#fff;font-family:inherit;font-size:13px;">
+        <button type="button" onclick="saveFollowerProfile()" style="padding:9px 14px;border:none;border-radius:9px;background:linear-gradient(135deg,#d4af37,#b89020);color:#06111c;font-family:inherit;font-weight:800;cursor:pointer;">حفظ</button>
+      </div>
+      <div id="followerSaveStatus" style="font-size:11.5px;color:#b9f6ca;margin-top:6px;"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button type="button" onclick="activateNotificationsFromFollow()" style="width:100%;padding:11px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#25d366,#169c49);color:#041a0d;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;">
+        🔔 تفعيل تنبيهات الدروس والمنشورات الجديدة على هاتفي
+      </button>
+      <button type="button" onclick="closeFollowModal(); inviteFriendsToPlatform();" style="width:100%;padding:10px 14px;border:1px solid rgba(212,175,55,0.45);border-radius:10px;background:rgba(212,175,55,0.14);color:#f5e6b3;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;">
+        🤝 دعوة صديقاتكِ من واتساب وفيسبوك لمتابعة المنصة
+      </button>
+      <button type="button" onclick="unfollowPlatform()" style="width:100%;padding:7px;border:none;background:transparent;color:#9c9689;font-family:inherit;font-size:11.5px;cursor:pointer;text-decoration:underline;">
+        إلغاء متابعة المنصة
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1686,7 +1933,7 @@ window.installPlatformApp = async function(){
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging.js";
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc, updateDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc, updateDoc, query, where, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",
@@ -2057,6 +2304,8 @@ window.openFawaidAdmin = async function(){
    await loadAdminChapters();
    await loadAdminIconsList();
    await loadPushServerSettings();
+   await loadAdminDailyChallenge();
+   await loadAdminFollowers();
  }else{
    alert("كلمة المرور غير صحيحة");
  }
@@ -2619,15 +2868,40 @@ let currentShareQuoteData = null;
 let currentShareMode = 'card'; // 'video' | 'audio' | 'image-card' | 'card'
 
 function buildPostDirectUrl(post){
+  if(post && post.isChallenge) return location.origin + location.pathname + '#dailyChallengeSection';
+  if(post && post.isInvite) return location.origin + location.pathname;
   return location.origin + location.pathname + '?post=' + post.id;
 }
 
 function buildStatusLinkCaption(post){
+  if(post && post.isChallenge){
+    return '🎯 اختبري علمكِ في تحدي اليوم على منصة طالبة علم شرعي:\n' + buildPostDirectUrl(post);
+  }
+  if(post && post.isInvite){
+    return '📚 انضمي لمتابعي منصة طالبة علم شرعي -سنة الثانية (ملخصات + تحديات + إشعارات):\n' + buildPostDirectUrl(post);
+  }
   return '👆 عرض على منصة طالبة علم شرعي -سنة الثانية:\n' + buildPostDirectUrl(post);
 }
 
 function buildQuotedPostCaption(post){
   const url = buildPostDirectUrl(post);
+  if(post && post.isChallenge){
+    return [
+      '🎯 تحدي اليوم التفاعلي — منصة طالبة علم شرعي -سنة الثانية ‹',
+      '👆 اضغطي هنا لاختيار الإجابة ومعرفة النتيجة فوراً:',
+      url,
+      '────────────────',
+      `❓ ${post.text || ''}`,
+      ...(Array.isArray(post.options) ? post.options.map((o,i)=> `${i+1}) ${o}`) : [])
+    ].join('\n');
+  }
+  if(post && post.isInvite){
+    return [
+      '📚 دعوة لمتابعة منصة طالبة علم شرعي -سنة الثانية ‹',
+      '👆 افتحي المنصة واضغطي «🔔 متابعة المنصة» لتصلكِ جميع الملخصات والتحديات:',
+      url
+    ].join('\n');
+  }
   const rawText = (post.text || '').trim();
   const cleanText = rawText || (post.video ? 'فيديو علمي منشور على منصة طالبة علم شرعي' : (post.audio ? 'مقطع صوتي علمي منشور على منصة طالبة علم شرعي' : 'منشور علمي على منصة طالبة علم شرعي'));
   return [
@@ -3672,6 +3946,374 @@ onMessage(messaging,(payload)=>{
   updateSubjectBadges();
   loadPosts();
 });
+
+/* ===== نظام متابعة المنصة + عداد المتابعين الحي ===== */
+const PLATFORM_STATS_DOC = doc(db, "settings", "platformStats");
+let currentFollowersCount = 0;
+
+function updateFollowButtonsUI(){
+  const isFollowing = localStorage.getItem("talibat_is_following") === "1";
+  const btn = document.getElementById("heroFollowBtn");
+  const icon = document.getElementById("heroFollowIcon");
+  const label = document.getElementById("heroFollowLabel");
+  const heroCount = document.getElementById("heroFollowCount");
+  const statCount = document.getElementById("followersStatCount");
+  const modalCount = document.getElementById("modalFollowCountText");
+  if(btn) btn.classList.toggle("following", isFollowing);
+  if(icon) icon.textContent = isFollowing ? "✓" : "🔔";
+  if(label) label.textContent = isFollowing ? "أنتِ متابِعة للمنصة" : "متابعة المنصة";
+  if(heroCount) heroCount.textContent = currentFollowersCount;
+  if(statCount) statCount.textContent = `${currentFollowersCount} متابع`;
+  if(modalCount) modalCount.textContent = currentFollowersCount;
+}
+
+onSnapshot(PLATFORM_STATS_DOC, (snap) => {
+  if(snap.exists()){
+    const val = Number(snap.data().followersCount || 0);
+    currentFollowersCount = val < 0 ? 0 : val;
+  }else{
+    currentFollowersCount = 0;
+  }
+  updateFollowButtonsUI();
+});
+
+async function loadRecentFollowersStrip(){
+  const strip = document.getElementById("recentFollowersStrip");
+  if(!strip) return;
+  try{
+    const snap = await getDocs(collection(db, "followers"));
+    const items = [];
+    snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+    items.sort((a,b) => (b.joinedAt || 0) - (a.joinedAt || 0));
+    const named = items.filter(x => x.name && x.name.trim()).slice(0, 5);
+    if(named.length === 0){
+      strip.style.display = "none";
+      return;
+    }
+    strip.style.display = "flex";
+    strip.innerHTML = `<span>🌟 أحدث المتابعات:</span>` + named.map(x => {
+      const safe = String(x.name).replace(/[<>&"]/g, s => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[s]));
+      return `<span class="follower-chip">${safe}</span>`;
+    }).join("");
+  }catch(e){}
+}
+loadRecentFollowersStrip();
+updateFollowButtonsUI();
+
+window.openFollowModal = function(){
+  const modal = document.getElementById("followWelcomeModal");
+  const input = document.getElementById("followerNameInput");
+  const status = document.getElementById("followerSaveStatus");
+  if(input) input.value = localStorage.getItem("talibat_follower_name") || "";
+  if(status) status.textContent = "";
+  updateFollowButtonsUI();
+  if(modal) modal.classList.add("active");
+};
+
+window.closeFollowModal = function(){
+  const modal = document.getElementById("followWelcomeModal");
+  if(modal) modal.classList.remove("active");
+};
+
+window.handleHeroFollowClick = async function(){
+  const already = localStorage.getItem("talibat_is_following") === "1";
+  if(!already){
+    localStorage.setItem("talibat_is_following", "1");
+    currentFollowersCount = currentFollowersCount + 1;
+    updateFollowButtonsUI();
+    try{
+      await setDoc(PLATFORM_STATS_DOC, { followersCount: increment(1), updatedAt: Date.now() }, { merge: true });
+    }catch(e){ console.log("follow increment err:", e); }
+  }
+  openFollowModal();
+};
+
+window.saveFollowerProfile = async function(){
+  const input = document.getElementById("followerNameInput");
+  const status = document.getElementById("followerSaveStatus");
+  const name = input ? input.value.trim() : "";
+  if(!name){
+    if(status) status.textContent = "اكتبي اسمكِ أو لقبكِ أولاً.";
+    return;
+  }
+  try{
+    localStorage.setItem("talibat_follower_name", name);
+    let docId = localStorage.getItem("talibat_follower_doc_id") || "";
+    if(docId){
+      await setDoc(doc(db, "followers", docId), { name, updatedAt: Date.now() }, { merge: true });
+    }else{
+      const ref = await addDoc(collection(db, "followers"), { name, joinedAt: Date.now() });
+      localStorage.setItem("talibat_follower_doc_id", ref.id);
+    }
+    if(status) status.textContent = "تم حفظ اسمكِ في قائمة المتابعين ✅";
+    loadRecentFollowersStrip();
+  }catch(e){
+    if(status) status.textContent = "تعذر الحفظ حالياً، أعيدي المحاولة.";
+  }
+};
+
+window.activateNotificationsFromFollow = async function(){
+  closeFollowModal();
+  await enableNotifications();
+};
+
+window.unfollowPlatform = async function(){
+  if(localStorage.getItem("talibat_is_following") !== "1"){
+    closeFollowModal();
+    return;
+  }
+  localStorage.removeItem("talibat_is_following");
+  currentFollowersCount = Math.max(0, currentFollowersCount - 1);
+  updateFollowButtonsUI();
+  closeFollowModal();
+  try{
+    if(currentFollowersCount >= 0){
+      await setDoc(PLATFORM_STATS_DOC, { followersCount: currentFollowersCount, updatedAt: Date.now() }, { merge: true });
+    }
+  }catch(e){}
+};
+
+window.inviteFriendsToPlatform = async function(){
+  const invitePost = {
+    id: "invite",
+    isInvite: true,
+    text: "انضموا لمتابعة منصة طالبة علم شرعي -سنة الثانية: ملخصات 12 مادة، تحديات يومية تفاعلية، وفوائد علمية مع إشعارات فورية للدروس الجديدة.",
+    time: Date.now()
+  };
+  currentShareQuoteData = invitePost;
+  currentShareMode = "card";
+  const modal = document.getElementById("shareQuoteModal");
+  const heading = document.getElementById("shareModalHeading");
+  const canvasWrap = document.getElementById("shareCanvasWrap");
+  const mediaWrap = document.getElementById("shareMediaWrap");
+  const primaryBtn = document.getElementById("sharePrimaryBtn");
+  const downloadBtn = document.getElementById("shareDownloadBtn");
+  const switchBtn = document.getElementById("shareSwitchQuoteCardBtn");
+  const statusEl = document.getElementById("shareQuoteStatus");
+
+  if(mediaWrap) mediaWrap.style.display = "none";
+  if(canvasWrap) canvasWrap.style.display = "block";
+  if(switchBtn) switchBtn.style.display = "none";
+  if(heading) heading.innerText = "🤝 بطاقة دعوة لمتابعة المنصة";
+  if(primaryBtn) primaryBtn.innerText = "📤 مشاركة الدعوة (واتساب / الحالة / فيسبوك)";
+  if(downloadBtn) downloadBtn.innerText = "⬇️ حفظ بطاقة الدعوة (PNG)";
+  if(modal) modal.classList.add("active");
+  if(statusEl) statusEl.innerText = "جاري تجهيز بطاقة الدعوة...";
+  await renderShareQuoteCard(invitePost, true);
+  if(statusEl) statusEl.innerText = "بطاقة الدعوة جاهزة ✅ شاركيها والصقي الرابط في «إضافة شرح توضيحي»";
+};
+
+window.loadAdminFollowers = async function(){
+  const totalEl = document.getElementById("adminFollowersTotal");
+  const listEl = document.getElementById("followersAdminList");
+  if(totalEl) totalEl.textContent = currentFollowersCount;
+  if(!listEl) return;
+  try{
+    const snap = await getDocs(collection(db, "followers"));
+    const arr = [];
+    snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
+    arr.sort((a,b) => (b.joinedAt || 0) - (a.joinedAt || 0));
+    if(arr.length === 0){
+      listEl.textContent = "لا توجد أسماء مسجلة بعد";
+      return;
+    }
+    listEl.innerHTML = arr.slice(0, 30).map(f => {
+      const safe = String(f.name || "متابِعة").replace(/[<>&"]/g, s => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[s]));
+      const dStr = f.joinedAt ? new Date(f.joinedAt).toLocaleDateString('ar-LY', {month:'short', day:'numeric'}) : '';
+      return `<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06);">🌟 ${safe} <span style="color:#9c9689;">(${dStr})</span></div>`;
+    }).join("");
+  }catch(e){}
+};
+
+/* ===== فعالية تحدي اليوم التفاعلي (سؤال + تصويت + مشاركة تحدي) ===== */
+const DAILY_CHALLENGE_DOC = doc(db, "settings", "dailyChallenge");
+let activeDailyChallenge = null;
+
+function renderDailyChallengeBox(data){
+  const section = document.getElementById("dailyChallengeSection");
+  if(!section) return;
+  if(!data || !data.active || !data.question || !Array.isArray(data.options) || data.options.length < 2){
+    section.style.display = "none";
+    activeDailyChallenge = null;
+    return;
+  }
+  activeDailyChallenge = data;
+  section.style.display = "block";
+
+  const qEl = document.getElementById("challengeQuestionDisplay");
+  const totalEl = document.getElementById("challengeTotalVotes");
+  const box = document.getElementById("challengeOptionsBox");
+  const fb = document.getElementById("challengeFeedbackBox");
+
+  const challengeKey = "talibat_challenge_vote_" + String(data.updatedAt || "1");
+  const myChoiceRaw = localStorage.getItem(challengeKey);
+  const hasVoted = myChoiceRaw !== null && myChoiceRaw !== "";
+  const myChoice = hasVoted ? Number(myChoiceRaw) : -1;
+
+  const votes = data.votes || {};
+  let totalVotes = 0;
+  data.options.forEach((_, idx) => { totalVotes += Number(votes[String(idx)] || 0); });
+
+  if(qEl) qEl.textContent = data.question;
+  if(totalEl) totalEl.textContent = `${totalVotes} مشاركة`;
+
+  if(box){
+    box.innerHTML = data.options.map((optText, idx) => {
+      const count = Number(votes[String(idx)] || 0);
+      const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+      const isCorrect = idx === Number(data.correctIndex);
+      const isMine = idx === myChoice;
+      let cls = "challenge-opt";
+      if(hasVoted){
+        if(isCorrect) cls += " correct";
+        else if(isMine) cls += " wrong";
+      }
+      const safeText = String(optText).replace(/[<>&"]/g, s => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[s]));
+      const prefix = hasVoted ? (isCorrect ? "✅ " : (isMine ? "❌ " : "")) : `${idx + 1}. `;
+      return `<button type="button" class="${cls}" ${hasVoted ? "disabled" : ""} onclick="voteDailyChallenge(${idx})">
+        <div class="challenge-opt-fill" style="width:${hasVoted ? pct : 0}%;"></div>
+        <span>${prefix}${safeText}</span>
+        ${hasVoted ? `<span class="tabular-nums" style="font-size:12px;opacity:.9;">${pct}% (${count})</span>` : `<span style="font-size:12px;color:#d4af37;">اختيار</span>`}
+      </button>`;
+    }).join("");
+  }
+
+  if(fb){
+    if(hasVoted){
+      const isRight = myChoice === Number(data.correctIndex);
+      const headerTxt = isRight ? "🎉 أحسنتِ! إجابة صحيحة." : "💡 إجابة غير صحيحة — الإجابة الصحيحة موضّحة باللون الأخضر.";
+      const exp = data.explanation ? `<div style="margin-top:4px;color:#f4f1ea;">${String(data.explanation).replace(/[<>&"]/g, s => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[s]))}</div>` : "";
+      fb.innerHTML = `<strong>${headerTxt}</strong>${exp}`;
+      fb.style.display = "block";
+    }else{
+      fb.style.display = "none";
+    }
+  }
+}
+
+onSnapshot(DAILY_CHALLENGE_DOC, (snap) => {
+  if(snap.exists()){
+    renderDailyChallengeBox(snap.data());
+  }else{
+    renderDailyChallengeBox(null);
+  }
+});
+
+window.voteDailyChallenge = async function(idx){
+  if(!activeDailyChallenge) return;
+  const challengeKey = "talibat_challenge_vote_" + String(activeDailyChallenge.updatedAt || "1");
+  if(localStorage.getItem(challengeKey) !== null) return;
+  localStorage.setItem(challengeKey, String(idx));
+
+  // تحديث فوري على الشاشة قبل وصول السيرفر
+  const copy = JSON.parse(JSON.stringify(activeDailyChallenge));
+  copy.votes = copy.votes || {};
+  copy.votes[String(idx)] = Number(copy.votes[String(idx)] || 0) + 1;
+  renderDailyChallengeBox(copy);
+
+  try{
+    await setDoc(DAILY_CHALLENGE_DOC, {
+      votes: { [String(idx)]: increment(1) }
+    }, { merge: true });
+  }catch(e){ console.log("vote err:", e); }
+};
+
+window.shareDailyChallengeCard = async function(){
+  if(!activeDailyChallenge) return;
+  const chPost = {
+    id: "challenge",
+    isChallenge: true,
+    text: activeDailyChallenge.question + "\n\n" + activeDailyChallenge.options.map((o,i) => `${i + 1}) ${o}`).join("\n") + "\n\n👇 اختبري نفسكِ واضغطي الرابط أسفل الحالة لمعرفة الإجابة الصحيحة!",
+    options: activeDailyChallenge.options,
+    time: activeDailyChallenge.updatedAt || Date.now()
+  };
+  currentShareQuoteData = chPost;
+  currentShareMode = "card";
+  const modal = document.getElementById("shareQuoteModal");
+  const heading = document.getElementById("shareModalHeading");
+  const canvasWrap = document.getElementById("shareCanvasWrap");
+  const mediaWrap = document.getElementById("shareMediaWrap");
+  const primaryBtn = document.getElementById("sharePrimaryBtn");
+  const downloadBtn = document.getElementById("shareDownloadBtn");
+  const switchBtn = document.getElementById("shareSwitchQuoteCardBtn");
+  const statusEl = document.getElementById("shareQuoteStatus");
+
+  if(mediaWrap) mediaWrap.style.display = "none";
+  if(canvasWrap) canvasWrap.style.display = "block";
+  if(switchBtn) switchBtn.style.display = "none";
+  if(heading) heading.innerText = "🎯 مشاركة تحدي اليوم التفاعلي";
+  if(primaryBtn) primaryBtn.innerText = "📤 مشاركة التحدي (واتساب / الحالة / فيسبوك)";
+  if(downloadBtn) downloadBtn.innerText = "⬇️ حفظ بطاقة التحدي (PNG)";
+  if(modal) modal.classList.add("active");
+  if(statusEl) statusEl.innerText = "جاري تجهيز بطاقة التحدي...";
+  await renderShareQuoteCard(chPost, true);
+  if(statusEl) statusEl.innerText = "جاهز ✅ شاركي التحدي والصقي الرابط في «إضافة شرح توضيحي» ليدخل الجميع ويصوتوا!";
+};
+
+window.loadAdminDailyChallenge = async function(){
+  try{
+    const snap = await getDoc(DAILY_CHALLENGE_DOC);
+    if(!snap.exists()) return;
+    const d = snap.data();
+    const qEl = document.getElementById("challengeQuestionInput");
+    const eEl = document.getElementById("challengeExplanationInput");
+    const cEl = document.getElementById("challengeCorrectSelect");
+    if(qEl) qEl.value = d.question || "";
+    if(eEl) eEl.value = d.explanation || "";
+    if(cEl) cEl.value = String(d.correctIndex ?? 0);
+    for(let i = 0; i < 4; i++){
+      const optEl = document.getElementById("challengeOpt" + i);
+      if(optEl) optEl.value = (d.options && d.options[i]) ? d.options[i] : "";
+    }
+  }catch(e){}
+};
+
+window.publishDailyChallenge = async function(){
+  const question = document.getElementById("challengeQuestionInput")?.value.trim() || "";
+  const opts = [0,1,2,3].map(i => document.getElementById("challengeOpt" + i)?.value.trim() || "").filter(Boolean);
+  const correctIdx = Math.min(opts.length - 1, Math.max(0, Number(document.getElementById("challengeCorrectSelect")?.value || 0)));
+  const explanation = document.getElementById("challengeExplanationInput")?.value.trim() || "";
+  const sendNotify = document.getElementById("challengeNotifyCheck")?.checked;
+
+  if(!question || opts.length < 2){
+    alert("أدخلي نص السؤال وخيارين على الأقل.");
+    return;
+  }
+  const now = Date.now();
+  const votes = {};
+  opts.forEach((_, i) => { votes[String(i)] = 0; });
+
+  try{
+    await setDoc(DAILY_CHALLENGE_DOC, {
+      active: true,
+      question,
+      options: opts,
+      correctIndex: correctIdx,
+      explanation,
+      votes,
+      updatedAt: now
+    });
+    if(sendNotify){
+      dispatchPushNotification({
+        title: "🎯 تحدي اليوم التفاعلي — طالبة علم شرعي",
+        body: question.length > 90 ? question.slice(0, 90) + "..." : question,
+        url: "./index.html#dailyChallengeSection",
+        tag: "talibat-challenge-" + now
+      }).catch(() => {});
+    }
+    alert("تم نشر التحدي التفاعلي بنجاح ✅");
+  }catch(e){
+    alert("تعذر نشر التحدي: " + (e.message || "تحققي من الاتصال"));
+  }
+};
+
+window.clearDailyChallenge = async function(){
+  if(!confirm("هل تريدين إخفاء التحدي الحالي من الصفحة الرئيسية؟")) return;
+  try{
+    await setDoc(DAILY_CHALLENGE_DOC, { active: false }, { merge: true });
+    alert("تم إخفاء التحدي بنجاح.");
+  }catch(e){}
+};
 </script>
 </body>
 </html>
