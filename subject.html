@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>عرض المادة - طالبة علم شرعي</title>
+<meta name="theme-color" content="#06111c" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="علم شرعي" />
+<link rel="manifest" href="./manifest.json" />
+<link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+<link rel="icon" type="image/svg+xml" href="./icon.svg" />
 
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -1634,7 +1642,7 @@ to{opacity:1;transform:translateY(0) scale(1);}
 
 </style>
 
-<script src="/_aistudio-iframe.js?v=1f94f900"></script></head>
+</head>
 <body>
 
 <div class="marquee">
@@ -1919,11 +1927,65 @@ try{
 const qLatest = query(collection(db,"lessons"),where("subject","==",id));
 const sLatest = await getDocs(qLatest);
 let latestTime = 0;
+const seenIds = [];
 sLatest.forEach(d=>{
- const t=d.data().time || 0;
+ seenIds.push(d.id);
+ const data = d.data();
+ const t = data.time || data.createdAt || 0;
  if(t>latestTime) latestTime=t;
 });
-localStorage.setItem("seenTime_"+id, latestTime);
+if(id){
+ localStorage.setItem("seenTime_"+id, String(latestTime || Date.now()));
+ localStorage.setItem("appSeen_"+id, String(latestTime || Date.now()));
+ try{
+  const prevIds = JSON.parse(localStorage.getItem("knownLessonIds") || "[]");
+  const merged = Array.from(new Set([...(Array.isArray(prevIds)?prevIds:[]), ...seenIds])).slice(-500);
+  localStorage.setItem("knownLessonIds", JSON.stringify(merged));
+ }catch(e){}
+}
+
+// إعادة احتساب الإشعارات المتبقية لتحديث شارة أيقونة التطبيق الخارجي
+const [allLessonsSnap, allPostsSnap] = await Promise.all([
+ getDocs(collection(db,"lessons")),
+ getDocs(collection(db,"posts"))
+]);
+let remainingUnread = 0;
+const knownLessonIds = new Set(JSON.parse(localStorage.getItem("knownLessonIds") || "[]"));
+const knownPostIds = new Set(JSON.parse(localStorage.getItem("knownPostIds") || "[]"));
+const lessonsReady = localStorage.getItem("appLessonsBaselineReady") === "1";
+const postsReady = localStorage.getItem("appPostsBaselineReady") === "1";
+
+allLessonsSnap.forEach(d=>{
+ const data = d.data();
+ if(!data.subject) return;
+ const t = data.time || data.createdAt || 0;
+ const appSeen = parseInt(localStorage.getItem("appSeen_"+data.subject) || localStorage.getItem("seenTime_"+data.subject) || "0", 10) || 0;
+ const isUnknownNew = !knownLessonIds.has(d.id) && lessonsReady;
+ if((t > 0 && t > appSeen) || (t === 0 && isUnknownNew)){
+  remainingUnread++;
+ }
+});
+
+const seenPostsTime = parseInt(localStorage.getItem("seenTime_posts") || "0", 10) || 0;
+allPostsSnap.forEach(d=>{
+ const data = d.data();
+ const t = data.time || data.createdAt || 0;
+ const isUnknownNew = !knownPostIds.has(d.id) && postsReady;
+ if((t > 0 && t > seenPostsTime) || (t === 0 && isUnknownNew)){
+  remainingUnread++;
+ }
+});
+
+if(typeof navigator.setAppBadge === "function"){
+ if(remainingUnread > 0) await navigator.setAppBadge(remainingUnread);
+ else if(typeof navigator.clearAppBadge === "function") await navigator.clearAppBadge();
+}
+if(navigator.serviceWorker && navigator.serviceWorker.controller){
+ navigator.serviceWorker.controller.postMessage({ type: "SET_APP_BADGE", count: remainingUnread });
+}
+if(window.parent && window.parent !== window){
+ window.parent.postMessage({ type: "PLATFORM_APP_BADGE", count: remainingUnread }, "*");
+}
 }catch(e){console.log(e);}
 
 let chaptersList = document.getElementById("chaptersList");
