@@ -223,6 +223,29 @@ messaging.onBackgroundMessage(async (payload) => {
   return showTopShadeNotification(title, body, url, tag);
 });
 
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+  let data = null;
+  try {
+    data = event.data.json();
+  } catch (_) {
+    return;
+  }
+  if (!data || data.source !== 'talibat-webpush') {
+    return;
+  }
+  event.waitUntil((async () => {
+    const current = await dbGet('unreadCount', 0);
+    await applyAppIconBadge((Number(current) || 0) + 1);
+    await showTopShadeNotification(
+      data.title || 'ط·ط§ظ„ط¨ط© ط¹ظ„ظ… ط´ط±ط¹ظٹ',
+      data.body || 'طھظ…طھ ط¥ط¶ط§ظپط© ظ…ط­طھظˆظ‰ ط¬ط¯ظٹط¯ ظپظٹ ط§ظ„ظ…ظ†طµط©',
+      data.url || './index.html',
+      data.tag || ('talibat-webpush-' + Date.now())
+    );
+  })());
+});
+
 self.addEventListener('message', (event) => {
   const data = event.data || {};
   if (data.type === 'SET_APP_BADGE') {
