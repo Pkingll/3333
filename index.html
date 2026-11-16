@@ -1107,7 +1107,7 @@ body::before {
   color: #9c9689;
 }
 </style>
-</head>
+<script src="/_aistudio-iframe.js?v=1f94f900"></script></head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
@@ -1819,6 +1819,7 @@ async function ensurePlatformServiceWorker(){
   try{
     const reg = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
     cachedRegistration = reg;
+    try{ await reg.update(); }catch(e){}
     if('periodicSync' in reg){
       try{
         await reg.periodicSync.register('talibat-check-updates', { minInterval: 15 * 60 * 1000 });
@@ -1975,7 +1976,7 @@ function recomputeUnreadAndApplyBadges(){
     if(t > cardSeen || isUnknownNewDoc){
       cardUnreadBySubject[subj] = (cardUnreadBySubject[subj] || 0) + 1;
     }
-    const isAppUnread = (t > 0 && t > appSeen) || (t === 0 && isUnknownNewDoc);
+    const isAppUnread = (t > 0 && t > appSeen) || isUnknownNewDoc;
     if(isAppUnread){
       appUnreadBySubject[subj] = (appUnreadBySubject[subj] || 0) + 1;
       const nKey = "lesson_" + item.id;
@@ -2015,7 +2016,7 @@ function recomputeUnreadAndApplyBadges(){
   latestPostsSnapshot.forEach(p => {
     const t = p.time || 0;
     const isUnknownNewPost = !knownPostIds.has(p.id) && localStorage.getItem("appPostsBaselineReady") === "1";
-    const isPostUnread = (t > 0 && t > seenPostsTime) || (t === 0 && isUnknownNewPost);
+    const isPostUnread = (t > 0 && t > seenPostsTime) || isUnknownNewPost;
     if(isPostUnread){
       unreadPostsCount++;
       const nKey = "post_" + p.id;
