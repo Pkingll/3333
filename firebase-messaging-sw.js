@@ -1,17 +1,3 @@
-importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js');
-
-firebase.initializeApp({
-  apiKey: "AIzaSyAVHnPVmRegwOQGTugDN7oltRqlSM-5_wA",
-  authDomain: "p-726bc.firebaseapp.com",
-  projectId: "p-726bc",
-  storageBucket: "p-726bc.firebasestorage.app",
-  messagingSenderId: "752913389065",
-  appId: "1:752913389065:web:20cf8c03fe4ace03650ad8"
-});
-
-const messaging = firebase.messaging();
-
 const DB_NAME = 'talibatBadgeDB';
 const STORE_NAME = 'state';
 
@@ -87,19 +73,23 @@ async function applyAppIconBadge(count) {
   return safeCount;
 }
 
-async function showTopShadeNotification(title, body, url, tag) {
+async function showTopShadeNotification(title, body, url, tag, image) {
   try {
-    await self.registration.showNotification(title, {
-      body: body || 'تمت إضافة محتوى جديد في منصة طالبة علم شرعي',
+    const opts = {
+      body: body || '',
       icon: './pwa-192x192.png',
       badge: './pwa-192x192.png',
       dir: 'rtl',
       lang: 'ar',
       tag: tag || ('talibat-alert-' + Date.now()),
-      renotify: true,
+      renotify: false,
       vibrate: [200, 100, 200],
       data: { url: url || './index.html' }
-    });
+    };
+    if (image) {
+      opts.image = image;
+    }
+    await self.registration.showNotification(title || 'طالبة علم شرعي', opts);
   } catch (e) {
     // Permission may not be granted yet
   }
@@ -173,6 +163,7 @@ async function syncUnreadFromFirestoreRest() {
         const docId = getDocIdFromName(d.name);
         const fields = d.fields || {};
         const postText = getFirestoreStringField(fields, 'text') || 'منشور جديد في المنصة';
+        const postImage = getFirestoreStringField(fields, 'image') || '';
         const t = getFirestoreNumberField(fields, 'time') || getFirestoreNumberField(fields, 'createdAt');
         if (t > seenPosts) {
           unread++;
@@ -182,6 +173,7 @@ async function syncUnreadFromFirestoreRest() {
             newlyNotified.push({
               title: '📢 منشور جديد — طالبة علم شرعي',
               body: postText.length > 110 ? postText.slice(0, 110) + '...' : postText,
+              image: postImage,
               url: `./index.html?post=${encodeURIComponent(docId)}`,
               tag: `talibat-post-${docId}`
             });
@@ -195,7 +187,7 @@ async function syncUnreadFromFirestoreRest() {
     if (newlyNotified.length > 0) {
       await dbSet('notifiedIds', Array.from(notifiedIds).slice(-600));
       for (const n of newlyNotified.slice(0, 3)) {
-        await showTopShadeNotification(n.title, n.body, n.url, n.tag);
+        await showTopShadeNotification(n.title, n.body, n.url, n.tag, n.image);
       }
     }
   } catch (e) {
@@ -203,46 +195,30 @@ async function syncUnreadFromFirestoreRest() {
   }
 }
 
-messaging.onBackgroundMessage(async (payload) => {
-  const current = await dbGet('unreadCount', 0);
-  const explicit = payload && payload.data && payload.data.badgeCount !== undefined
-    ? Number(payload.data.badgeCount)
-    : null;
-  const nextCount = explicit !== null && !Number.isNaN(explicit) ? explicit : (Number(current) || 0) + 1;
-  await applyAppIconBadge(nextCount);
-
-  const title = (payload.notification && payload.notification.title) ||
-    (payload.data && payload.data.title) ||
-    'طالبة علم شرعي';
-  const body = (payload.notification && payload.notification.body) ||
-    (payload.data && payload.data.body) ||
-    'تمت إضافة ملخص أو منشور جديد في المنصة';
-  const url = (payload.data && payload.data.url) || './index.html';
-  const tag = (payload.data && payload.data.tag) || ('talibat-fcm-' + Date.now());
-
-  return showTopShadeNotification(title, body, url, tag);
-});
-
 self.addEventListener('push', (event) => {
   if (!event.data) return;
   let data = null;
   try {
     data = event.data.json();
   } catch (_) {
-    return;
+    try {
+      data = { title: 'طالبة علم شرعي', body: event.data.text() };
+    } catch (__) {
+      return;
+    }
   }
-  if (!data || data.source !== 'talibat-webpush') {
-    return;
-  }
+  if (!data) return;
+
+  const title = data.title || (data.notification && data.notification.title) || (data.data && data.data.title) || 'طالبة علم شرعي';
+  const body = data.body || (data.notification && data.notification.body) || (data.data && data.data.body) || '';
+  const image = data.image || (data.notification && data.notification.image) || (data.data && data.data.image) || '';
+  const url = data.url || (data.data && data.data.url) || './index.html';
+  const tag = data.tag || (data.data && data.data.tag) || ('talibat-webpush-' + Date.now());
+
   event.waitUntil((async () => {
     const current = await dbGet('unreadCount', 0);
     await applyAppIconBadge((Number(current) || 0) + 1);
-    await showTopShadeNotification(
-      data.title || 'طالبة علم شرعي',
-      data.body || 'تمت إضافة محتوى جديد في المنصة',
-      data.url || './index.html',
-      data.tag || ('talibat-webpush-' + Date.now())
-    );
+    await showTopShadeNotification(title, body, url, tag, image);
   })());
 });
 
@@ -257,7 +233,7 @@ self.addEventListener('message', (event) => {
   } else if (data.type === 'SYNC_NOTIFIED_IDS' && Array.isArray(data.ids)) {
     event.waitUntil(dbSet('notifiedIds', data.ids.slice(-600)));
   } else if (data.type === 'SHOW_SYSTEM_NOTIFICATION') {
-    event.waitUntil(showTopShadeNotification(data.title, data.body, data.url, data.tag));
+    event.waitUntil(showTopShadeNotification(data.title, data.body, data.url, data.tag, data.image));
   }
 });
 
